@@ -1,3 +1,9 @@
+using DataLayer;
+using DataLayer.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ACC
 {
     public class Program
@@ -5,12 +11,14 @@ namespace ACC
         public static void Main(string[] args)
         {
 
-            //hello from nasr
-            //hello from hamed branch
-            // heloo from gaber branch
-            //hello from Ibrahim brach
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<AppDbContext>((options) =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+              .AddEntityFrameworkStores<AppDbContext>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
