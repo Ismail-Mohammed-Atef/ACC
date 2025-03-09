@@ -4,6 +4,7 @@ using DataLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250309211455_addingRoleToAppUser")]
+    partial class addingRoleToAppUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +31,6 @@ namespace DataLayer.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AccessLevel")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AddedOn")
@@ -86,9 +86,6 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -367,7 +364,7 @@ namespace DataLayer.Migrations
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Role", "Role")
-                        .WithMany("Members")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -453,11 +450,6 @@ namespace DataLayer.Migrations
                 });
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
-                {
-                    b.Navigation("Members");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Role", b =>
                 {
                     b.Navigation("Members");
                 });

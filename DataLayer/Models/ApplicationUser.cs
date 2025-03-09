@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using DataLayer.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,6 +17,12 @@ namespace DataLayer.Models
         [ForeignKey(nameof(Company))]
         public int CompanyId { get; set; }
         public Company? Company { get; set; }
+
+        [ForeignKey(nameof(Role))]
+        public int RoleId { get; set; }
+        public Role Role { get; set; }
+        public Status Status { get; set; }
+        public AccessLevel AccessLevel { get; set; }
         public ICollection<ProjectMembers>? Projects { get; set; }
         public DateTime AddedOn { get; set; } = DateTime.Now;
         public string FirstName { get; set; }
