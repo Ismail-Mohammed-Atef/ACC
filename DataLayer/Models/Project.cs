@@ -15,6 +15,7 @@ namespace DataLayer.Models
         public string? Address { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public DateTime? CreationDate { get; set; }
         public double? ProjectValue { get; set; }
         public Currency? Currency { get; set; }
 

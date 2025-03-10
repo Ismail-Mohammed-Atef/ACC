@@ -1,4 +1,5 @@
-﻿using DataLayer;
+﻿using BusinessLogic.Repository.RepositoryInterfaces;
+using DataLayer;
 using DataLayer.Models;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusinessLogic.Repository
+namespace BusinessLogic.Repository.RepositoryClasses
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
@@ -20,7 +21,7 @@ namespace BusinessLogic.Repository
         {
             var model = _context.Set<T>().Remove(obj);
         }
-
+       
         public IList<T> GetAll()
         {
             return _context.Set<T>().ToList();
