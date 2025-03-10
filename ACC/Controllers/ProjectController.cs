@@ -21,8 +21,5 @@ namespace ACC.Controllers
             return View(projects);
         }
 
-
-
-
     }
 }
