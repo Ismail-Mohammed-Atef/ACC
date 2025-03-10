@@ -9,5 +9,8 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
 {
     public interface IProjetcRepository : IGenericRepository<Project>
     {
+        List<string> GetCurrencyValues();
+        List<string> GetProjectTypeValues();
+
     }
 }
