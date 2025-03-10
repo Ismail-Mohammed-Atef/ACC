@@ -91,5 +91,15 @@ namespace ACC.Controllers
             }
             return NotFound();
         }
+        [HttpGet]
+        public IActionResult Details(string id)
+        {
+            var member = _userManager.Users.FirstOrDefault(u=>u.Id == id);
+            if (member != null)
+            {
+                return Json(member);
+            }
+            return Json(new { error = "Member not found" });
+        }
     }
 }
