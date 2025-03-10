@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.Repository.RepositoryInterfaces;
+using DataLayer.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ACC.Controllers
@@ -15,8 +16,9 @@ namespace ACC.Controllers
 
         public IActionResult Index()
         {
+            var projects = projectRepo.GetAll();
 
-            return View();
+            return View(projects);
         }
 
 

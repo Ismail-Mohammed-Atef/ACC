@@ -1,6 +1,4 @@
-﻿
-
-namespace BusinessLogic.Repository
+﻿namespace BusinessLogic.Repository.RepositoryInterfaces
 {
     public interface IGenericRepository<T>
     {

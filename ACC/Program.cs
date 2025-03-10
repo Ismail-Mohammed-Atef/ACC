@@ -24,6 +24,7 @@ namespace ACC
             builder.Services.AddControllersWithViews();
 
             #region Dependency Injection Repositories
+
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
 
             #endregion
