@@ -15,15 +15,15 @@ namespace DataLayer.Models
         
 
         [ForeignKey(nameof(Company))]
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
         public Company? Company { get; set; }
 
         [ForeignKey(nameof(Role))]
-        public int RoleId { get; set; }
+        public int? RoleId { get; set; }
         public Role? Role { get; set; }
         public Status? Status { get; set; }
-        public AccessLevel? AccessLevel { get; set; }
-        public ICollection<ProjectMembers>? Projects { get; set; }
+        public IList<AccessLevel>? AccessLevel { get; set; }
+        public IList<ProjectMembers>? Projects { get; set; }
         public DateTime? AddedOn { get; set; } = DateTime.Now;
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

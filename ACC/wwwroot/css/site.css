@@ -1,22 +1,144 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+tr{
+    text-align : center;
+}
+
+.details-panel {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 350px;
+    height: 100vh;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    transition: right 0.3s ease-in-out;
+    box-shadow: -5px 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    padding: 16px;
+    font-family: Arial, sans-serif;
+    z-index: 1000;
+}
+
+    .details-panel.show {
+        right: 0; 
+    }
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    background: #cce5b8;
+    color: #445533;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.member-info {
+    flex-grow: 1;
+    margin-left: 12px;
+}
+
+.email-link {
+    text-decoration: none;
+    color: #0073e6;
+    font-size: 14px;
+}
+
+.status-badge {
+    background: #ff9800;
+    color: white;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.panel-body {
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.text-muted {
+    color: #777;
+    font-size: 14px;
+}
+/* Custom menu styling */
+.action-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 1000;
+}
+
+    .action-menu button {
+        display: block;
+        width: 100%;
+        padding: 5px 10px;
+        border: none;
+        background: none;
+        text-align: left;
+        color: #dc3545; /* Bootstrap's text-danger color */
+    }
+
+        .action-menu button:hover {
+            background: #f8f9fa;
+        }
+
+.action-btn {
+    position: relative;
 }
