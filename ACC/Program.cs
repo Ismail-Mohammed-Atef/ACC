@@ -29,7 +29,20 @@ namespace ACC
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 
-            #endregion
+
+
+
+
+              
+
+
+
+
+
+
+
+
+
 
             var app = builder.Build();
 
