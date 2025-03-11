@@ -26,21 +26,9 @@ namespace ACC
             #region Dependency Injection Repositories
 
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
+            builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
             #endregion
-
-
-
-
-            //hello from ahmed
-
-
-
-
-
-
-
-
 
 
             var app = builder.Build();
