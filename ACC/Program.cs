@@ -27,20 +27,6 @@ namespace ACC
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
-            #endregion
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             var app = builder.Build();
