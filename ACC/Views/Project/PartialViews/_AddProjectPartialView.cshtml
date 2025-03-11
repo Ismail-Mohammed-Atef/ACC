@@ -1,209 +1,181 @@
 ﻿@using ACC.ViewModels.ProjectVMs
 @model AddProjectVM
 
+@{
+	var Currency = ViewBag.Currencies;
+	var ProjectTypes = ViewBag.ProjectTypes;
+}
+
 <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addProjectModalLabel">Add Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addProjectForm" method="post">
-                    <!-- Project Name -->
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label">Project name <span class="required">*</span></label>
-                        <input type="text" class="form-control custom-input" asp-for="Name" placeholder="Enter a project name" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addProjectModalLabel">Create project</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="addProjectForm" method="post">
+					<!-- Project Name -->
+					<div class="mb-3">
+						<label asp-for="Name" class="form-label">Project name <span class="required">*</span></label>
+						<input type="text" class="form-control" asp-for="Name" placeholder="Enter a project name" />
+						<span asp-validation-for="Name" class="text-danger"></span>
+					</div>
 
-                    <!-- Project Number -->
-                    <div class="mb-3">
-                        <label asp-for="ProjectNumber" class="form-label">Project number <span class="required">*</span></label>
-                        <input type="text" class="form-control custom-input" asp-for="ProjectNumber" placeholder="Enter a project number" />
-                        <span asp-validation-for="ProjectNumber" class="text-danger"></span>
-                    </div>
+					<!-- Project Number -->
+					<div class="mb-3">
+						<label asp-for="ProjectNumber" class="form-label">Project number <span class="required">*</span></label>
+						<input type="text" class="form-control" asp-for="ProjectNumber" placeholder="Enter a project number" />
+						<span asp-validation-for="ProjectNumber" class="text-danger"></span>
+					</div>
 
-                    <!-- Project Type Dropdown -->
-                    <div class="mb-3">
-                        <label asp-for="ProjectType" class="form-label">Project type <span class="required">*</span></label>
-                        <select class="form-select custom-input" asp-for="ProjectType" asp-items="Model.ProjectTypes">
-                            <option value="" selected>Select a project type</option>
-                        </select>
-                        <span asp-validation-for="ProjectType" class="text-danger"></span>
-                    </div>
+					<!-- Project Type Dropdown -->
+					<div class="mb-3">
+						<label asp-for="ProjectType" class="form-label">Project type <span class="required">*</span></label>
+						<select asp-for="ProjectType" asp-items="ProjectTypes" class="form-control">
+							<option value="" disabled selected>Select a project type</option>
+						</select>
+						<span asp-validation-for="ProjectType" class="text-danger"></span>
+					</div>
 
-                    <!-- Address -->
-                    <div class="mb-3">
-                        <label asp-for="Address" class="form-label">Address</label>
-                        <input type="text" class="form-control custom-input" asp-for="Address" placeholder="Enter a location" />
-                        <span asp-validation-for="Address" class="text-danger"></span>
-                    </div>
+					<!-- Address -->
+					<div class="mb-3">
+						<label asp-for="Address" class="form-label">Address</label>
+						<input type="text" class="form-control" asp-for="Address" placeholder="Enter a location" />
+						<span asp-validation-for="Address" class="text-danger"></span>
+					</div>
 
-                    <!-- Start Date and End Date -->
-                    <div class="mb-3 date-row">
-                        <div class="date-group">
-                            <label asp-for="StartDate" class="form-label">Start date <span class="required">*</span></label>
-                            <input type="date" class="form-control date-input" asp-for="StartDate" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
-                        </div>
-                        <div class="date-group">
-                            <label asp-for="EndDate" class="form-label">End date <span class="required">*</span></label>
-                            <input type="date" class="form-control date-input" asp-for="EndDate" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
-                        </div>
-                    </div>
+					<div class="row mb-3">
+						<div class="col-md-3" style="width:290px;">
+							<label asp-for="StartDate" class="form-label">Start date <span class="required">*</span></label>
+							<input type="date" class="form-control" asp-for="StartDate" />
+							<span asp-validation-for="StartDate" class="text-danger"></span>
+						</div>
+						<div class="col-md-3" style="width:290px;">
+							<label asp-for="EndDate" class="form-label">End date <span class="required">*</span></label>
+							<input type="date" class="form-control" asp-for="EndDate" />
+							<span asp-validation-for="EndDate" class="text-danger"></span>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-3" style="width:290px;">
+							<label asp-for="ProjectValue" class="form-label">Project value</label>
+							<input type="number" class="form-control" asp-for="ProjectValue" placeholder="Enter a value" />
+							<span asp-validation-for="ProjectValue" class="text-danger"></span>
+						</div>
+						<div class="col-md-3" style="width:290px;">
+							<label asp-for="Currency" class="form-label">Currency</label>
+							<select asp-for="Currency" asp-items="Currency" class="form-control">
+								<option value="USD" selected>USD</option>
+							</select>
+							<span asp-validation-for="Currency" class="text-danger"></span>
+						</div>
+					</div>
 
-                    <!-- Project Value and Currency -->
-                    <div class="mb-3 value-row">
-                        <div class="value-group">
-                            <label asp-for="ProjectValue" class="form-label">Project value</label>
-                            <input type="number" class="form-control value-input" asp-for="ProjectValue" placeholder="Enter a value" />
-                            <span asp-validation-for="ProjectValue" class="text-danger"></span>
-                        </div>
-                        <div class="value-group">
-                            <label asp-for="Currency" class="form-label">Currency</label>
-                            <select class="form-select value-input" asp-for="Currency" asp-items="Model.Currencies">
-                                <option value="" selected>Select a currency</option>
-                            </select>
-                            <span asp-validation-for="Currency" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="color:white;">Cancel</button>
-                        <button type="submit" class="btn btn-primary" >Create project</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+					<!-- Modal Footer -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="color:white">Cancel</button>
+						<button type="submit" class="btn btn-primary">Create project</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>
-    .modal-header {
-        border-bottom: 1px solid #e5e5e5;
-    }
 
-    .modal-title {
-        font-weight: bold;
-        font-size: 18px;
-    }
+	.form-control {
+		appearance: menulist;		
+		-webkit-appearance: menulist; 
+		-moz-appearance: menulist;	
+		background-image: none;		
+	}		
 
-    .modal-body {
-        padding: 20px;
-    }
+	.custom-select {
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23000000"><path d="M7 10l5 5 5-5z"/></svg>');
+		background-repeat: no-repeat;
+		background-position: right 0.75rem center;
+		background-size: 12px;
+		padding-right: 2rem; 
+	}	
 
-    .form-label {
-        font-weight: bold;
-        font-size: 14px;
-        color: #333;
-        margin-bottom: 5px;
-    }
+	.modal-lg {
+		max-width: 600px; 
+	}
 
-    .required {
-        color: #dc3545;
-        font-weight: normal;
-    }
+	.form-label {
+		font-weight: bold;
+		font-size: 14px;
+		color: #333;
+		margin-bottom: 5px;
+	}
 
-    .custom-input {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        height: 36px;
-        font-size: 14px;
-        color: #495057;
-        padding: 6px 12px;
-        box-shadow: none;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
+	.required {
+		color: #dc3545;
+		font-weight: normal;
+	}
 
-    .custom-input:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
+	.form-control {
+		width: 100%;
+		border: 1px solid #ced4da;
+		border-radius: 4px;
+		height: 36px;
+		font-size: 14px;
+		color: #495057;
+		padding: 6px 12px;
+		box-shadow: none;
+		transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+	}
 
-    .custom-input::placeholder {
-        color: #6c757d;
-        font-size: 14px;
-    }
+		.form-control:focus {
+			border-color: #80bdff;
+			outline: 0;
+			box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+		}
 
-    .date-row {
-        display: flex;
-        gap: 10px;
-    }
+		.form-control::placeholder {
+			color: #6c757d;
+			font-size: 14px;
+		}
 
-    .date-group {
-        flex: 1;
-    }
+	.modal-header {
+		border-bottom: 1px solid #e5e5e5;
+	}
 
-    .date-input {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        height: 36px;
-        font-size: 14px;
-        color: #495057;
-        padding: 6px 12px;
-        width: 100%;
-        box-shadow: none;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
+	.modal-title {
+		font-weight: bold;
+		font-size: 18px;
+	}
 
-    .date-input:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
+	.modal-body {
+		padding: 20px;
+	}
 
-    .value-row {
-        display: flex;
-        gap: 10px;
-    }
+	.modal-footer {
+		border-top: 1px solid #e5e5e5;
+		padding: 15px;
+	}
 
-    .value-group {
-        flex: 1;
-    }
+	.btn-secondary {
+		color: #6c757d;
+		border-color: #6c757d;
+		padding: 6px 12px;
+	}
 
-    .value-input {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        height: 36px;
-        font-size: 14px;
-        color: #495057;
-        padding: 6px 12px;
-        width: 100%;
-        box-shadow: none;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
+	.btn-primary {
+		background-color: #007bff;
+		border-color: #007bff;
+		padding: 6px 12px;
+	}
 
-    .value-input:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    .modal-footer {
-        border-top: 1px solid #e5e5e5;
-        padding: 15px;
-    }
-
-    .btn-secondary {
-        color: #6c757d;
-        border-color: #6c757d;
-        padding: 6px 12px;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        padding: 6px 12px;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #0056b3;
-    }
+		.btn-primary:hover {
+			background-color: #0056b3;
+			border-color: #0056b3;
+		}
 </style>
 
 <script src="/lib/jquery/dist/jquery.min.js"></script>
@@ -212,31 +184,31 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <script>
-    $(document).ready(function () {
-        $("#addProjectForm").on("submit", function (event) {
-            event.preventDefault();
+	$(document).ready(function () {
+		$("#addProjectForm").on("submit", function (event) {
+			event.preventDefault();
 
-            if ($(this).valid()) {
-                $.ajax({
-                    url: "/Project/AddProject",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function (response) {
-                        if (response.success) {
-                            $("#addProjectModal").modal("hide");
-                            setTimeout(function () {
-                                location.reload();
-                            }, 500);
-                        } else {
-                            $("#addProjectModal .modal-body").html(response);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("AJAX Error:", error);
-                        alert("Failed to save project. Please try again.");
-                    }
-                });
-            }
-        });
-    });
+			if ($(this).valid()) {
+				$.ajax({
+					url: "/Project/AddProject",
+					type: "POST",
+					data: $(this).serialize(),
+					success: function (response) {
+						if (response.success) {
+							$("#addProjectModal").modal("hide");
+							setTimeout(function () {
+								location.reload();
+							}, 500);
+						} else {
+							$("#addProjectModal .modal-body").html(response);
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error("AJAX Error:", error);
+						alert("Failed to save project. Please try again.");
+					}
+				});
+			}
+		});
+	});
 </script>

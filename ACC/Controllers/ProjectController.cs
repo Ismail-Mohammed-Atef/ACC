@@ -20,6 +20,12 @@ namespace ACC.Controllers
 
         public IActionResult Index()
         {
+            var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
+            var  ProjectTypes = new SelectList(Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>());
+
+            ViewBag.Currencies = Currencies;
+            ViewBag.ProjectTypes = ProjectTypes;
+
             var projects = projectRepo.GetAll();
             if (projects == null || !projects.Any())
             {
@@ -41,20 +47,16 @@ namespace ACC.Controllers
         }
 
 
-        [HttpGet]
-        public IActionResult AddProject()
-        {
-            //var currencyValues = projectRepo.GetCurrencyValues();
-            //var projectTypeValues = projectRepo.GetProjectTypeValues();
-
-            AddProjectVM model = new AddProjectVM
-            {
-                Currencies =   new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>()),
-                ProjectTypes = new SelectList(Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>())
-            };
-
-            return PartialView("PartialViews/_AddProjectPartialView", model);
-        }
+        //[HttpGet]
+        //public IActionResult AddProject()
+        //{
+        //    AddProjectVM model = new AddProjectVM
+        //    {
+        //        Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>()),
+        //        ProjectTypes = new SelectList(Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>())
+        //    };
+        //    return PartialView("PartialViews/_AddProjectPartialView", model);
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -70,7 +72,7 @@ namespace ACC.Controllers
                     ProjectValue = projectFromRequest.ProjectValue,
                     StartDate = projectFromRequest.StartDate,
                     EndDate = projectFromRequest.EndDate,
-                    CreationDate = DateTime.Now, 
+                    CreationDate = DateTime.Now,
                     Currency = projectFromRequest.Currency,
                     Address = projectFromRequest.Address,
                 };
