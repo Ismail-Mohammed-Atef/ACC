@@ -1,6 +1,6 @@
 ﻿using DataLayer.Models.Enums;
 
-namespace ACC.ViewModels
+namespace ACC.ViewModels.MemberVM.MemberVM
 {
     public class MemberVM
     {

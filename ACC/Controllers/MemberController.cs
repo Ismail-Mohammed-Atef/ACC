@@ -1,10 +1,8 @@
-﻿
-using ACC.ViewModels;
+﻿using ACC.ViewModels.MemberVM.MemberVM;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ACC.Controllers
 {
@@ -33,9 +31,10 @@ namespace ACC.Controllers
                     AddedOn = Users[i].AddedOn,
                     AccessLevels = new List<AccessLevel>()
                 });
-                foreach(var accessLevel in Users[i].AccessLevel){
+                foreach (var accessLevel in Users[i].AccessLevel)
+                {
                     members[i].AccessLevels.Add(accessLevel);
-                 }
+                }
             }
             return View(members);
         }
@@ -61,14 +60,14 @@ namespace ACC.Controllers
                 {
                     User.AccessLevel.Add(AccessLevel.Excutive);
                 }
-                if(memberFromReq.standardAccess)
+                if (memberFromReq.standardAccess)
                 {
                     User.AccessLevel.Add(AccessLevel.StandardAccess);
                 }
-                var result = await _userManager.CreateAsync(User,"123Aa_");
+                var result = await _userManager.CreateAsync(User, "123Aa_");
                 if (result.Succeeded)
                 {
-                return Json(new { success = true }); // Indicate success
+                    return Json(new { success = true }); // Indicate success
                 }
                 foreach (var error in result.Errors)
                 {
@@ -86,7 +85,7 @@ namespace ACC.Controllers
                 var result = await _userManager.DeleteAsync(member);
                 if (result.Succeeded)
                 {
-                return Ok();
+                    return Ok();
                 }
             }
             return NotFound();
@@ -94,7 +93,7 @@ namespace ACC.Controllers
         [HttpGet]
         public IActionResult Details(string id)
         {
-            var member = _userManager.Users.FirstOrDefault(u=>u.Id == id);
+            var member = _userManager.Users.FirstOrDefault(u => u.Id == id);
             if (member != null)
             {
                 return Json(member);

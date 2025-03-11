@@ -1,7 +1,7 @@
 ﻿using DataLayer.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace ACC.ViewModels
+namespace ACC.ViewModels.MemberVM.MemberVM
 {
     public class InsertMemberVM
     {
