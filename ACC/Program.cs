@@ -23,7 +23,6 @@ namespace ACC
               .AddEntityFrameworkStores<AppDbContext>();
             builder.Services.AddControllersWithViews();
 
-            #region Dependency Injection Repositories
 
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
