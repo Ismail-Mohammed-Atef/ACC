@@ -1,0 +1,106 @@
+﻿@using ACC.ViewModels
+@model List<CompanyVM>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Companies</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid p-4">
+        <h2>Account Companies</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCompanyModal">+ Add Companies</button>
+        <div class="d-flex justify-content-between my-3">
+            <input type="text" class="form-control w-25" placeholder="Search by name,trade or email" value="@Context.Request.Query["searchTerm"]">
+            <button class="btn btn-outline-secondary">Export</button>
+        </div>
+
+        <!-- Companies Table -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Description</th>
+                    <th>Country</th>
+                    <th>Website</th>
+                    <th>Phone Number</th>
+                    <th>Company Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Address</td>
+                        <td>@item.Description</td>
+                        <td>@item.Country</td>
+                        <td>@item.Website</td>
+                        <td>@item.PhoneNumber</td>
+                        <td>@item.CompanyType</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Company Modal -->
+    <div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyModalLabel">Add Company</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="SaveNew" asp-controller="Company" method="post">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Name</label>
+                            <input type="text" class="form-control" name="Name" placeholder="Enter name" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Address" class="form-label">Address</label>
+                            <input type="text" class="form-control" name="Address" placeholder="Enter address" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" name="Description" placeholder="Enter description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Country" class="form-label">Country</label>
+                            <input type="text" class="form-control" name="Country" placeholder="Enter country" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Website" class="form-label">Website</label>
+                            <input type="text" class="form-control" name="Website" placeholder="Enter website" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="PhoneNumber" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" name="PhoneNumber" placeholder="Enter phone number" />
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+
+
+
