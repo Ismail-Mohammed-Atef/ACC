@@ -29,20 +29,6 @@ namespace ACC
 
 
 
-
-
-
-              
-
-
-
-
-
-
-
-
-
-
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())
