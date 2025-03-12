@@ -3,8 +3,10 @@ using ACC.ViewModels.ProjectVMs;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
+using Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ACC.Controllers
 {
@@ -18,20 +20,35 @@ namespace ACC.Controllers
         }
 
 
-        public IActionResult Index()
+
+        #region Index DisplayData Action
+        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 3)
         {
-            var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
-            var  ProjectTypes = new SelectList(Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>());
+            // Get all Currency enum values
+            var Currencies =new SelectList( Enum.GetValues(typeof(Currency)).Cast<Currency>());
+
+            // Get all ProjectType enum values and format them using EnumHelper
+            var ProjectTypes = Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>()
+                .Select(pt => new
+                {
+                    Value = pt.ToString(), // Use the enum value as the value
+                    DisplayName = EnumHelper.GetDescription(pt) // Use the formatted display name
+                })
+                .ToList();
 
             ViewBag.Currencies = Currencies;
-            ViewBag.ProjectTypes = ProjectTypes;
+            ViewBag.ProjectTypes = new SelectList(ProjectTypes, "Value", "DisplayName");
 
-            var projects = projectRepo.GetAll();
+            // Get paginated projects
+            var projects = projectRepo.GetPaginatedProjects(Page, Pagesize, srchText);
+
+            // If no projects are found, return an empty list
             if (projects == null || !projects.Any())
             {
                 return View(new List<DisplayProjectsVM>());
             }
 
+            // Map the projects to the ViewModel
             List<DisplayProjectsVM> displayProject = projects.Select(p => new DisplayProjectsVM
             {
                 Name = p.Name,
@@ -43,21 +60,23 @@ namespace ACC.Controllers
                 CreationDate = p.CreationDate
             }).ToList();
 
-            return View(displayProject);
+            // Calculate pagination details
+            int ProjectCount = projectRepo.ProjectsCount();
+            int TotalPages = (int)Math.Ceiling((double)ProjectCount / Pagesize);
+
+            // Pass pagination details to the view
+            ViewBag.CurrentPage = Page;
+            ViewBag.totalPages = TotalPages;
+
+            // Return the view with the paginated and filtered projects
+            return View("Index", displayProject);
         }
 
+        #endregion
 
-        //[HttpGet]
-        //public IActionResult AddProject()
-        //{
-        //    AddProjectVM model = new AddProjectVM
-        //    {
-        //        Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>()),
-        //        ProjectTypes = new SelectList(Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>())
-        //    };
-        //    return PartialView("PartialViews/_AddProjectPartialView", model);
-        //}
 
+
+        #region Create Project Action 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddProject(AddProjectVM projectFromRequest)
@@ -83,10 +102,28 @@ namespace ACC.Controllers
                 return Json(new { success = true });
             }
 
-            projectFromRequest.Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
-            projectFromRequest.ProjectTypes = new SelectList(Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>());
-            return PartialView("PartialViews/_AddProjectPartialView", projectFromRequest);
+            // If ModelState is invalid, return validation errors as JSON
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return Json(new { success = false, errors = errors });
         }
+
+        #endregion
+
+
+        #region Search Action
+        public IActionResult Search(string seachText)
+        {
+            if (!seachText.IsNullOrEmpty())
+            {
+
+            }
+
+            return View("Index");
+        } 
+        #endregion
 
 
     }

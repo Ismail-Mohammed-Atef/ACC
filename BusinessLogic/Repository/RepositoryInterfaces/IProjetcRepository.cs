@@ -11,6 +11,9 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
     {
         List<string> GetCurrencyValues();
         List<string> GetProjectTypeValues();
+        int ProjectsCount();
+
+        List<Project> GetPaginatedProjects(int page, int pageSize, string searchText = null);
 
     }
 }
