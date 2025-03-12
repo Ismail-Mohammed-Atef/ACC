@@ -1,24 +1,27 @@
 ﻿@using ACC.ViewModels
 @model List<CompanyVM>
 
-@{
-    ViewData["Title"] = "Index";
-}
+
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Account Companies</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="/css/site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/Company.css" />
+  
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="container-fluid p-4">
         <h2>Account Companies</h2>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCompanyModal">+ Add Companies</button>
         <div class="d-flex justify-content-between my-3">
-            <input type="text" class="form-control w-25" placeholder="Search by name,trade or email" value="@Context.Request.Query["searchTerm"]">
-            <button class="btn btn-outline-secondary">Export</button>
+            <input type="text" id="searchBox" class="form-control w-25" placeholder="Search by name, trade, or email" value="@Context.Request.Query["searchTerm"]">
+
         </div>
 
         <!-- Companies Table -->
@@ -32,11 +35,11 @@
                     <th>Website</th>
                     <th>Phone Number</th>
                     <th>Company Type</th>
+                    <th><i class="fas fa-cog"></i></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="companyTableBody">
                 @foreach (var item in Model)
-
                 {
                     <tr>
                         <td>@item.Name</td>
@@ -46,56 +49,139 @@
                         <td>@item.Website</td>
                         <td>@item.PhoneNumber</td>
                         <td>@item.CompanyType</td>
+                        <td>
+                            <div class="position-relative">
+                                <button class="btn btn-sm btn-light toggle-menu">
+                                    <i class="fas fa-ellipsis-v"></i> <!-- Three-dot icon -->
+                                </button>
+                                <div class="action-menu position-absolute bg-white border shadow-sm rounded p-2" style="display: none;">
+                                    <form asp-action="DeleteConfirmed" method="post" onsubmit="return confirmDelete()" style="display:inline;">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+
+                                </div>                  
+                            </div>
+                        </td>
+
                     </tr>
                 }
             </tbody>
         </table>
+
     </div>
+    <div class="pagination">    
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            <a href="/Company/Index?page=@i"
+               class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+                @i
+            </a>
+        }
+    </div>
+
 
     <!-- Add Company Modal -->
-    <div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addCompanyModalLabel">Add Company</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form asp-action="SaveNew" asp-controller="Company" method="post">
-                        <div class="mb-3">
-                            <label for="Name" class="form-label">Name</label>
-                            <input type="text" class="form-control" name="Name" placeholder="Enter name" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="Address" class="form-label">Address</label>
-                            <input type="text" class="form-control" name="Address" placeholder="Enter address" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="Description" class="form-label">Description</label>
-                            <textarea class="form-control" name="Description" placeholder="Enter description"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="Country" class="form-label">Country</label>
-                            <input type="text" class="form-control" name="Country" placeholder="Enter country" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="Website" class="form-label">Website</label>
-                            <input type="text" class="form-control" name="Website" placeholder="Enter website" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="PhoneNumber" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" name="PhoneNumber" placeholder="Enter phone number" />
-                        </div>
 
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <partial name="PartialViews/_AddCompanyPartialView" model="new CompanyVM()" />
+  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchBox").on("keyup", function () {
+                var searchTerm = $(this).val();
+                $.ajax({
+                    url: '@Url.Action("SearchCompanies", "Company")',
+                    type: 'GET',
+                    data: { searchTerm: searchTerm },
+                    success: function (data) {
+                        var tableBody = $("#companyTableBody");
+                        tableBody.empty(); // Clear the table before appending new rows
+
+                        $.each(data, function (index, company) {
+                            tableBody.append(
+                                `<tr>
+                                    <td>${company.name}</td>
+                                    <td>${company.address}</td>
+                                    <td>${company.description}</td>
+                                    <td>${company.country}</td>
+                                    <td>${company.website}</td>
+                                    <td>${company.phoneNumber}</td>
+                                    <td>${company.companyType}</td>
+                                </tr>`
+                            );
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    <script>
+        //Add Company
+        $(document).ready(function () {
+            $("#addCompanyForm").submit(function (event) {
+                event.preventDefault(); // Prevent page reload
+
+                var formData = {
+                    Name: $("input[name='Name']").val(),
+                    Address: $("input[name='Address']").val(),
+                    Description: $("textarea[name='Description']").val(),
+                    Country: $("input[name='Country']").val(),
+                    Website: $("input[name='Website']").val(),
+                    PhoneNumber: $("input[name='PhoneNumber']").val()
+                };
+
+                $.ajax({
+                    url: '@Url.Action("SaveNew", "Company")',
+                    type: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        // Close modal
+                        $("#addCompanyModal").modal('hide');
+
+                        // Refresh or dynamically add the new company to the table
+                        location.reload(); // Or append new data to the table without reload
+                    },
+                    error: function () {
+                        alert("Error adding company.");
+                    }
+                });
+            });
+        });
+
+
+        //Delete Company
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this Company?");
+        }
+
+        //toggle
+        $(document).on("click", ".toggle-menu", function (e) {
+            e.stopPropagation();
+            var menu = $(this).siblings(".action-menu");
+
+            // Hide other menus before toggling the current one
+            $(".action-menu").not(menu).hide();
+            menu.toggle();
+        });
+
+        // Hide the menu when clicking outside
+        $(document).click(function () {
+            $(".action-menu").hide();
+        });
+
+
+     
+    </script>
+
+
+
+
+
+
 
 </body>
 </html>

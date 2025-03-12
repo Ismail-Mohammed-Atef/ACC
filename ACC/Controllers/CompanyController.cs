@@ -5,6 +5,7 @@ using DataLayer.Models.Enums;
 using ACC.ViewModels;
 using DataLayer.Models;
 using NuGet.Protocol.Core.Types;
+using Microsoft.AspNetCore.Identity;
 
 namespace ACC.Controllers
 {
@@ -17,15 +18,16 @@ namespace ACC.Controllers
         {
             this.companyRepository = companyRepository;
         }
-        public IActionResult Index(string searchTerm, CompanyType? companyType, int page = 1, int pageSize = 4)
+        public IActionResult Index(int page = 1, int pageSize = 4)
         {
-            var query = companyRepository.SearchCompanies(searchTerm, companyType);
+            var query = companyRepository.GetAll();
 
             int totalRecords = query.Count();
 
             List<CompanyVM>
     companiesListModel = query.Select(c => new CompanyVM
     {
+        Id = c.Id,  
         Name = c.Name,
         Address = c.Address,
         Description = c.Description,
@@ -37,13 +39,33 @@ namespace ACC.Controllers
     ).Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
 
+            // Pass pagination data to the view
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             ViewBag.CurrentPage = page;
-            ViewBag.SearchTerm = searchTerm;
 
             return View("Index", companiesListModel);
 
         }
+
+        public IActionResult SearchCompanies(string searchTerm , CompanyType companyType)
+        {
+            var query = companyRepository.SearchCompanies(searchTerm, companyType);
+
+            var companiesListModel = query.Select(c => new
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Address = c.Address,
+                Description = c.Description,
+                Country = c.Country,
+                Website = c.Website,
+                PhoneNumber = c.PhoneNumber,
+                CompanyType = c.CompanyType.ToString()
+            }).ToList();
+
+            return Json(companiesListModel);
+        }
+
 
         public IActionResult InsertCompany()
         {
@@ -55,8 +77,7 @@ namespace ACC.Controllers
 
         public IActionResult SaveNew(Company companyFromRequest)
         {
-            if (ModelState.IsValid == true)
-            {
+           
                 try
                 {
                     companyRepository.Insert(companyFromRequest);
@@ -69,11 +90,32 @@ namespace ACC.Controllers
                     ModelState.AddModelError(string.Empty, ex.InnerException.Message);
 
                 }
-            }
+            
 
             ViewBag.companytList = companyRepository.GetAll();
-            return View("InsertCompany", companyFromRequest);
+            return View("Index", companyFromRequest);
         }
+
+        [HttpPost]
+        public IActionResult DeleteConfirmed(int? id)
+        {
+            var company = companyRepository.GetById(id.Value);
+            if (company == null)
+            {
+                return NotFound();
+            }
+
+           
+
+            companyRepository.Delete(company);
+            companyRepository.Save();
+            TempData["SuccessMessage"] = "Company deleted successfully.";
+            return RedirectToAction("Index");
+        }
+
+
+
+
 
     }
 }
