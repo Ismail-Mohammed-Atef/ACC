@@ -51,6 +51,7 @@ namespace ACC.Controllers
             // Map the projects to the ViewModel
             List<DisplayProjectsVM> displayProject = projects.Select(p => new DisplayProjectsVM
             {
+                id = p.Id,
                 Name = p.Name,
                 ProjectNumber = p.ProjectNumber,
                 ProjectType = p.ProjectType,
@@ -67,7 +68,7 @@ namespace ACC.Controllers
             // Pass pagination details to the view
             ViewBag.CurrentPage = Page;
             ViewBag.totalPages = TotalPages;
-
+            
             // Return the view with the paginated and filtered projects
             return View("Index", displayProject);
         }
@@ -85,6 +86,7 @@ namespace ACC.Controllers
             {
                 Project newProject = new Project
                 {
+                    
                     Name = projectFromRequest.Name,
                     ProjectNumber = projectFromRequest.ProjectNumber,
                     ProjectType = projectFromRequest.ProjectType,
@@ -113,17 +115,20 @@ namespace ACC.Controllers
         #endregion
 
 
-        #region Search Action
-        public IActionResult Search(string seachText)
+        [HttpPost]
+        public IActionResult Delete(int id)
         {
-            if (!seachText.IsNullOrEmpty())
+            var deletedProject = projectRepo.GetById(id);
+            if (deletedProject == null)
             {
-
+                return NotFound(); // Return 404 if project isn't found
             }
 
-            return View("Index");
-        } 
-        #endregion
+            projectRepo.Delete(deletedProject);
+            projectRepo.Save();
+
+            return Json(new { success = true });  // Return JSON response for AJAX
+        }
 
 
     }
