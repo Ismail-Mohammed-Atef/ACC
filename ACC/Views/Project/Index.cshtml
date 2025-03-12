@@ -180,8 +180,8 @@
                                                 &#x22EE; <!-- Unicode for three vertical dots -->
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton_@item.id">
-                                                <li><a class="dropdown-item" href="@Url.Action("Edit", "Project", new { id = item.id })">Edit</a></li>
-                                                <li><a class="dropdown-item text-danger" href="@Url.Action("Delete", "Project", new { id = item.id })">Delete</a></li>
+                                                <li><a class="dropdown-item edite-project" data-id="@item.id" href="#">Edite project</a></li>
+                                                <li><a class="dropdown-item text-danger delete-project" data-id="@item.id" href="#">Delete project</a></li>
                                             </ul>
                                         </div>
                                     </td>
@@ -210,6 +210,54 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(document).on("submit", "#addProjectForm", function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    url: "/Member/AddProject",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (!response.success) {
+                            $("#addProjectModal .modal-body").html($(response).find(".modal-body").html());
+                        } else {
+                            console.log("ok");
+                            $("#addProjectModal").modal("hide");
+
+                            setTimeout(function () {
+                                location.reload();
+                            }, 500);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        alert("Something went wrong!");
+                    }
+                });
+            });
+
+                    $(document).on("click", ".delete-project", function (e) {
+            e.preventDefault();
+            var projectId = $(this).data("id");
+
+            if (confirm("Are you sure you want to delete this project?")) {
+                $.ajax({
+                    url: "/Project/Delete/" + projectId,
+                    type: "POST",  // Change from GET to POST
+                    success: function () {
+                        location.reload();  // Refresh the page after deletion
+                    },
+                    error: function () {
+                        alert("Error deleting project.");
+                    }
+                });
+            }
+        });
+
+        });
+    </script>
 
     
 </body>
