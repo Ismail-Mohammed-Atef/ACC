@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLogic.Repository.RepositoryInterfaces
 {
-    public interface ICompanyRepository
+    public interface ICompanyRepository :IGenericRepository<Company>
     {
         IEnumerable<Company> SearchCompanies(string searchTerm, CompanyType? companyType);
     }
