@@ -67,6 +67,7 @@ namespace ACC.Controllers
                 var result = await _userManager.CreateAsync(User, "123Aa_");
                 if (result.Succeeded)
                 {
+                    TempData["SuccessMessage"] = "Member added successfully!";//toastr
                     return Json(new { success = true }); // Indicate success
                 }
                 foreach (var error in result.Errors)
@@ -74,6 +75,7 @@ namespace ACC.Controllers
                     ModelState.AddModelError("", error.Description);
                 }
             }
+            TempData["ErrorMessage"] = "Failed to add member!";//toastr
             return PartialView("PartialViews/_AddMemberPartialView", memberFromReq);
         }
         [HttpPost]
@@ -85,9 +87,13 @@ namespace ACC.Controllers
                 var result = await _userManager.DeleteAsync(member);
                 if (result.Succeeded)
                 {
+                    TempData["SuccessMessage"] = "Member added successfully!";//toastr
+
                     return Ok();
                 }
             }
+            TempData["ErrorMessage"] = "Failed to add member!";//toastr
+
             return NotFound();
         }
         [HttpGet]

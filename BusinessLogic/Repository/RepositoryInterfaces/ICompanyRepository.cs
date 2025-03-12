@@ -10,6 +10,9 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
 {
     public interface ICompanyRepository :IGenericRepository<Company>
     {
+        dynamic GetAll();
+        void Insert(Company companyFromRequest);
+        void Save();
         IEnumerable<Company> SearchCompanies(string searchTerm, CompanyType? companyType);
     }
 }
