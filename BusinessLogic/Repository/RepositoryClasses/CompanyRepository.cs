@@ -36,6 +36,9 @@ namespace BusinessLogic.Repository.RepositoryClasses
             return query.ToList();
         }
 
-
+        dynamic ICompanyRepository.GetAll()
+        {
+            return base.GetAll();
+        }
     }
 }
