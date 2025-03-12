@@ -63,3 +63,31 @@
 .sidebar.collapsed + .content {
     margin-left: 60px;
 }
+#toast-container > .toast {
+    background-color: #333 !important;
+    color: #fff !important;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#toast-container > .toast-success {
+    background-color: #28a745 !important;
+}
+
+#toast-container > .toast-error {
+    background-color: #dc3545 !important;
+}
+
+#toast-container > .toast-warning {
+    background-color: #ffc107 !important;
+    color: #333 !important;
+}
+
+#toast-container > .toast-info {
+    background-color: #17a2b8 !important;
+}
+
+.toast-close-button {
+    color: white !important;
+    opacity: 1 !important;
+}
