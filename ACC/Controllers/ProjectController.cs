@@ -6,6 +6,7 @@ using DataLayer.Models.Enums;
 using Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ACC.Controllers
@@ -22,25 +23,23 @@ namespace ACC.Controllers
 
 
         #region Index DisplayData Action
-        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 3)
+        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 3, bool showArchived = false)
         {
-            // Get all Currency enum values
-            var Currencies =new SelectList( Enum.GetValues(typeof(Currency)).Cast<Currency>());
+            var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
 
-            // Get all ProjectType enum values and format them using EnumHelper
             var ProjectTypes = Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>()
                 .Select(pt => new
                 {
-                    Value = pt.ToString(), // Use the enum value as the value
-                    DisplayName = EnumHelper.GetDescription(pt) // Use the formatted display name
+                    Value = pt.ToString(),
+                    DisplayName = EnumHelper.GetDescription(pt)
                 })
                 .ToList();
 
             ViewBag.Currencies = Currencies;
             ViewBag.ProjectTypes = new SelectList(ProjectTypes, "Value", "DisplayName");
 
-            // Get paginated projects
-            var projects = projectRepo.GetPaginatedProjects(Page, Pagesize, srchText);
+            // Get paginated projects with showArchived filter
+            var projects = projectRepo.GetPaginatedProjects(Page, Pagesize, srchText, showArchived);
 
             // If no projects are found, return an empty list
             if (projects == null || !projects.Any())
@@ -51,6 +50,7 @@ namespace ACC.Controllers
             // Map the projects to the ViewModel
             List<DisplayProjectsVM> displayProject = projects.Select(p => new DisplayProjectsVM
             {
+                id = p.Id,
                 Name = p.Name,
                 ProjectNumber = p.ProjectNumber,
                 ProjectType = p.ProjectType,
@@ -61,14 +61,14 @@ namespace ACC.Controllers
             }).ToList();
 
             // Calculate pagination details
-            int ProjectCount = projectRepo.ProjectsCount();
+            int ProjectCount = projectRepo.GetProjectsCount(srchText, showArchived);
             int TotalPages = (int)Math.Ceiling((double)ProjectCount / Pagesize);
 
             // Pass pagination details to the view
             ViewBag.CurrentPage = Page;
             ViewBag.totalPages = TotalPages;
+            ViewBag.ShowArchived = showArchived;
 
-            // Return the view with the paginated and filtered projects
             return View("Index", displayProject);
         }
 
@@ -85,6 +85,7 @@ namespace ACC.Controllers
             {
                 Project newProject = new Project
                 {
+                    
                     Name = projectFromRequest.Name,
                     ProjectNumber = projectFromRequest.ProjectNumber,
                     ProjectType = projectFromRequest.ProjectType,
@@ -113,18 +114,45 @@ namespace ACC.Controllers
         #endregion
 
 
-        #region Search Action
-        public IActionResult Search(string seachText)
+        [HttpPost]
+        public IActionResult Delete(int id)
         {
-            if (!seachText.IsNullOrEmpty())
+            var deletedProject = projectRepo.GetById(id);
+            if (deletedProject == null)
             {
-
+                return NotFound(); // Return 404 if project isn't found
             }
 
-            return View("Index");
-        } 
-        #endregion
+            projectRepo.Delete(deletedProject);
+            projectRepo.Save();
 
+            return Json(new { success = true });  // Return JSON response for AJAX
+        }
+
+        //[HttpPost]
+        public IActionResult Archive(int id)
+        {
+            var project = projectRepo.GetById(id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            project.IsArchived = true;
+            projectRepo.Save();
+            return Ok();
+        }
+
+        public IActionResult Restore(int id)
+        {
+            var project = projectRepo.GetById(id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            project.IsArchived = false; 
+            projectRepo.Save();
+            return Ok();
+        }
 
     }
 }
