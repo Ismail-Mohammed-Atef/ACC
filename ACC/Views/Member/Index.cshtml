@@ -1,6 +1,9 @@
 ﻿@using ACC.ViewModels.MemberVM
 @using ACC.ViewModels.MemberVM.MemberVM
-
+@{
+    var companies = new SelectList(ViewBag.Companies, "Id", "Name");
+    var roles = new SelectList(ViewBag.Roles, "Id", "Name");
+}
 @model List<MemberVM>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +24,6 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">+ Add members</button>
                 <div class="d-flex">
                     <input type="text" class="form-control me-2" id="searchInput" placeholder="Search by name or email">
-                    <button class="btn btn-outline-secondary">Export</button>
                 </div>
             </div>
 
