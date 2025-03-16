@@ -41,7 +41,7 @@ namespace ACC.ViewModels.ProjectVMs
    
 
         // Custom validation method for EndDate
-        public static ValidationResult ValidateEndDate(DateTime? endDate, ValidationContext context)
+        public static ValidationResult? ValidateEndDate(DateTime? endDate, ValidationContext context)
         {
             var instance = context.ObjectInstance as AddProjectVM;
             if (instance == null || !instance.StartDate.HasValue || !endDate.HasValue)
