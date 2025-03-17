@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DataLayer.Models.Enums;
 
+
 namespace ACC.ViewModels
 {
     public class CompanyVM
@@ -33,5 +34,6 @@ namespace ACC.ViewModels
         public Country? SelectedCountry { get; set; }
 
         public List<Country>? Countries { get; set; } = Enum.GetValues<Country>().Cast<Country>().ToList();
+
     }
 }

@@ -2,7 +2,10 @@
 @using ACC.ViewModels.MemberVM
 @using ACC.ViewModels.MemberVM.MemberVM
 @model InsertMemberVM
-
+@{
+    var companies = new SelectList(ViewBag.Companies,"Id","Name");
+    var roles = new SelectList(ViewBag.Roles, "Id", "Name");
+}
 <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -19,14 +22,18 @@
                     </div>
                     <div class="mb-3">
                         <label asp-for="CompanyId" class="form-label">Company</label>
-                        <select class="form-select" asp-for="CompanyId">
-                            <option value="" selected>Apply to all members (optional)</option>
+                        <select class="form-select" asp-for="CompanyId" asp-items="companies">
+                            <option value="" disabled selected>Please Select Company</option>
+
+                            <option value="" selected>No Company</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label asp-for="RoleId" class="form-label">Default role</label>
-                        <select class="form-select" asp-for="RoleId">
-                            <option value="" selected>Apply to all members (optional)</option>
+                        <select class="form-select" asp-for="RoleId" asp-items="roles">
+                            <option value="" disabled selected>Please Select Role</option>
+
+                            <option value="" selected>No Role</option>
                         </select>
                     </div>
                     <div class="mb-3">

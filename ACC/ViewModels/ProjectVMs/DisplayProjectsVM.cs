@@ -4,6 +4,7 @@ namespace ACC.ViewModels.ProjectVMs
 {
     public class DisplayProjectsVM
     {
+        public int id { get; set; }
         public string? Name { get; set; }
         public string? ProjectNumber { get; set; }
         public ProjectType? ProjectType { get; set; }
