@@ -1,13 +1,10 @@
-﻿using ACC.ViewModels.MemberVM.MemberVM;
-using ACC.ViewModels.ProjectVMs;
+﻿using ACC.ViewModels.ProjectVMs;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
 using Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace ACC.Controllers
 {
@@ -85,7 +82,7 @@ namespace ACC.Controllers
             {
                 Project newProject = new Project
                 {
-                    
+
                     Name = projectFromRequest.Name,
                     ProjectNumber = projectFromRequest.ProjectNumber,
                     ProjectType = projectFromRequest.ProjectType,
@@ -149,7 +146,7 @@ namespace ACC.Controllers
             {
                 return NotFound();
             }
-            project.IsArchived = false; 
+            project.IsArchived = false;
             projectRepo.Save();
             return Ok();
         }
