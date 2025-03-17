@@ -10,6 +10,6 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
 {
     public interface ICompanyRepository : IGenericRepository<Company>
     {
-        
+
     }
 }
