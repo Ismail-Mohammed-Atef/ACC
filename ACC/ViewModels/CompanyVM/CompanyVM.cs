@@ -7,11 +7,10 @@ namespace ACC.ViewModels
     {
         public int? Id { get; set; }
 
-        [Required(ErrorMessage = "Name is required.")]
-        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
+        [Required(ErrorMessage = "Company name is required.")]
+        [StringLength(100, ErrorMessage = "Company name cannot exceed 100 characters.")]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Address is required.")]
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string? Address { get; set; }
 
@@ -21,14 +20,18 @@ namespace ACC.ViewModels
         [Url(ErrorMessage = "Please enter a valid website URL.")]
         public string? Website { get; set; }
 
-        [Phone(ErrorMessage = "Please enter a valid phone number.")]
         [Required(ErrorMessage = "Phone number is required.")]
+        [RegularExpression(@"^\+?\d{10,15}$", ErrorMessage = "Invalid phone number format.")]
         public string? PhoneNumber { get; set; }
 
-        [Required(ErrorMessage = "Company type is required.")]
-        public CompanyType? CompanyType { get; set; }
+        [Required(ErrorMessage = "Company trade is required.")]
+        public CompanyType? SelectedCompanyType { get; set; }
 
-        [Required(ErrorMessage = "Country is required.")]
-        public Country? Country { get; set; }
+        public List<CompanyType>? CompanyTypes { get; set; } = Enum.GetValues(typeof(CompanyType)).Cast<CompanyType>().ToList();
+
+        [Required(ErrorMessage = "Country selection is required.")]
+        public Country? SelectedCountry { get; set; }
+
+        public List<Country>? Countries { get; set; } = Enum.GetValues<Country>().Cast<Country>().ToList();
     }
 }

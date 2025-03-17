@@ -1,4 +1,9 @@
-﻿<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
+﻿@using ACC.ViewModels
+@using ACC.ViewModels.MemberVM
+@using ACC.ViewModels.MemberVM.MemberVM
+@model CompanyVM
+
+<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -9,31 +14,42 @@
                 <form asp-action="SaveNew" asp-controller="Company" method="post">
                     <div class="mb-3">
                         <label for="Name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="Name" placeholder="Enter name" />
+                        <input type="text" class="form-control" asp-for="Name" placeholder="Enter name" />
+                        <span class="text-danger" asp-validation-for="Name"></span>
                     </div>
                     <div class="mb-3">
                         <label for="Address" class="form-label">Address</label>
-                        <input type="text" class="form-control" name="Address" placeholder="Enter address" />
+                        <input type="text" class="form-control" asp-for="Address" placeholder="Enter address" />
+                        <span class="text-danger" asp-validation-for="Address"></span>
                     </div>
                     <div class="mb-3">
                         <label for="Description" class="form-label">Description</label>
-                        <textarea class="form-control" name="Description" placeholder="Enter description"></textarea>
+                        <textarea class="form-control" asp-for="Description" placeholder="Enter description"></textarea>
+                        <span class="text-danger" asp-validation-for="Description"></span>
                     </div>
                     <div class="mb-3">
                         <label for="Country" class="form-label">Country</label>
-                        <input type="text" class="form-control" name="Country" placeholder="Enter country" />
+                        <select class="form-control" asp-for="SelectedCountry" asp-items="@(new SelectList(Model.Countries))">
+                            <option value="">-- Select Country --</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="SelectedCountry"></span>
                     </div>
                     <div class="mb-3">
                         <label for="Website" class="form-label">Website</label>
-                        <input type="text" class="form-control" name="Website" placeholder="Enter website" />
+                        <input type="text" class="form-control" asp-for="Website" placeholder="Enter website" />
+                        <span class="text-danger" asp-validation-for="Website"></span>
                     </div>
                     <div class="mb-3">
                         <label for="PhoneNumber" class="form-label">Phone Number</label>
-                        <input type="text" class="form-control" name="PhoneNumber" placeholder="Enter phone number" />
+                        <input type="text" class="form-control" asp-for="PhoneNumber" placeholder="Enter phone number" />
+                        <span class="text-danger" asp-validation-for="PhoneNumber"></span>
                     </div>
                     <div class="mb-3">
                         <label for="CompanyType" class="form-label">Trade</label>
-                        <input type="text" class="form-control" name="CompanyType" placeholder="Enter Company trade" />
+                        <select class="form-control" asp-for="SelectedCompanyType" asp-items="@(new SelectList(Model.CompanyTypes))">
+                            <option value="">-- Select Company Trade --</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="SelectedCompanyType"></span>
                     </div>
 
                     <div class="modal-footer">
@@ -45,3 +61,7 @@
         </div>
     </div>
 </div>
+
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>

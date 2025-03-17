@@ -1,28 +1,76 @@
 ﻿@using ACC.ViewModels
 @model List<CompanyVM>
 
-
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Account Companies</title>
     <link href="/css/site.css" rel="stylesheet" />
     <link rel="stylesheet" href="/css/Company.css" />
-  
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Custom CSS for loading indicator */
+        #CompanyDetailsPanel.loading::after {
+            content: "Loading...";
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .selected {
+            background-color: #f8d7da !important; /* Light red for selection */
+        }
+
+
+        /* Pagination styling */
+        .pagination .btn {
+            margin: 0 2px;
+        }
+
+        .pagination .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .pagination .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .action-menu {
+            min-width: 80px;
+            max-width: 100px;
+            padding: 8px;
+            font-size: 14px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+    </style>
 </head>
 <body>
     <div class="container-fluid p-4">
         <h2>Account Companies</h2>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCompanyModal">+ Add Companies</button>
         <div class="d-flex justify-content-between my-3">
-            <input type="text" id="searchBox" class="form-control w-25" placeholder="Search by name, trade, or email" value="@Context.Request.Query["searchTerm"]">
 
+            <div class="d-flex">
+                <input type="text" id="searchInput" class="form-control me-2" placeholder="Search by name, email or trade">
+
+
+            </div>
         </div>
+
+
+
+
 
         <!-- Companies Table -->
         <table class="table table-bordered">
@@ -34,158 +82,279 @@
                     <th>Country</th>
                     <th>Website</th>
                     <th>Phone Number</th>
-                    <th>Company Type</th>
+                    <th>Trade</th>
                     <th><i class="fas fa-cog"></i></th>
                 </tr>
             </thead>
             <tbody id="companyTableBody">
                 @foreach (var item in Model)
                 {
-                    <tr>
+                    <tr class="company-row" data-id="@item.Id">
                         <td>@item.Name</td>
                         <td>@item.Address</td>
                         <td>@item.Description</td>
-                        <td>@item.Country</td>
+                        <td>@item.SelectedCountry</td>
                         <td>@item.Website</td>
                         <td>@item.PhoneNumber</td>
-                        <td>@item.CompanyType</td>
+                        <td>@item.SelectedCompanyType</td>
                         <td>
-                            <div class="position-relative">
-                                <button class="btn btn-sm btn-light toggle-menu">
-                                    <i class="fas fa-ellipsis-v"></i> <!-- Three-dot icon -->
-                                </button>
-                                <div class="action-menu position-absolute bg-white border shadow-sm rounded p-2" style="display: none;">
-                                    <form asp-action="DeleteConfirmed" method="post" onsubmit="return confirmDelete()" style="display:inline;">
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-
-                                </div>                  
+                            <button class="btn btn-sm btn-light toggle-menu">
+                                <i class="fas fa-ellipsis-v"></i> <!-- Three-dot icon -->
+                            </button>
+                            <div class="action-menu position-absolute bg-white border shadow-sm rounded p-2" style="display: none;">
+                                <form asp-action="DeleteConfirmed" method="post" onsubmit="return confirmDelete()" style="display:inline;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" asp-action="Delete" asp-controller="Company" asp-route-Id="@item.Id" class="btn btn-danger">Delete</button>
+                                </form>
                             </div>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
 
-    </div>
-    <div class="pagination">    
-        @for (int i = 1; i <= ViewBag.TotalPages; i++)
-        {
-            <a href="/Company/Index?page=@i"
-               class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
-                @i
-            </a>
-        }
+        <!-- Pagination -->
+        <div class="pagination">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <a href="/Company/Index?page=@i"
+                   class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+                    @i
+                </a>
+            }
+        </div>
     </div>
 
+    <!-- Right-Side Panel -->
+    <div id="CompanyDetailsPanel" class="details-panel">
+        <div class="panel-header">
+            <div class="avatar">
+                <span id="CompanyInitials"></span>
+            </div>
+            <div class="company-info">
+                <h5><input type="text" id="CompanyName" class="form-control" /></h5>
+                <p class="text-muted">
+                    <input type="text" id="CompanyPhone" class="form-control" placeholder="No phone number" />
+                </p>
+                <a href="#" id="CompanyWebsiteLink" class="email-link">
+                    <input type="text" id="CompanyWebsite" class="form-control" />
+                </a>
+            </div>
+            <button id="closePanel" class="close-btn"><i class="bi bi-x"></i></button>
+        </div>
+
+        <hr>
+
+        <div class="panel-body">
+            <p><strong>Address:</strong> <input type="text" id="CompanyAddress" class="form-control" /></p>
+            <p><strong>Description:</strong> <textarea id="CompanyDescription" class="form-control"></textarea></p>
+            <p>
+                <strong>Country:</strong>
+                <select id="CompanyCountry" class="form-control">
+
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </p>
+
+            <p>
+                <strong>Company Type:</strong>
+                <select id="CompanyType" class="form-control">
+                </select>
+            </p>
+            </p>
+
+            <button id="saveCompanyChanges" class="btn btn-success mt-3" onclick="saveCompanyChanges()" >Save Changes </button>
+        </div>
+
+    </div>
 
     <!-- Add Company Modal -->
-
     <partial name="PartialViews/_AddCompanyPartialView" model="new CompanyVM()" />
-  
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+
+        // toggle menu
+
+        $(document).ready(function () {
+            $(".toggle-menu").click(function (event) {
+                event.stopPropagation(); // Prevent event bubbling
+
+                // Close all other open menus
+                $(".action-menu").not($(this).siblings(".action-menu")).hide();
+
+                // Get the menu related to the clicked button
+                let menu = $(this).closest("td").find(".action-menu");
+
+                // Get the position and size of the button
+                let buttonOffset = $(this).offset();
+                let buttonHeight = $(this).outerHeight();
+                let buttonWidth = $(this).outerWidth();
+
+                // Show the menu
+                menu.css({
+                    top: buttonOffset.top + buttonHeight + 5 + "px", // Slightly below the button
+                    left: buttonOffset.left - (menu.outerWidth() / 2) + (buttonWidth / 2) + "px", // Center it under the button
+                    display: "block",
+                    position: "absolute",
+                    zIndex: 1000 // Ensure it's above other elements
+                });
+            });
+
+            // Close menu when clicking outside
+            $(document).click(function () {
+                $(".action-menu").hide();
+            });
+
+            // Prevent the menu from closing when clicking inside it
+            $(".action-menu").click(function (event) {
+                event.stopPropagation();
+            });
+        });
+
+
+
+        // Row click to open panel
+        $(document).on("click", ".company-row", function (e) {
+            if (!$(e.target).closest(".toggle-menu, .delete-btn").length) {
+                console.log("Row clicked, ID:", $(this).data("id"));
+
+                var companyId = $(this).data("id"); // Fix typo
+
+                $.ajax({
+                    url: "/Company/Details/" + companyId,
+                    type: "GET",
+                    beforeSend: function () {
+                        $("#CompanyDetailsPanel").addClass("loading");
+                    },
+                    success: function (data) {
+                        console.log("AJAX response:", data);
+
+                        // Populate fields
+                        $("#CompanyName").val(data.name);
+                        $("#CompanyPhone").val(data.phoneNumber);
+                        $("#CompanyWebsite").val(data.website);
+                        $("#CompanyAddress").val(data.address);
+                        $("#CompanyDescription").val(data.description);
+
+
+                        // Clear and populate Country dropdown
+                        var TypeDropdown = $("#CompanyType");
+                        TypeDropdown.empty(); // Clear existing options
+                        TypeDropdown.append('<option value="">Select a country</option>'); // Add default option
+                        for (let item of data.companyTypes) {
+                            TypeDropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+                        }
+                        TypeDropdown.val(data.selectedCountry); // Set selected value
+
+
+                        // Clear and populate Country dropdown
+                        var countryDropdown = $("#CompanyCountry");
+                        countryDropdown.empty(); // Clear existing options
+                        countryDropdown.append('<option value="">Select a country</option>'); // Add default option
+                        for (let item of data.countries) {
+                            countryDropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+                        }
+                        countryDropdown.val(data.selectedCountry); // Set selected value
+
+
+
+
+
+                        // Show the panel
+                        $("#CompanyDetailsPanel").removeClass("loading hidden").addClass("show");
+                    },
+                    error: function () {
+                        alert("Failed to load company details.");
+                    }
+                });
+            }
+        });
+
+        // Close panel
+        $("#closePanel").click(function () {
+            $("#CompanyDetailsPanel").removeClass("show").addClass("hidden");
+        });
+
+
+        $(document).ready(function () {
+            $(".company-row").click(function () {
+                $(".company-row").removeClass("selected"); // Remove previous selection
+                $(this).addClass("selected"); // Add "selected" class to the clicked row
+            });
+        });
+
+       
+
+        
+        function saveCompanyChanges() {
+            var companyId = $(".company-row.selected").data("id");
+
+            if (!companyId) {
+                alert("No company selected.");
+                return;
+            }
+
+            var updatedCompany = {
+               
+                Name: $("#CompanyName").val(),
+                PhoneNumber: $("#CompanyPhone").val(),
+                Website: $("#CompanyWebsite").val(),
+                Address: $("#CompanyAddress").val(),
+                Description: $("#CompanyDescription").val(),
+                SelectedCompanyType: $("#CompanyType").val(), 
+                SelectedCountry: $("#CompanyCountry").val()  
+            };
+
+            $.ajax({
+                url: "/Company/UpdateCompany/" + companyId,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(updatedCompany),
+                success: function (response) {
+                    if (response.success) {
+                        alert("Company updated successfully!");
+                        location.reload(); // Refresh to reflect changes
+                    } else {
+                        alert("Update failed: " + response.message);
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while updating the company.");
+                }
+            });
+        }
+
+     
+
+
+
+
+
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            $("#searchBox").on("keyup", function () {
-                var searchTerm = $(this).val();
-                $.ajax({
-                    url: '@Url.Action("SearchCompanies", "Company")',
-                    type: 'GET',
-                    data: { searchTerm: searchTerm },
-                    success: function (data) {
-                        var tableBody = $("#companyTableBody");
-                        tableBody.empty(); // Clear the table before appending new rows
+            $("#searchInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
 
-                        $.each(data, function (index, company) {
-                            tableBody.append(
-                                `<tr>
-                                    <td>${company.name}</td>
-                                    <td>${company.address}</td>
-                                    <td>${company.description}</td>
-                                    <td>${company.country}</td>
-                                    <td>${company.website}</td>
-                                    <td>${company.phoneNumber}</td>
-                                    <td>${company.companyType}</td>
-                                </tr>`
-                            );
-                        });
-                    }
+                $("#companyTableBody tr").filter(function () {
+                    var name = $(this).find("td:nth-child(1)").text().toLowerCase(); // Name Column
+                    var email = $(this).find("td:nth-child(5)").text().toLowerCase(); // Website (assuming email is here)
+                    var companyType = $(this).find("td:nth-child(7)").text().toLowerCase(); // Company Type Column
+
+                    $(this).toggle(name.indexOf(value) > -1 || email.indexOf(value) > -1 || companyType.indexOf(value) > -1);
                 });
             });
         });
     </script>
-
-
-    <script>
-        //Add Company
-        $(document).ready(function () {
-            $("#addCompanyForm").submit(function (event) {
-                event.preventDefault(); // Prevent page reload
-
-                var formData = {
-                    Name: $("input[name='Name']").val(),
-                    Address: $("input[name='Address']").val(),
-                    Description: $("textarea[name='Description']").val(),
-                    Country: $("input[name='Country']").val(),
-                    Website: $("input[name='Website']").val(),
-                    PhoneNumber: $("input[name='PhoneNumber']").val()
-                };
-
-                $.ajax({
-                    url: '@Url.Action("SaveNew", "Company")',
-                    type: 'POST',
-                    contentType: "application/json",
-                    data: JSON.stringify(formData),
-                    success: function (response) {
-                        // Close modal
-                        $("#addCompanyModal").modal('hide');
-
-                        // Refresh or dynamically add the new company to the table
-                        location.reload(); // Or append new data to the table without reload
-                    },
-                    error: function () {
-                        alert("Error adding company.");
-                    }
-                });
-            });
-        });
-
-
-        //Delete Company
-        function confirmDelete() {
-            return confirm("Are you sure you want to delete this Company?");
-        }
-
-        //toggle
-        $(document).on("click", ".toggle-menu", function (e) {
-            e.stopPropagation();
-            var menu = $(this).siblings(".action-menu");
-
-            // Hide other menus before toggling the current one
-            $(".action-menu").not(menu).hide();
-            menu.toggle();
-        });
-
-        // Hide the menu when clicking outside
-        $(document).click(function () {
-            $(".action-menu").hide();
-        });
-
-
-     
-    </script>
-
-
-
-
 
 
 
 </body>
 </html>
-
 
 
 
