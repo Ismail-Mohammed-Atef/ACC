@@ -19,22 +19,8 @@ namespace BusinessLogic.Repository.RepositoryClasses
             Context = context; ;
         }
 
-        public IEnumerable<Company> SearchCompanies(string searchTerm, CompanyType? companyType)
-        {
-            var query = Context.Companies.AsQueryable();
+       
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(c => c.Name.Contains(searchTerm) || c.Description.Contains(searchTerm));
-            }
-
-            if (companyType.HasValue)
-            {
-                query = query.Where(c => c.CompanyType == companyType);
-            }
-
-            return query.ToList();
-        }
 
     }
 }
