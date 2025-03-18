@@ -1,9 +1,11 @@
 ﻿using ACC.ViewModels.MemberVM;
 using ACC.ViewModels.MemberVM.MemberVM;
+using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ACC.Controllers
@@ -11,10 +13,14 @@ namespace ACC.Controllers
     public class MemberController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRoleRepository _roleRepository;
+        private readonly ICompanyRepository _companyRepository;
 
-        public MemberController(UserManager<ApplicationUser> userManager)
+        public MemberController(UserManager<ApplicationUser> userManager , IRoleRepository roleRepository , ICompanyRepository companyRepository)
         {
             _userManager = userManager;
+            _roleRepository = roleRepository;
+            _companyRepository = companyRepository;
         }
 
         public IActionResult Index(int page = 1, string search = "", int pageSize = 10)
@@ -53,6 +59,8 @@ namespace ACC.Controllers
                     pageSize
                 });
             }
+            ViewBag.Companies = _companyRepository.GetAll();
+            ViewBag.Roles = _roleRepository.GetAll();
             return View(members);
         }
 
@@ -174,24 +182,33 @@ namespace ACC.Controllers
         [HttpGet]
         public IActionResult GetUpdatePartial(string id)
         {
-            var member = _userManager.Users.FirstOrDefault(u => u.Id == id);
-            if (member == null)
+            if (ModelState.IsValid)
             {
-                return NotFound();
+
+                var member = _userManager.Users.FirstOrDefault(u => u.Id == id);
+                if (member == null)
+                {
+                    return NotFound();
+                }
+
+                var insertMemberVM = new InsertMemberVM
+                {
+                    Email = member.Email,
+                    RoleId = member.RoleId,
+                    CompanyId = member.CompanyId,
+                    Status = member.Status,
+                    adminAccess = member.AccessLevel?.Contains(AccessLevel.AccountAdmin) ?? false,
+                    excutive = member.AccessLevel?.Contains(AccessLevel.Excutive) ?? false,
+                    standardAccess = member.AccessLevel?.Contains(AccessLevel.StandardAccess) ?? false
+                };
+                ViewBag.Companies = new SelectList(_companyRepository.GetAll(), "Id", "Name");
+                ViewBag.Roles = new SelectList(_roleRepository.GetAll(), "Id", "Name");
+
+                return PartialView("PartialViews/_UpdateMemberPartialView", insertMemberVM);
             }
+            return PartialView("PartialViews/_UpdateMemberPartialView", ModelState);
 
-            var insertMemberVM = new InsertMemberVM
-            {
-                Email = member.Email,
-                RoleId = member.RoleId,
-                CompanyId = member.CompanyId,
-                Status = member.Status,
-                adminAccess = member.AccessLevel?.Contains(AccessLevel.AccountAdmin) ?? false,
-                excutive = member.AccessLevel?.Contains(AccessLevel.Excutive) ?? false,
-                standardAccess = member.AccessLevel?.Contains(AccessLevel.StandardAccess) ?? false
-            };
-
-            return PartialView("PartialViews/_UpdateMemberPartialView", insertMemberVM);
         }
+
     }
 }

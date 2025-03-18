@@ -1,8 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Roles Management";
 }
+
 @model List<ACC.ViewModels.RoleVM.RoleViewModel>
-@* hamed *@
+
+
+
+@model List<ACC.ViewModels.RoleVM.RoleViewModel>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +28,7 @@
     <div class="container mt-4">
         <h2>Roles Management</h2>
 
+
         <!-- Add Role Button -->
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoleModal">Add Role</button>
 
@@ -39,6 +46,7 @@
                             X
                         </button>
                     </li>
+
                 }
             </ul>
         </div>
@@ -97,6 +105,7 @@
             };
 
             // Add Role
+
             $("#addRoleForm").submit(function (event) {
                 event.preventDefault();
                 var roleName = $("#roleName").val().trim();
@@ -149,6 +158,7 @@
                 });
             });
 
+
             // Role Search
             $("#searchRole").on("input", function () {
                 var searchText = $(this).val().toLowerCase();
@@ -160,9 +170,8 @@
         });
     </script>
 
+
 </body>
 </html>
-
-
 
 
