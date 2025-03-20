@@ -1,20 +1,32 @@
 ﻿@{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Roles Management";
 }
 
-
-
 @model List<ACC.ViewModels.RoleVM.RoleViewModel>
+
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </head>
 <body>
+
     <div class="container mt-4">
-        <h2>Roles</h2>
+        <h2>Roles Management</h2>
+
 
         <!-- Add Role Button -->
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoleModal">Add Role</button>
@@ -27,7 +39,13 @@
             <ul id="roleList" class="list-group">
                 @foreach (var role in Model)
                 {
-                    <li class="list-group-item role-item">@role.RoleName</li>
+                    <li class="list-group-item role-item d-flex justify-content-between align-items-center">
+                        @role.RoleName
+                        <button class="btn btn-danger btn-sm delete-role" data-role="@role.RoleName" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                            X
+                        </button>
+                    </li>
+
                 }
             </ul>
         </div>
@@ -55,9 +73,38 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this role?</p>
+                    <input type="hidden" id="deleteRoleName">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         $(document).ready(function () {
+            // Toastr configuration
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: "3000"
+            };
+
+            // Add Role
+
             $("#addRoleForm").submit(function (event) {
                 event.preventDefault();
                 var roleName = $("#roleName").val().trim();
@@ -69,18 +116,47 @@
                         data: { roleName: roleName },
                         success: function (response) {
                             if (response.success) {
-                                var newItem = $("<li>").addClass("list-group-item role-item").text(roleName);
+                                var newItem = $("<li>").addClass("list-group-item role-item d-flex justify-content-between align-items-center")
+                                    .html(`${roleName} <button class="btn btn-danger btn-sm delete-role" data-role="${roleName}" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">X</button>`);
                                 $("#roleList").append(newItem);
-                                $("#roleName").val(""); // Reset input
-                                $("#addRoleModal").modal("hide"); // Close modal
-                                alert(response.message); // Show success message
+                                $("#roleName").val("");
+                                $("#addRoleModal").modal("hide");
+                                toastr.success(response.message);
                             } else {
-                                alert(response.message); // Show error message
+                                toastr.error(response.message);
                             }
                         }
                     });
                 }
             });
+
+            // Open Delete Confirmation Modal
+            $(document).on("click", ".delete-role", function () {
+                var roleName = $(this).data("role");
+                $("#deleteRoleName").val(roleName);
+            });
+
+            // Confirm Delete
+            $("#confirmDeleteBtn").click(function () {
+                var roleName = $("#deleteRoleName").val();
+                var roleItem = $(".delete-role[data-role='" + roleName + "']").closest("li");
+
+                $.ajax({
+                    url: "/Role/DeleteRole",
+                    type: "POST",
+                    data: { roleName: roleName },
+                    success: function (response) {
+                        if (response.success) {
+                            roleItem.remove();
+                            $("#confirmDeleteModal").modal("hide");
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    }
+                });
+            });
+
 
             // Role Search
             $("#searchRole").on("input", function () {
@@ -93,310 +169,8 @@
         });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* ------------------------------------------------------------------------------------ *@
-@* <!DOCTYPE html> *@
-@* <html lang="en"> *@
-@* <head> *@
-@*     <meta charset="UTF-8"> *@
-@*     <meta name="viewport" content="width=device-width, initial-scale=1.0"> *@
-@*     <title>Roles Management</title> *@
-@*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> *@
-@*     <style> *@
-@*         .roles-container { *@
-@*             display: flex; *@
-@*             height: 80vh; *@
-@*         } *@
-
-@*         .roles-list { *@
-@*             width: 30%; *@
-@*             overflow-y: auto; *@
-@*             border-right: 1px solid #ddd; *@
-@*             padding: 10px; *@
-@*         } *@
-
-@*         .role-details { *@
-@*             width: 70%; *@
-@*             padding: 20px; *@
-@*         } *@
-@*     </style> *@
-@* </head> *@
-@* <body> *@
-@*     <div class="container mt-4"> *@
-@*         <h2>Roles Management</h2> *@
-
-@*         <!-- Add Role Button --> *@
-@*         <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addRoleModal">Add Role</button> *@
-
-@*         <!-- Search Input --> *@
-@*         <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search roles..." onkeyup="filterRoles()"> *@
-
-@*         <div class="roles-container border rounded"> *@
-@*             <!-- Scrollable Roles List --> *@
-@*             <div class="roles-list"> *@
-@*                 <ul class="list-group" id="roleList"> *@
-@*                     @if (Model != null) *@
-@*                     { *@
-@*                         foreach (var role in Model) *@
-@*                         { *@
-@*                             <li class="list-group-item role-item" onclick="showRoleDetails('@role.RoleName')"> *@
-@*                                 @role.RoleName *@
-@*                             </li> *@
-@*                         } *@
-@*                     } *@
-@*                     else *@
-@*                     { *@
-@*                         <li class="list-group-item text-center">No roles found.</li> *@
-@*                     } *@
-@*                 </ul> *@
-@*             </div> *@
-
-@*             <!-- Role Details Section --> *@
-@*             <div class="role-details"> *@
-@*                 <h4>Role Details</h4> *@
-@*                 <p id="roleDetailsText">Select a role to view details.</p> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-
-@*     <!-- Bootstrap Modal for Adding a Role --> *@
-@*     <div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true"> *@
-@*         <div class="modal-dialog"> *@
-@*             <div class="modal-content"> *@
-@*                 <div class="modal-header"> *@
-@*                     <h5 class="modal-title" id="addRoleModalLabel">Add Role</h5> *@
-@*                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
-@*                 </div> *@
-@*                 <div class="modal-body"> *@
-@*                     <form id="addRoleForm"> *@
-@*                         <div class="mb-3"> *@
-@*                             <label for="roleName" class="form-label">Role name*</label> *@
-@*                             <input type="text" class="form-control" id="roleName" placeholder="Add role name" required> *@
-@*                         </div> *@
-@*                         <button type="submit" class="btn btn-primary">Add Role</button> *@
-@*                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> *@
-@*                     </form> *@
-@*                 </div> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-
-@*     <script> *@
-@*         function filterRoles() { *@
-@*             var input = document.getElementById("searchInput").value.toLowerCase(); *@
-@*             var items = document.getElementsByClassName("role-item"); *@
-
-@*             for (var i = 0; i < items.length; i++) { *@
-@*                 var text = items[i].innerText.toLowerCase(); *@
-@*                 items[i].style.display = text.includes(input) ? "" : "none"; *@
-@*             } *@
-@*         } *@
-
-@*         function showRoleDetails(roleName) { *@
-@*             document.getElementById("roleDetailsText").innerText = "Selected Role: " + roleName; *@
-@*         } *@
-
-@*         document.getElementById("addRoleForm").addEventListener("submit", function(event) { *@
-@*             event.preventDefault(); *@
-@*             var roleName = document.getElementById("roleName").value; *@
-@*             if (roleName.trim() !== "") { *@
-@*                 var roleList = document.getElementById("roleList"); *@
-@*                 var newItem = document.createElement("li"); *@
-@*                 newItem.className = "list-group-item role-item"; *@
-@*                 newItem.innerText = roleName; *@
-@*                 newItem.onclick = function () { showRoleDetails(roleName); }; *@
-@*                 roleList.appendChild(newItem); *@
-@*                 document.getElementById("roleName").value = ""; // Reset input *@
-@*                 var modal = bootstrap.Modal.getInstance(document.getElementById('addRoleModal')); *@
-@*                 modal.hide(); // Close modal *@
-@*             } *@
-@*         }); *@
-@*     </script> *@
-
-@*     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
-@* </body> *@
-@* </html> *@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* ------------------------------------------------------------------------------------------ *@
-@* <!DOCTYPE html> *@
-@* <html lang="en"> *@
-@* <head> *@
-@*     <meta charset="UTF-8"> *@
-@*     <meta name="viewport" content="width=device-width, initial-scale=1.0"> *@
-@*     <title>Roles Management</title> *@
-@*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> *@
-@*     <style> *@
-@*         .roles-container { *@
-@*             display: flex; *@
-@*             height: 80vh; *@
-@*         } *@
-@*         .roles-list { *@
-@*             width: 30%; *@
-@*             overflow-y: auto; *@
-@*             border-right: 1px solid #ddd; *@
-@*             padding: 10px; *@
-@*         } *@
-@*         .role-details { *@
-@*             width: 70%; *@
-@*             padding: 20px; *@
-@*         } *@
-@*     </style> *@
-@* </head> *@
-@* <body> *@
-@*     <div class="container mt-4"> *@
-@*         <h2>Roles Management</h2> *@
-
-@*         <!-- Add Role Button --> *@
-@*         <button class="btn btn-primary mb-3" onclick="addRole()">Add Role</button> *@
-
-@*         <!-- Search Input --> *@
-@*         <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search roles..." onkeyup="filterRoles()"> *@
-
-@*         <div class="roles-container border rounded"> *@
-@*             <!-- Scrollable Roles List --> *@
-@*             <div class="roles-list"> *@
-@*                 <ul class="list-group" id="roleList"> *@
-@*                     @if (Model != null) *@
-@*                     { *@
-@*                         foreach (var role in Model) *@
-@*                         { *@
-@*                             <li class="list-group-item role-item" onclick="showRoleDetails('@role.RoleName')"> *@
-@*                                 @role.RoleName *@
-@*                             </li> *@
-@*                         } *@
-@*                     } *@
-@*                     else *@
-@*                     { *@
-@*                         <li class="list-group-item text-center">No roles found.</li> *@
-@*                     } *@
-@*                 </ul> *@
-@*             </div> *@
-
-@*             <!-- Role Details Section --> *@
-@*             <div class="role-details"> *@
-@*                 <h4>Role Details</h4> *@
-@*                 <p id="roleDetailsText">Select a role to view details.</p> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-
-@*     <script> *@
-@*         function filterRoles() { *@
-@*             var input = document.getElementById("searchInput").value.toLowerCase(); *@
-@*             var items = document.getElementsByClassName("role-item"); *@
-
-@*             for (var i = 0; i < items.length; i++) { *@
-@*                 var text = items[i].innerText.toLowerCase(); *@
-@*                 items[i].style.display = text.includes(input) ? "" : "none"; *@
-@*             } *@
-@*         } *@
-
-@*         function showRoleDetails(roleName) { *@
-@*             document.getElementById("roleDetailsText").innerText = "Selected Role: " + roleName; *@
-@*         } *@
-
-@*         function addRole() { *@
-@*             alert("Add Role functionality not implemented yet."); *@
-@*         } *@
-@*     </script> *@
-@* </body> *@
-@* </html> *@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* ---------------------------------------------------------------------- *@
-
-@* <!DOCTYPE html> *@
-@* <html lang="en"> *@
-@* <head> *@
-@*     <meta charset="UTF-8"> *@
-@*     <meta name="viewport" content="width=device-width, initial-scale=1.0"> *@
-@*     <title>Roles</title> *@
-@*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> *@
-@* </head> *@
-@* <body> *@
-@*     <div class="container mt-4"> *@
-@*         <h2>Roles</h2> *@
-@*         <table class="table table-striped"> *@
-@*             <thead> *@
-@*                 <tr> *@
-@*                     <th>#</th> *@
-@*                     <th>Role Name</th> *@
-@*                 </tr> *@
-@*             </thead> *@
-@*             <tbody> *@
-@*                 @if (Model != null) *@
-@*                 { *@
-@*                     var index = 1; *@
-@*                     foreach (var role in Model) *@
-@*                     { *@
-@*                         <tr> *@
-@*                             <td>@index</td> *@
-@*                             <td>@role.RoleName</td> *@
-@*                         </tr> *@
-@*                         index++; *@
-@*                     } *@
-@*                 } *@
-@*                 else *@
-@*                 { *@
-@*                     <tr> *@
-@*                         <td colspan="2" class="text-center">No roles found.</td> *@
-@*                     </tr> *@
-@*                 } *@
-@*             </tbody> *@
-@*         </table> *@
-@*     </div> *@
-@* </body> *@
-@* </html> *@
 

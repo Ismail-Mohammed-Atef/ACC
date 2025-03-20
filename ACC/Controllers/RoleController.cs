@@ -16,6 +16,11 @@ namespace ACC.Controllers
         }
 
 
+        // helooo gaber
+        // helooo gaber
+
+
+
         public IActionResult Index()
         {
             var Roles = _roleRepository.GetAll();
@@ -51,6 +56,26 @@ namespace ACC.Controllers
             }
             return Json(new { success = false, message = "Invalid role name" });
         }
+
+
+        [HttpPost]
+        public IActionResult DeleteRole(string roleName)
+        {
+            if (!string.IsNullOrWhiteSpace(roleName))
+            {
+                var roleToDelete = _roleRepository.GetAll().FirstOrDefault(r => r.Name == roleName);
+                if (roleToDelete != null)
+                {
+                    _roleRepository.Delete(roleToDelete);
+                    _roleRepository.Save();
+
+                    return Json(new { success = true, message = "Role deleted successfully" });
+                }
+                return Json(new { success = false, message = "Role not found" });
+            }
+            return Json(new { success = false, message = "Invalid role name" });
+        }
+
 
     }
 }

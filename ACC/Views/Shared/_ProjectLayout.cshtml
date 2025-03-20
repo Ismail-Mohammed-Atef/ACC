@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - MyApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/css/site.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #sidebar {
+            width: 250px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+            .nav-link img {
+                width: 20px;
+                height: 20px;
+            }
+
+        #sidebarToggle {
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .logo {
+            width: 150px;
+        }
+
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+
+            .nav-link:hover {
+                color: #5daeff !important; /* Light blue on hover */
+            }
+
+            .nav-link:active {
+                color: #0056b3 !important; /* Darker blue on click */
+            }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg bg-light border-bottom shadow-sm px-3">
+        <button id="sidebarToggle" class="btn btn-outline-primary me-3">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="container-fluid d-flex align-items-center">
+            <i class="fa-solid fa-user-gear text-primary fs-5"></i>
+            <span class="ms-2 fw-semibold text-secondary">Account Admin</span>
+        </div>
+    </nav>
+
+
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="bg-light border-end vh-100 p-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a asp-controller="Project" asp-action="index" class="nav-link text-dark">
+                        <i class="fa-solid fa-sitemap me-3"></i> <span>Members</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Member" asp-action="index" class="nav-link text-dark">
+                        <i class="fa-solid fa-person me-3"></i> <span>Companies</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Company" asp-action="index" class="nav-link text-dark">
+                        <i class="fa-solid fa-building me-3"></i> <span>Activities</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Role" asp-action="index" class="nav-link text-dark">
+                        <i class="fa-solid fa-address-book me-3"></i> <span>Notifications</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Role" asp-action="index" class="nav-link text-dark">
+                        <i class="fa-solid fa-address-book me-3"></i> <span>Settings</span>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="p-4 flex-grow-1" id="content">
+            @RenderBody()
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("sidebarToggle").addEventListener("click", function () {
+            document.getElementById("sidebar").classList.toggle("d-none");
+        });
+    </script>
+</body>
+</html>
