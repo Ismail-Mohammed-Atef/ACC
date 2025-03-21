@@ -19,10 +19,14 @@ namespace ACC
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+
+
+            #region Dependency injection
             builder.Services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+               {
+                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+               });
+
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
               .AddEntityFrameworkStores<AppDbContext>();
             builder.Services.AddControllersWithViews();
@@ -33,6 +37,7 @@ namespace ACC
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 
+            #endregion
 
 
             var app = builder.Build();
