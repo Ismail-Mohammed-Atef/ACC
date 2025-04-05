@@ -197,6 +197,9 @@ namespace DataLayer.Migrations
                     b.Property<string>("MemberId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.HasKey("ProjectId", "MemberId");
 
                     b.HasIndex("MemberId");
