@@ -42,5 +42,7 @@ namespace DataLayer
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectMembers> ProjectMembers { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<ProjectActivities> ProjectActivities { get; set; }
+
     }
 }
