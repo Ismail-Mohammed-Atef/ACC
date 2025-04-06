@@ -127,6 +127,7 @@
     </style>
 </head>
 <body>
+
     <div class="d-flex">
         <div class="container-fluid p-4">
             <div class="header-div">
@@ -338,5 +339,222 @@
             });
         });
     </script>
+
+	<div class="d-flex">
+		<div class="container-fluid p-4">
+			<div class="header-div">
+				<h2>Projects</h2>
+			</div>
+
+			<div id="custom-notification" class="custom-notification">
+				<span id="notification-message"></span>
+			</div>
+
+			<div id="custom-notification-delete" class="custom-notification-delete">
+				<span id="notification-message-delete"></span>
+			</div>
+
+			<div class="nav-links mb-3">
+				<a href="@Url.Action("Index", new { showArchived = false })" class="@(ViewBag.ShowArchived == false ? "active" : "")">Active</a>
+				<a href="@Url.Action("Index", new { showArchived = true })" class="@(ViewBag.ShowArchived == true ? "active" : "")">Archived</a>
+			</div>
+
+			<div class="d-flex justify-content-between button-group mb-3">
+				
+					<div>
+						<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addProjectModal">+ Create Project</button>
+						<i class="fas fa-info-circle" style="color: #666;"></i>
+					</div>
+
+				<form action="/Project/Index" method="get" class="d-flex">
+					<div class="search-container">
+						<input type="text" class="form-control" name="srchText" placeholder="Search" value="@Context.Request.Query["srchText"]" />
+					</div>
+					<button type="submit" class="btn btn-primary ms-2" style="height:40px;">Search</button>
+				</form>
+			</div>
+
+			<div class="table-container">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th style="text-align:left;">Name</th>
+							<th style="text-align:left;">Number</th>
+							<th style="text-align:left;">Project Type</th>
+							<th>Project Value</th>
+							<th>Start Date</th>
+							<th>End Date</th>
+							<th>Creation Date</th>
+							<th class="action-column">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@if (Model == null || !Model.Any())
+						{
+							<tr>
+								<td colspan="8" class="text-center">No projects found.</td>
+							</tr>
+						}
+						else
+						{
+							@foreach (var item in Model)
+							{
+								<tr>
+									<td style="text-align:left;">@item.Name</td>
+									<td style="text-align:left;">@item.ProjectNumber</td>
+									<td style="text-align:left;">@Enum_Helper.GetDescription(item.ProjectType)</td>
+									<td>@item.ProjectValue?.ToString("N2")</td>
+									<td>@item.StartDate?.ToString("MM/dd/yyyy")</td>
+									<td>@item.EndDate?.ToString("MM/dd/yyyy")</td>
+									<td>@item.CreationDate?.ToString("MM/dd/yyyy")</td>
+									<td>
+										<div class="dropdown">
+											<button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton_@item.id" data-bs-toggle="dropdown" aria-expanded="false">
+												&#x22EE; <!-- Unicode for three vertical dots -->
+											</button>
+											<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton_@item.id">
+												@if (ViewBag.ShowArchived == false)
+												{
+													<li><a class="dropdown-item archive-project" data-id="@item.id" href="#">Archive project</a></li>
+													<li><a class="dropdown-item text-danger delete-project" data-id="@item.id" href="#">Delete project</a></li>
+												}
+												else
+												{
+												<li><a class="dropdown-item restore-project" data-id="@item.id" href="#">Restore project</a></li>
+												}
+											</ul>
+										</div>
+									</td>
+								</tr>
+							}
+						}
+					</tbody>
+				</table>
+			</div>
+
+			<div class="pagination mt-3 d-flex justify-content-center gap-2">
+				@for (int i = 1; i <= (ViewBag.totalPages ?? 1); i++)
+				{
+					<a href="@Url.Action("Index", new { page = i, srchText = Context.Request.Query["srchText"], showArchived = ViewBag.ShowArchived })"
+					   class="btn @(i == (ViewBag.CurrentPage ?? 1) ? "btn-primary" : "btn-light")">
+						@i
+					</a>
+				}
+			</div>
+
+			<partial name="PartialViews/_AddProjectPartialView" model="new AddProjectVM()" />
+		</div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			function showNotification(message) {
+			$("#notification-message").text(message);
+			$("#custom-notification")
+			.fadeIn(400) 
+			.delay(3000) 
+			.fadeOut(1000);
+		}
+		
+		function showNotification_delete(message) {
+			$("#notification-message-delete").text(message);
+			$("#custom-notification-delete")
+			.fadeIn(400)
+			.delay(3000)
+			.fadeOut(1000);
+		}
+
+		$(document).on("submit", "#addProjectForm", function (event) {
+			event.preventDefault();
+
+			$.ajax({
+				url: "/Project/AddProject",
+				type: "POST",
+				data: $(this).serialize(),
+				success: function (response) {
+					if (!response.success) {
+						$("#addProjectModal .modal-body").html($(response).find(".modal-body").html());
+					} else {
+						$("#addProjectModal").modal("hide");
+
+						// Show custom success message
+						showNotification("The project is successfully created!");
+
+						setTimeout(function () {
+							location.reload();
+						}, 500);
+					}
+				},
+				error: function (xhr, status, error) {
+					console.error("AJAX Error:", error);
+					alert("Something went wrong!");
+				}
+			});
+		});
+
+			// Handle delete project button click
+			$(document).on("click", ".delete-project", function (e) {
+				e.preventDefault();
+				var projectId = $(this).data("id");
+
+				if (confirm("Are you sure you want to delete this project?")) {
+					$.ajax({
+						url: "/Project/Delete/" + projectId,
+						type: "POST",
+						success: function () {
+
+							showNotification_delete("The project is successfully deleted");
+
+							setTimeout(function () {
+							location.reload();
+						}, 500);
+						},
+						error: function () {
+							alert("Error deleting project.");
+						}
+					});
+				}
+			});
+
+			// Handle archive project button click
+			$(document).on("click", ".archive-project", function (e) {
+				e.preventDefault();
+				console.log("Archive clicked!");
+				var projectId = $(this).data("id");
+				$.ajax({
+					url: "/Project/Archive/" + projectId,
+					type: "POST",
+					success: function () {
+						location.reload();
+					},
+					error: function () {
+						alert("Error archiving project.");
+					}
+				});
+			});
+
+			// Handle restore project button click
+			$(document).on("click", ".restore-project", function (e) {
+				e.preventDefault();
+				var projectId = $(this).data("id");
+				$.ajax({
+					url: "/Project/Restore/" + projectId,
+					type: "POST",
+					success: function () {
+						location.reload();
+					},
+					error: function () {
+						alert("Error restoring project.");
+					}
+				});
+			});
+		}); // Closing bracket for $(document).ready
+	</script>
+
+
 </body>
 </html>

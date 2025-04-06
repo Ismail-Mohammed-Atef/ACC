@@ -1,3 +1,4 @@
+
 ﻿using ACC.ViewModels.ProjectVMs;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
@@ -6,10 +7,12 @@ using Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
+
 namespace ACC.Controllers.ProjectDetailsController
 {
     public class ProjectSettingController : Controller
     {
+
         private readonly IProjetcRepository projectRepo;
 
         public ProjectSettingController(IProjetcRepository projectRepo)
@@ -94,6 +97,5 @@ namespace ACC.Controllers.ProjectDetailsController
             {
                 return Json(new { success = false, error = "An error occurred while updating the project" });
             }
-        }
     }
 }

@@ -35,6 +35,7 @@ namespace ACC
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+            builder.Services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
 
 
             #endregion

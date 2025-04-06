@@ -1,0 +1,220 @@
+﻿@using ACC.ViewModels.ProjectActivityVM
+@model List<ProjectActivityVM>
+
+@{
+    ViewData["Title"] = "Index";
+}
+@{
+    Layout = "_ProjectLayout";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project Activities</title>
+    <link href="/css/site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/Company.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Custom CSS for loading indicator */
+        #FilterPanel.loading::after {
+            content: "Loading...";
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .selected {
+            background-color: #f8d7da !important; /* Light red for selection */
+        }
+
+        /* Pagination styling */
+        .pagination .btn {
+            margin: 0 2px;
+        }
+
+        .pagination .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .pagination .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .action-menu {
+            min-width: 80px;
+            max-width: 100px;
+            padding: 8px;
+            font-size: 14px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .buttonsContainer {
+            width: 320px;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            margin-right: 0px;
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .bt-1 {
+            width: 150px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-4">
+        <h2>Activity Log</h2>
+        <hr>
+
+        <div class="buttonsContainer">
+            <button id="btn_export" class="bt-1">
+                <i class="fas fa-file-export"></i> Export All
+            </button>
+            <button id="btn_filters" class="bt-1">
+                <i class="fas fa-filter"></i> Filters
+            </button>
+        </div>
+
+        <!-- Form for filtering -->
+        <form method="get" action="/ProjectActivities/Index">
+            <div id="FilterPanel" class="details-panel">
+                <div class="panel-header">
+                    <h5>Filter Activity Data</h5>
+                    <button id="closePanel" class="close-btn"><i class="bi bi-x"></i></button>
+                </div>
+
+                <hr>
+
+                <div class="panel-body">
+                    <p>
+                        <span>From Date:</span>
+                        <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDateFilter?.ToString("yyyy-MM-dd")" />
+                    </p>
+                    <p>
+                        <span>To Date:</span>
+                        <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDateFilter?.ToString("yyyy-MM-dd")" />
+                    </p>
+                  
+
+
+                    <p>
+                        <span>Activity Type:</span>
+                        <select name="activityType" class="form-control">
+                            <option value=" " >Display All</option>
+                            @foreach (var item in ViewBag.ActivitTypeList)
+                            {
+                                <option value="@item.Text.ToString()">@item.Text.ToString()</option>
+                            }
+
+                        </select>
+                    </p>
+
+  
+
+
+                    <button type="submit" class="btn btn-primary mt-3">Apply Filters</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Activities Table -->
+        <table id="activitiesTable" class="table table-bordered">
+
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Activity Type</th>
+                    <th>Activity Details</th>
+                </tr>
+            </thead>
+            <tbody id="ActivitiesTableBody">
+                @foreach (var item in Model)
+                {
+                    <tr class="company-row" data-id="@item.Id">
+                        <td>@item.Date</td>
+                        <td>@item.ActivityType</td>
+                        <td>@item.ActivityDetail</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- التصفح بين الصفحات -->
+        <div class="pagination">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <a href="/ProjectActivities/Index?page=@i&activityType=@ViewBag.ActivityTypeFilter&startDate=@ViewBag.StartDateFilter&endDate=@ViewBag.EndDateFilter"
+                   class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+                    @i
+                </a>
+            }
+        </div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Open the filter panel
+            $("#btn_filters").click(function () {
+                $("#FilterPanel").removeClass("hidden").addClass("show");
+                $(this).html('<i class="fas fa-times"></i> Close Filters');
+            });
+
+            // Close the filter panel
+            $("#closePanel").click(function () {
+                $("#FilterPanel").removeClass("show").addClass("hidden");
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Open the filter panel
+            $("#btn_filters").click(function () {
+                $("#FilterPanel").removeClass("hidden").addClass("show");
+                $(this).html('<i class="fas fa-times"></i> Close Filters');
+            });
+
+            // Close the filter panel
+            $("#closePanel").click(function () {
+                $("#FilterPanel").removeClass("show").addClass("hidden");
+            });
+
+            // Export table to Excel
+                    $("#btn_export").click(function () {
+            let table = document.getElementById("activitiesTable");
+            let workbook = XLSX.utils.table_to_book(table, { sheet: "Activities" });
+            let worksheet = workbook.Sheets["Activities"];
+
+            // Set custom column widths (approx character widths)
+            worksheet['!cols'] = [
+                { wch: 20 }, // Date column width
+                { wch: 30 }, // Activity Type column width
+                { wch: 60 }  // Activity Details column width
+            ];
+
+            XLSX.writeFile(workbook, "ActivityLog.xlsx");
+        });
+        });
+    </script>
+
+
+</body>
+</html>
