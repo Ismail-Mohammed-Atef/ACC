@@ -12,5 +12,12 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
     {
      
         IEnumerable<Company> SearchCompanies(string searchTerm, CompanyType? companyType);
+
+        public Company GetCompanyByName(string companyName);
+
+
+        public Company GetCompanyByEmail(string website);
+
+
     }
 }
