@@ -21,6 +21,8 @@ namespace ACC.Controllers.ProjectDetailsController
         }
         public IActionResult Index(int id)
         {
+            ViewBag.Id = id;
+
             var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
             var ProjectTypes = Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>()
                 .Select(pt => new
