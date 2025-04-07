@@ -19,6 +19,8 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             this.projectRepo = projectRepo;
         }
+
+
         public IActionResult Index(int id)
         {
             var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
