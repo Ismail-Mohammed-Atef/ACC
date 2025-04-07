@@ -24,6 +24,7 @@ public class ProjectActivityRepository : GenericRepository<ProjectActivities>, I
         {
             newActivity = new ProjectActivities
             {
+                projectId = project.Id,
                 Date = DateTime.Now,
                 ActivityType = "Project Created",
                 ActivityDetail = $"{project.Name} has been created.",
@@ -35,7 +36,8 @@ public class ProjectActivityRepository : GenericRepository<ProjectActivities>, I
         else if (newObject is Company company)
         {
             newActivity = new ProjectActivities
-            {
+            {  
+
                 Date = DateTime.Now,
                 ActivityType = "Company Added",
                 ActivityDetail = $"{company.Name} has been added."

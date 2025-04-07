@@ -23,10 +23,10 @@ namespace ACC.Controllers.ProjectDetailsController
 
 
 
-        public IActionResult Index(int? id , int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
+        public IActionResult Index(int id , int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
         
         {
-            var query = activityRepository.GetByProjectId((int)id);  
+            var query = activityRepository.GetByProjectId(id);   
 
             if (!string.IsNullOrEmpty(activityType))
             {
@@ -52,6 +52,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     Date = a.Date,
                     ActivityType = a.ActivityType,
                     ActivityDetail = a.ActivityDetail,
+                    ProjectId = a.projectId
                 })
                 .Skip((page - 1) * pageSize)  
                 .Take(pageSize)  
@@ -63,6 +64,7 @@ namespace ACC.Controllers.ProjectDetailsController
             ViewBag.StartDateFilter = startDate;
             ViewBag.EndDateFilter = endDate;
             ViewBag.ActivitTypeList = Enum_Helper.GetEnumSelectListWithDisplayNames<ActivityType>();
+            ViewBag.id = id;
 
             return View("Index", ActivitiesListModel);
         }
