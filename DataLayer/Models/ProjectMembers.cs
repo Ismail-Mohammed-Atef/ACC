@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataLayer.Models
 {
-    public class ProjectMembers
+    public class ProjectMembers:BaseEntity
     {
         public string MemberId { get; set; }
         public ApplicationUser? Member { get; set; }

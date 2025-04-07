@@ -28,6 +28,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             var query = activityRepository.GetByProjectId(id);   
 
+
             if (!string.IsNullOrEmpty(activityType))
             {
                 query = query.Where(a => a.ActivityType == activityType).ToList();
