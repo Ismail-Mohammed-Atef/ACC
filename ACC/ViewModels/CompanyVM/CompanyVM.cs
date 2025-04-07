@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DataLayer.Models.Enums;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace ACC.ViewModels
@@ -8,6 +9,7 @@ namespace ACC.ViewModels
     {
         public int? Id { get; set; }
 
+        [Remote(action:"CheckName",controller:"Company" , ErrorMessage ="Company is already existed.")]
         [Required(ErrorMessage = "Company name is required.")]
         [StringLength(100, ErrorMessage = "Company name cannot exceed 100 characters.")]
         public string? Name { get; set; }
@@ -18,6 +20,7 @@ namespace ACC.ViewModels
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
         public string? Description { get; set; }
 
+        [Remote(action: "CheckWebsite", controller: "Company", ErrorMessage = "Website is already existed.")]
         [Url(ErrorMessage = "Please enter a valid website URL.")]
         public string? Website { get; set; }
 

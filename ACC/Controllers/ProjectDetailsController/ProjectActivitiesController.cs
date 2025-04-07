@@ -1,4 +1,4 @@
-﻿using ACC.ViewModels;
+﻿ using ACC.ViewModels;
 using ACC.ViewModels.ProjectActivityVM;
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
@@ -26,11 +26,9 @@ namespace ACC.Controllers.ProjectDetailsController
         public IActionResult Index(int id , int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
         
         {
-            ViewBag.Id = id;
-            // استرجاع جميع الأنشطة
-            var query = activityRepository.GetAll();
+            var query = activityRepository.GetByProjectId(id);   
 
-            // تطبيق الفلاتر
+
             if (!string.IsNullOrEmpty(activityType))
             {
                 query = query.Where(a => a.ActivityType == activityType).ToList();
@@ -46,10 +44,8 @@ namespace ACC.Controllers.ProjectDetailsController
                 query = query.Where(a => a.Date <= endDate.Value).ToList();
             }
 
-            // حساب إجمالي السجلات بعد الفلترة
             int totalRecords = query.Count();
 
-            // تقسيم البيانات إلى صفحات
             var ActivitiesListModel = query
                 .Select(a => new ProjectActivityVM
                 {
@@ -57,9 +53,10 @@ namespace ACC.Controllers.ProjectDetailsController
                     Date = a.Date,
                     ActivityType = a.ActivityType,
                     ActivityDetail = a.ActivityDetail,
+                    ProjectId = a.projectId
                 })
-                .Skip((page - 1) * pageSize)  // تخطي العناصر بناءً على الصفحة الحالية
-                .Take(pageSize)  // أخذ العناصر بناءً على حجم الصفحة
+                .Skip((page - 1) * pageSize)  
+                .Take(pageSize)  
                 .ToList();
 
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
@@ -68,6 +65,7 @@ namespace ACC.Controllers.ProjectDetailsController
             ViewBag.StartDateFilter = startDate;
             ViewBag.EndDateFilter = endDate;
             ViewBag.ActivitTypeList = Enum_Helper.GetEnumSelectListWithDisplayNames<ActivityType>();
+            ViewBag.id = id;
 
             return View("Index", ActivitiesListModel);
         }

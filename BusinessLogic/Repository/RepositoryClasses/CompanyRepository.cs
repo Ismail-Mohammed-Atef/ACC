@@ -2,11 +2,7 @@
 using DataLayer.Models.Enums;
 using DataLayer.Models;
 using DataLayer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace BusinessLogic.Repository.RepositoryClasses
 {
@@ -36,5 +32,16 @@ namespace BusinessLogic.Repository.RepositoryClasses
             return query.ToList();
         }
 
+
+        public Company GetCompanyByName(string companyName)
+        {
+            return Context.Companies.FirstOrDefault(c => c.Name.ToLower() == companyName.ToLower());
+        }
+
+        public Company GetCompanyByEmail(string website)
+        {
+            return Context.Companies.FirstOrDefault(c => c.Website.ToLower() == website.ToLower());
+        }
     }
 }
+
