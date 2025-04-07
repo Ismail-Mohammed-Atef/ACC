@@ -64,7 +64,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     .Select(pt => new
                     {
                         Value = pt.ToString(),
-                        DisplayName = EnumHelper.GetDescription(pt)
+                        DisplayName = Enum_Helper.GetDescription(pt)
                     })
                     .ToList();
                 // Project types and currencies for edit 
