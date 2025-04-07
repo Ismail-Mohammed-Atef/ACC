@@ -1,5 +1,6 @@
 ﻿using ACC.ViewModels.ProjectVMs;
 using BusinessLogic.Repository.RepositoryInterfaces;
+using DataLayer;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
 using Helpers;
@@ -11,9 +12,10 @@ namespace ACC.Controllers
     public class ProjectController : Controller
     {
         private readonly IProjetcRepository projectRepo;
-
-        public ProjectController(IProjetcRepository ProjectRepo)
+        private readonly AppDbContext _context;
+        public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo)
         {
+            _context = context;
             projectRepo = ProjectRepo;
         }
      
