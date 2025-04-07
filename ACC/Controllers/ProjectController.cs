@@ -12,8 +12,9 @@ namespace ACC.Controllers
     public class ProjectController : Controller
     {
         private readonly IProjetcRepository projectRepo;
+        private readonly IProjectActivityRepository projectActivityRepo;
         private readonly AppDbContext _context;
-        public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo)
+        public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo ,IProjectActivityRepository projectActivityRepo)
 
         {
             _context = context;
