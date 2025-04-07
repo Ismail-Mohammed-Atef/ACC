@@ -15,10 +15,12 @@ namespace ACC.Controllers
     public class CompanyController : Controller
     {
         private readonly ICompanyRepository _companyRepository;
+        private readonly IProjectActivityRepository _projectActivityRepository;
 
-        public CompanyController(ICompanyRepository companyRepository)
+        public CompanyController(ICompanyRepository companyRepository, IProjectActivityRepository projectActivityRepository)
         {
             _companyRepository = companyRepository;
+            _projectActivityRepository = projectActivityRepository;
         }
 
         // GET: Company/Index
@@ -94,6 +96,7 @@ namespace ACC.Controllers
 
                 _companyRepository.Insert(company);
                 _companyRepository.Save();
+                _projectActivityRepository.AddNewActivity(company);
 
                 return RedirectToAction("Index");
             }
@@ -122,6 +125,7 @@ namespace ACC.Controllers
 
             _companyRepository.Delete(company);
             _companyRepository.Save();
+            _projectActivityRepository.RemoveActivity(company);
 
             TempData["SuccessMessage"] = "Company deleted successfully.";
             return RedirectToAction("Index");

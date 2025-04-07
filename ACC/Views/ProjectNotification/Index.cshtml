@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - YourAppName</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @{
+        ViewData["Title"] = "Project Notification Settings";
+    }
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Project notification settings</h1>
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-md-3 border-end pe-4">
+                <button class="btn btn-primary w-100 mb-3">+ Create notification group</button>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action active">Default notification settings</a>
+                </div>
+            </div>
+
+            <!-- Right Content (Table) -->
+            <div class="col-md-9">
+                <h3 class="mb-3">Default notification settings</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Tools and notification types</th>
+                                <th scope="col">Frequency <span class="text-muted small">ⓘ</span></th>
+                                <th scope="col">Member permissions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>&gt; Action required notifications <span class="text-muted small">ⓘ</span></td>
+                                <td>
+                                    <select class="form-select">
+                                        <option>Various</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-link p-0">Manage</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>&gt; Other notifications <span class="text-muted small">ⓘ</span></td>
+                                <td>
+                                    <select class="form-select">
+                                        <option>Various</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-link p-0">Manage</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

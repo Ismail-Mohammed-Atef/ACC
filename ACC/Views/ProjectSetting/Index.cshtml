@@ -1,10 +1,15 @@
 ﻿
+﻿@using ACC.ViewModels.ProjectVMs
+@using Helpers;
+
+@model DisplayProjectsVM
 @{
-    ViewData["Title"] = "Index";
+	ViewData["Title"] = "Index";
+	Layout = "_ProjectLayout";
 }
 @{
-    Layout = "_ProjectLayout";
+	var Currency = ViewBag.Currencies;
+	var ProjectTypes = ViewBag.ProjectTypes as SelectList;
 }
 
-<h1>Index</h1>
 
