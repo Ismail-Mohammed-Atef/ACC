@@ -22,7 +22,7 @@ namespace ACC.Controllers
 
 
         #region Index DisplayData Action
-        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 3, bool showArchived = false)
+        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 5, bool showArchived = false)
         {
             var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
 
