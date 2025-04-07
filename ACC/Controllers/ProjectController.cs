@@ -16,8 +16,7 @@ namespace ACC.Controllers
         {
             projectRepo = ProjectRepo;
         }
-        //h
-
+     
 
         #region Index DisplayData Action
         public IActionResult Index(string srchText, int Page = 1, int Pagesize = 3, bool showArchived = false)
