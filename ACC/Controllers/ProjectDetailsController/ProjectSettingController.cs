@@ -19,10 +19,11 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             this.projectRepo = projectRepo;
         }
+
+
         public IActionResult Index(int id)
         {
             ViewBag.Id = id;
-
             var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
             var ProjectTypes = Enum.GetValues(typeof(ProjectType)).Cast<ProjectType>()
                 .Select(pt => new
@@ -59,6 +60,7 @@ namespace ACC.Controllers.ProjectDetailsController
         [ValidateAntiForgeryToken]
         public IActionResult EditProject(DisplayProjectsVM projectFromRequest)
         {
+
             if (!ModelState.IsValid)
             {
                 var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
