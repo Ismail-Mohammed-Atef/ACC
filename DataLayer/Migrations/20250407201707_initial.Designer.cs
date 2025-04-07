@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250401173017_Adding_ProjectActivity_Table")]
-    partial class Adding_ProjectActivity_Table
+    [Migration("20250407201707_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -211,7 +211,12 @@ namespace DataLayer.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("projectId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("projectId");
 
                     b.ToTable("ProjectActivities");
                 });
@@ -223,6 +228,9 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("MemberId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.HasKey("ProjectId", "MemberId");
 
@@ -395,6 +403,17 @@ namespace DataLayer.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
+                {
+                    b.HasOne("DataLayer.Models.Project", "project")
+                        .WithMany("Activities")
+                        .HasForeignKey("projectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("project");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.HasOne("DataLayer.Models.ApplicationUser", "Member")
@@ -472,6 +491,8 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
+                    b.Navigation("Activities");
+
                     b.Navigation("Members");
                 });
 
