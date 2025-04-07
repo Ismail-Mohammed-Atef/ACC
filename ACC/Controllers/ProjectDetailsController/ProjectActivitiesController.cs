@@ -23,7 +23,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
 
 
-        public IActionResult Index(int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
+        public IActionResult Index(int id , int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
         
         {
             // استرجاع جميع الأنشطة

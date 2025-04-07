@@ -67,7 +67,7 @@ namespace ACC.Controllers
                 Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToList()
             };
 
-            return View("InsertCompany", model);
+            return View("Index", model);
         }
 
         // POST: Company/SaveNew
@@ -79,7 +79,7 @@ namespace ACC.Controllers
             {
                 model.CompanyTypes = Enum.GetValues(typeof(CompanyType)).Cast<CompanyType>().ToList();
                 model.Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToList();
-                return View("InsertCompany", model);
+                return RedirectToAction("InsertCompany", model);
             }
 
             try
@@ -106,7 +106,7 @@ namespace ACC.Controllers
                 ModelState.AddModelError(string.Empty, ex.InnerException?.Message ?? ex.Message);
             }
 
-            return View("InsertCompany", model);
+            return RedirectToAction("InsertCompany", model);
         }
 
         // POST: Company/Delete
