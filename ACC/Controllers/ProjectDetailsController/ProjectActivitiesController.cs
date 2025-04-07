@@ -23,13 +23,11 @@ namespace ACC.Controllers.ProjectDetailsController
 
 
 
-        public IActionResult Index(int id , int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
+        public IActionResult Index(int? id , int page = 1, int pageSize = 4, string activityType = null, DateTime? startDate = null, DateTime? endDate = null)
         
         {
-            // استرجاع جميع الأنشطة
-            var query = activityRepository.GetAll();
+            var query = activityRepository.GetByProjectId((int)id);  
 
-            // تطبيق الفلاتر
             if (!string.IsNullOrEmpty(activityType))
             {
                 query = query.Where(a => a.ActivityType == activityType).ToList();
@@ -45,10 +43,8 @@ namespace ACC.Controllers.ProjectDetailsController
                 query = query.Where(a => a.Date <= endDate.Value).ToList();
             }
 
-            // حساب إجمالي السجلات بعد الفلترة
             int totalRecords = query.Count();
 
-            // تقسيم البيانات إلى صفحات
             var ActivitiesListModel = query
                 .Select(a => new ProjectActivityVM
                 {
@@ -57,8 +53,8 @@ namespace ACC.Controllers.ProjectDetailsController
                     ActivityType = a.ActivityType,
                     ActivityDetail = a.ActivityDetail,
                 })
-                .Skip((page - 1) * pageSize)  // تخطي العناصر بناءً على الصفحة الحالية
-                .Take(pageSize)  // أخذ العناصر بناءً على حجم الصفحة
+                .Skip((page - 1) * pageSize)  
+                .Take(pageSize)  
                 .ToList();
 
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);

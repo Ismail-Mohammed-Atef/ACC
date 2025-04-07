@@ -12,8 +12,10 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
     {
         public void AddNewActivity(object _object);
         public void RemoveActivity(object _object);
+        public List<ProjectActivities> GetByProjectId(int Proid);
 
-   
+
+
 
 
     }

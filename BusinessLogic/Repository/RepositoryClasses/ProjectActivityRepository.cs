@@ -12,6 +12,11 @@ public class ProjectActivityRepository : GenericRepository<ProjectActivities>, I
         this.context = context;
     }
 
+
+    public List<ProjectActivities> GetByProjectId(int Proid)
+    {
+        return context.ProjectActivities.Where(p=>p.projectId == Proid).ToList();   
+    }
     public void AddNewActivity(object newObject)
     {
         ProjectActivities newActivity;
