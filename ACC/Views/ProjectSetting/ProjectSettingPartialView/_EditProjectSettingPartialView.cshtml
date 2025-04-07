@@ -1,0 +1,38 @@
+﻿
+@{
+	var Currency = ViewBag.Currencies;
+	var ProjectTypes = ViewBag.ProjectTypes as SelectList;
+}
+
+
+<div id="Edit-data-class">
+
+	<div id="display-data-class">
+
+		<div class="general-data">
+			<!-- Left Side: Header -->
+			<div class="header">
+				<h3>General</h3>
+				<p class="subtitle">Visible to all project members</p>
+			</div>
+
+			<!-- Right Side: Details -->
+			<div class="details">
+			</div>
+		</div>
+
+		<div class="advanced-data">
+			<!-- Left Side: Header -->
+			<div class="header">
+				<h3>Advanced</h3>
+				<p class="subtitle">Only visible to project and account admins</p>
+			</div>
+
+			<!-- Right Side: Details -->
+			<div class="details">
+				<form id="editProjectForm" method="post">
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

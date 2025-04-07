@@ -12,5 +12,8 @@ namespace ACC.ViewModels.ProjectVMs
         public DateTime? EndDate { get; set; }
         public DateTime? CreationDate { get; set; }
         public double? ProjectValue { get; set; }
+        public string? Address { get;  set; }
+        public Currency? Currency { get;  set; }
+
     }
 }

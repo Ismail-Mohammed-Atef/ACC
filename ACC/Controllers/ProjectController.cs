@@ -14,14 +14,16 @@ namespace ACC.Controllers
         private readonly IProjetcRepository projectRepo;
         private readonly AppDbContext _context;
         public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo)
+
         {
             _context = context;
             projectRepo = ProjectRepo;
+            this.projectActivityRepo = projectActivityRepo;
         }
      
 
         #region Index DisplayData Action
-        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 3, bool showArchived = false)
+        public IActionResult Index(string srchText, int Page = 1, int Pagesize = 5, bool showArchived = false)
         {
             var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
 
@@ -29,7 +31,7 @@ namespace ACC.Controllers
                 .Select(pt => new
                 {
                     Value = pt.ToString(),
-                    DisplayName = EnumHelper.GetDescription(pt)
+                    DisplayName = Enum_Helper.GetDescription(pt)
                 })
                 .ToList();
 
@@ -97,6 +99,7 @@ namespace ACC.Controllers
 
                 projectRepo.Insert(newProject);
                 projectRepo.Save();
+                projectActivityRepo.AddNewActivity(newProject);
 
                 return Json(new { success = true });
             }
@@ -123,6 +126,7 @@ namespace ACC.Controllers
 
             projectRepo.Delete(deletedProject);
             projectRepo.Save();
+            projectActivityRepo.RemoveActivity(deletedProject);
 
             return Json(new { success = true });  // Return JSON response for AJAX
         }

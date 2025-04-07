@@ -15,10 +15,12 @@ namespace ACC.Controllers
     public class CompanyController : Controller
     {
         private readonly ICompanyRepository _companyRepository;
+        private readonly IProjectActivityRepository _projectActivityRepository;
 
-        public CompanyController(ICompanyRepository companyRepository)
+        public CompanyController(ICompanyRepository companyRepository, IProjectActivityRepository projectActivityRepository)
         {
             _companyRepository = companyRepository;
+            _projectActivityRepository = projectActivityRepository;
         }
 
         // GET: Company/Index
@@ -65,7 +67,7 @@ namespace ACC.Controllers
                 Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToList()
             };
 
-            return View("InsertCompany", model);
+            return View("Index", model);
         }
 
         // POST: Company/SaveNew
@@ -76,7 +78,7 @@ namespace ACC.Controllers
             {
                 model.CompanyTypes = Enum.GetValues(typeof(CompanyType)).Cast<CompanyType>().ToList();
                 model.Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToList();
-                return View("InsertCompany", model);
+                return RedirectToAction("InsertCompany", model);
             }
 
             try
@@ -94,6 +96,7 @@ namespace ACC.Controllers
 
                 _companyRepository.Insert(company);
                 _companyRepository.Save();
+                _projectActivityRepository.AddNewActivity(company);
 
                 return RedirectToAction("Index");
             }
@@ -102,7 +105,7 @@ namespace ACC.Controllers
                 ModelState.AddModelError(string.Empty, ex.InnerException?.Message ?? ex.Message);
             }
 
-            return View("InsertCompany", model);
+            return RedirectToAction("InsertCompany", model);
         }
 
         // POST: Company/Delete
@@ -122,6 +125,7 @@ namespace ACC.Controllers
 
             _companyRepository.Delete(company);
             _companyRepository.Save();
+            _projectActivityRepository.RemoveActivity(company);
 
             TempData["SuccessMessage"] = "Company deleted successfully.";
             return RedirectToAction("Index");
