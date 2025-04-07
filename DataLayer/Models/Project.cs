@@ -20,6 +20,7 @@ namespace DataLayer.Models
         public Currency? Currency { get; set; }
         public bool IsArchived { get; set; } = false;
         public ICollection<ProjectMembers>? Members { get; set; }
+        public ICollection<ProjectActivities>? Activities { get; set; }
 
     }
 }

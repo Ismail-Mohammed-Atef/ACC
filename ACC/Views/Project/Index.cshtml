@@ -349,21 +349,25 @@
 				});
 			});
 
-			$(document).on("click", ".restore-project", function (e) {
-				e.preventDefault();
-				var projectId = $(this).data("id");
-				$.ajax({
-					url: "/Project/Restore/" + projectId,
-					type: "POST",
-					success: function () {
-						location.reload();
-					},
-					error: function () {
-						alert("Error restoring project.");
-					}
-				});
-			});
-		});
-	</script>
+            $(document).on("click", ".restore-project", function (e) {
+                e.preventDefault();
+                var projectId = $(this).data("id");
+                $.ajax({
+                    url: "/Project/Restore/" + projectId,
+                    type: "POST",
+                    success: function () {
+                        location.reload();
+                    },
+                    error: function () {
+                        alert("Error restoring project.");
+                    }
+                });
+            });
+        });
+    </script>
+
+	
+
+
 </body>
 </html>

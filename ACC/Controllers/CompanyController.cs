@@ -72,6 +72,7 @@ namespace ACC.Controllers
 
         // POST: Company/SaveNew
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SaveNew(CompanyVM model)
         {
             if (!ModelState.IsValid)
@@ -212,6 +213,35 @@ namespace ACC.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.InnerException?.Message ?? ex.Message });
+            }
+        }
+
+
+        public IActionResult CheckName(string name)
+        {
+            Company company = _companyRepository.GetCompanyByName(name);    
+
+            if (company == null)
+            {
+                return Json(true);
+            }
+            else
+            {
+                return Json(false);
+            }
+        }
+
+        public IActionResult CheckWebsite(string website)
+        {
+            Company company = _companyRepository.GetCompanyByEmail(website);
+
+            if (company == null)
+            {
+                return Json(true);
+            }
+            else
+            {
+                return Json(false);
             }
         }
 
