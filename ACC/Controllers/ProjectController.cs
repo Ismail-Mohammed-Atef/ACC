@@ -1,5 +1,6 @@
 ﻿using ACC.ViewModels.ProjectVMs;
 using BusinessLogic.Repository.RepositoryInterfaces;
+using DataLayer;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
 using Helpers;
@@ -11,15 +12,15 @@ namespace ACC.Controllers
     public class ProjectController : Controller
     {
         private readonly IProjetcRepository projectRepo;
-        private readonly IProjectActivityRepository projectActivityRepo;
+        private readonly AppDbContext _context;
+        public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo)
 
-        public ProjectController(IProjetcRepository ProjectRepo, IProjectActivityRepository projectActivityRepo)
         {
+            _context = context;
             projectRepo = ProjectRepo;
             this.projectActivityRepo = projectActivityRepo;
         }
-        //h
-
+     
 
         #region Index DisplayData Action
         public IActionResult Index(string srchText, int Page = 1, int Pagesize = 5, bool showArchived = false)
