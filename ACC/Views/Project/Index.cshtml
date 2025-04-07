@@ -17,6 +17,29 @@
 
 
 	<style>
+		.custom-notification {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			padding: 15px;
+			background-color: #28a745;
+			color: white;
+			border-radius: 5px;
+			display: none;
+			z-index: 1000;
+		}
+
+		.custom-notification-delete {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			padding: 15px;
+			background-color: red;
+			color: white;
+			border-radius: 5px;
+			display: none;
+			z-index: 1000;
+		}
 		body {
 			font-family: 'Roboto', sans-serif;
 			background-color: #f8f9fa;
@@ -239,6 +262,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
 	<script>
 		$(document).ready(function () {
+
+			// open project details 
 			$(document).on("click", ".project-row", function (e) {
 				if (!$(e.target).closest(".dropdown").length) {
 					var projectId = $(this).data("project-id");
