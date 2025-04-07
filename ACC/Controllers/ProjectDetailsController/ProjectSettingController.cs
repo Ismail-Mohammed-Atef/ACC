@@ -26,7 +26,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 .Select(pt => new
                 {
                     Value = pt.ToString(),
-                    DisplayName = EnumHelper.GetDescription(pt)
+                    DisplayName = Enum_Helper.GetDescription(pt)
                 })
                 .ToList();
             // Project types and currencies for edit 
@@ -46,16 +46,16 @@ namespace ACC.Controllers.ProjectDetailsController
                 StartDate = ProjectSelected.StartDate,
                 EndDate = ProjectSelected.EndDate,
                 Address = ProjectSelected.Address,
-                Currency= ProjectSelected.Currency
+                Currency = ProjectSelected.Currency
             };
 
-            return View("Index" , ProjectSelectedvm);
+            return View("Index", ProjectSelectedvm);
         }
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditProject( DisplayProjectsVM projectFromRequest)
+        public IActionResult EditProject(DisplayProjectsVM projectFromRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -90,12 +90,13 @@ namespace ACC.Controllers.ProjectDetailsController
 
                 projectRepo.Update(project);
                 projectRepo.Save();
-                
+
                 return Json(new { success = true });
             }
             catch (Exception)
             {
                 return Json(new { success = false, error = "An error occurred while updating the project" });
             }
+        }
     }
 }
