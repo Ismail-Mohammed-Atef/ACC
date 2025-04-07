@@ -14,5 +14,6 @@ namespace ACC.ViewModels.ProjectVMs
         public double? ProjectValue { get; set; }
         public string? Address { get;  set; }
         public Currency? Currency { get;  set; }
+
     }
 }

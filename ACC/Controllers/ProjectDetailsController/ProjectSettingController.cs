@@ -59,6 +59,7 @@ namespace ACC.Controllers.ProjectDetailsController
         [ValidateAntiForgeryToken]
         public IActionResult EditProject(DisplayProjectsVM projectFromRequest)
         {
+
             if (!ModelState.IsValid)
             {
                 var Currencies = new SelectList(Enum.GetValues(typeof(Currency)).Cast<Currency>());
