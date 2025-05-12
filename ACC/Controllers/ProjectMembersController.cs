@@ -8,6 +8,7 @@ using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace ACC.Controllers
@@ -19,6 +20,7 @@ namespace ACC.Controllers
         private readonly ICompanyRepository _companyRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly AppDbContext _context;
+        private static int projectId;
 
         public ProjectMembersController(
             UserManager<ApplicationUser> userManager,
@@ -34,9 +36,9 @@ namespace ACC.Controllers
             _projectRepository = projectRepository;
         }
 
-        public IActionResult Index(int projectId, int page = 1, string search = "", int pageSize = 5)
+        public IActionResult Index(int id, int page = 1, string search = "", int pageSize = 5)
         {
-            var projectExists = _context.Projects.Any(p => p.Id == projectId);
+            var projectExists = _context.Projects.Any(p => p.Id == id);
             if (!projectExists)
             {
                 TempData["ErrorMessage"] = "Project not found!";
@@ -44,7 +46,7 @@ namespace ACC.Controllers
             }
 
             var userIdsInProject = _context.ProjectMembers
-                .Where(pm => pm.ProjectId == projectId)
+                .Where(pm => pm.ProjectId == id)
                 .Select(pm => pm.MemberId)
                 .ToList();
 
@@ -88,13 +90,14 @@ namespace ACC.Controllers
 
             ViewBag.Companies = _companyRepository.GetAll();
             ViewBag.Roles = _roleRepository.GetAll();
-            ViewBag.ProjectId = projectId;
+            ViewBag.Id = id;
+            projectId = id;
 
             return View(projectMembers);
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertMemberAsync(InsertMemberVM memberFromReq, int projectId)
+        public async Task<IActionResult> InsertMemberAsync(InsertMemberVM memberFromReq)
         {
             var projectExists = _context.Projects.Any(p => p.Id == projectId);
             if (!projectExists)

@@ -67,7 +67,7 @@
             event.preventDefault();
 
             $.ajax({
-                url: "/Member/InsertMember",
+                url: "/ProjectMembers/InsertMember",
                 type: "POST",
                 data: $(this).serialize(),
                 success: function (response) {
