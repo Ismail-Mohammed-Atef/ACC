@@ -38,6 +38,10 @@ namespace ACC.Controllers
 
         public IActionResult Index(int id, int page = 1, string search = "", int pageSize = 5)
         {
+            if(id == 0)
+            {
+                id = projectId;
+            }
             var projectExists = _context.Projects.Any(p => p.Id == id);
             if (!projectExists)
             {
@@ -77,19 +81,18 @@ namespace ACC.Controllers
                 })
                 .ToList();
 
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new
-                {
-                    data = projectMembers,
-                    totalItems,
-                    currentPage = page,
-                    pageSize
-                });
-            }
+            //if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            //{
+            //    return Json(new
+            //    {
+            //        data = projectMembers,
+            //        totalItems,
+            //        currentPage = page,
+            //        pageSize
+            //    });
+            //}
 
-            ViewBag.Companies = _companyRepository.GetAll();
-            ViewBag.Roles = _roleRepository.GetAll();
+            ViewBag.Members = _userManager.Users.ToList();
             ViewBag.Id = id;
             projectId = id;
 
@@ -99,54 +102,23 @@ namespace ACC.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertMemberAsync(InsertMemberVM memberFromReq)
         {
-            var projectExists = _context.Projects.Any(p => p.Id == projectId);
-            if (!projectExists)
+            var memebr = _userManager.Users.Where(u=>u.UserName == memberFromReq.Name).FirstOrDefault();
+            if (memebr != null)
             {
-                TempData["ErrorMessage"] = "Project not found!";
-                return RedirectToAction("Index", "Projects");
-            }
-
-            if (ModelState.IsValid)
-            {
-                ApplicationUser user = new ApplicationUser()
+                var projectMember = new ProjectMembers()
                 {
-                    UserName = memberFromReq.Email.Split("@")[0],
-                    Email = memberFromReq.Email,
-                    RoleId = memberFromReq.RoleId,
-                    CompanyId = memberFromReq.CompanyId,
-                    Status = memberFromReq.Status,
-                    AccessLevel = new List<AccessLevel>()
+                    ProjectId = projectId,
+                    MemberId = memebr.Id
                 };
-
-                if (memberFromReq.adminAccess) user.AccessLevel.Add(AccessLevel.AccountAdmin);
-                if (memberFromReq.excutive) user.AccessLevel.Add(AccessLevel.Excutive);
-                if (memberFromReq.standardAccess) user.AccessLevel.Add(AccessLevel.StandardAccess);
-
-                var result = await _userManager.CreateAsync(user, "123Aa_");
-
-                if (result.Succeeded)
+                if(memebr.Projects is null)
                 {
-                    var projectMember = new ProjectMembers
-                    {
-                        ProjectId = projectId,
-                        MemberId = user.Id
-                    };
-
-                    _context.ProjectMembers.Add(projectMember);
-                    await _context.SaveChangesAsync();
-
-                    TempData["SuccessMessage"] = "Member added successfully!";
-                    return Json(new { success = true });
+                    memebr.Projects = new List<ProjectMembers>();
                 }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
+                memebr.Projects.Add(projectMember);
+                await _userManager.UpdateAsync(memebr);
+                
             }
-
-            TempData["ErrorMessage"] = "Failed to add member!";
-            return PartialView("PartialViews/_AddProjectMembersPartialView", memberFromReq);
+            return Json(new { success = true });
         }
 
         [HttpPost]

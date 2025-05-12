@@ -5,6 +5,7 @@ using DataLayer.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace ACC.Controllers.ProjectDetailsController
 {
@@ -12,7 +13,7 @@ namespace ACC.Controllers.ProjectDetailsController
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly IProjectActivityRepository _projectActivityRepository;
-
+        private static int projectId;
         public ProjectCompanyController(ICompanyRepository companyRepository, IProjectActivityRepository projectActivityRepository)
         {
             _companyRepository = companyRepository;
@@ -42,6 +43,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 .ToList();
 
             ViewBag.Id = id;
+            projectId = id;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             ViewBag.CurrentPage = page;
 
@@ -55,11 +57,12 @@ namespace ACC.Controllers.ProjectDetailsController
             var allCompanies = _companyRepository.GetAll();
             var assignedCompanies = _companyRepository.GetCompaniesInEacProjectWithPrpjectId(projectId).Select(c => c.Id).ToList();
 
-            var companiesForSelection = allCompanies.Select(c => new
+
+            var companiesForSelection = allCompanies.Select(c => new CompanyVM
             {
                 Id = c.Id,
                 Name = assignedCompanies.Contains(c.Id) ? $"{c.Name} (Already in project)" : c.Name,
-                Disabled = assignedCompanies.Contains(c.Id)
+
             }).ToList();
 
             return Json(companiesForSelection);
@@ -80,7 +83,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 }
 
                 _companyRepository.AddCompanyToProject(company.Id, id);
-                _projectActivityRepository.AddNewActivity(company);
+                _projectActivityRepository.AddNewActivity(company,projectId);
                 return Json(new { success = true, redirect = Url.Action("Index", new { id }) });
             }
             else
@@ -110,7 +113,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     _companyRepository.Insert(company);
                     _companyRepository.Save();
                     _companyRepository.AddCompanyToProject(company.Id, id);
-                    _projectActivityRepository.AddNewActivity(company);
+                    _projectActivityRepository.AddNewActivity(company, projectId);
 
                     return Json(new { success = true, redirect = Url.Action("Index", new { id }) });
                 }

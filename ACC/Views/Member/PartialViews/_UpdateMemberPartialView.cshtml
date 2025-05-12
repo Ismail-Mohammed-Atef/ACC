@@ -9,7 +9,7 @@
         <div class="member-info">
             <h5 id="memberName">@(Model?.Email.Split("@")[0] ?? "N/A")</h5>
             <p class="text-muted" id="memberPhone">No phone number</p>
-            <input type="email" disabled id="memberEmail" class="form-control" value="@Model?.Email"/>
+            <input type="email" disabled id="memberEmail" class="form-control" value="@Model?.Email" />
             <span class="status-badge">@(Model?.Status)</span>
         </div>
         <button id="closePanel" class="close-btn"><i class="bi bi-x"></i></button>
@@ -28,7 +28,15 @@
             {
                 foreach (var company in ViewBag.Companies as SelectList)
                 {
-                    <option value="@company.Value" >@company.Text</option>
+                    if (Model.currentCompany == company.Text)
+                    {
+                        <option value="@company.Value" selected>@company.Text</option>
+
+                    }
+                    else
+                    {
+                        <option value="@company.Value">@company.Text</option>
+                    }
                 }
             }
         </select>
@@ -41,7 +49,16 @@
             {
                 foreach (var role in ViewBag.Roles as SelectList)
                 {
-                    <option value="@role.Value">@role.Text</option>
+
+                    if (Model.currentRole == role.Text)
+                    {
+                        <option value="@role.Value" selected>@role.Text</option>
+
+                    }
+                    else
+                    {
+                        <option value="@role.Value">@role.Text</option>
+                    }
                 }
             }
         </select>

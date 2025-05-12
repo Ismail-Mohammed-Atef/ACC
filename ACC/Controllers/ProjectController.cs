@@ -100,7 +100,7 @@ namespace ACC.Controllers
 
                 projectRepo.Insert(newProject);
                 projectRepo.Save();
-                projectActivityRepo.AddNewActivity(newProject);
+                projectActivityRepo.AddNewActivity(newProject , newProject.Id);
 
                 return Json(new { success = true });
             }
@@ -125,6 +125,14 @@ namespace ACC.Controllers
                 return NotFound(); // Return 404 if project isn't found
             }
 
+            var activities = projectActivityRepo.GetAll();
+            for(int i = 0; i < activities.Count; i++)
+            {
+                if(activities[i].Id == id)
+                {
+                    projectActivityRepo.Delete(activities[i]);
+                }
+            }
             projectRepo.Delete(deletedProject);
             projectRepo.Save();
             projectActivityRepo.RemoveActivity(deletedProject);

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250427163304_initialmigr")]
-    partial class initialmigr
+    [Migration("20250512143919_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -273,84 +273,6 @@ namespace DataLayer.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("DataLayer.Models.Transmittals.Transmittal", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SenderCompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TransmittalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("SenderCompanyId");
-
-                    b.ToTable("Transmittals");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Transmittals.TransmittalFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TransmittalId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TransmittalId");
-
-                    b.ToTable("TransmittalFiles");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Transmittals.TransmittalRecipient", b =>
-                {
-                    b.Property<int>("TransmittalId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RecipientCompanyId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TransmittalId", "RecipientCompanyId");
-
-                    b.HasIndex("RecipientCompanyId");
-
-                    b.ToTable("TransmittalRecipients");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -548,55 +470,6 @@ namespace DataLayer.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("DataLayer.Models.Transmittals.Transmittal", b =>
-                {
-                    b.HasOne("DataLayer.Models.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataLayer.Models.Company", "SenderCompany")
-                        .WithMany()
-                        .HasForeignKey("SenderCompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-
-                    b.Navigation("SenderCompany");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Transmittals.TransmittalFile", b =>
-                {
-                    b.HasOne("DataLayer.Models.Transmittals.Transmittal", "Transmittal")
-                        .WithMany("Files")
-                        .HasForeignKey("TransmittalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Transmittal");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Transmittals.TransmittalRecipient", b =>
-                {
-                    b.HasOne("DataLayer.Models.Company", "RecipientCompany")
-                        .WithMany("ReceivedTransmittals")
-                        .HasForeignKey("RecipientCompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DataLayer.Models.Transmittals.Transmittal", "Transmittal")
-                        .WithMany("Recipients")
-                        .HasForeignKey("TransmittalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RecipientCompany");
-
-                    b.Navigation("Transmittal");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -656,8 +529,6 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.Company", b =>
                 {
                     b.Navigation("ProjectCompany");
-
-                    b.Navigation("ReceivedTransmittals");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
@@ -672,13 +543,6 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.Role", b =>
                 {
                     b.Navigation("Members");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Transmittals.Transmittal", b =>
-                {
-                    b.Navigation("Files");
-
-                    b.Navigation("Recipients");
                 });
 #pragma warning restore 612, 618
         }

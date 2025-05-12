@@ -122,7 +122,7 @@
                         <div id="formErrors" class="alert alert-danger d-none"></div>
                         <div class="mb-3">
                             <label for="companySelect" class="form-label">Name</label>
-                            <select class="form-control" id="companySelect" name="selectedCompanyId">
+                            <select class="form-control"  id="companySelect" name="selectedCompanyId">
                                 <option value="">-- Select Company --</option>
                                 <!-- Options populated dynamically -->
                             </select>
@@ -222,13 +222,14 @@
         $(document).ready(function () {
             // Load companies for combobox
             $.get('/ProjectCompany/GetCompaniesForProject/' + @id, function (data) {
+                console.log(data);
                 var select = $('#companySelect');
                 select.empty();
                 select.append('<option value="">-- Select Company --</option>');
                 data.forEach(function (company) {
                     var option = $('<option></option>')
-                        .val(company.Id)
-                        .text(company.Name)
+                        .val(company.id)
+                        .text(company.name)
                         .addClass(company.Disabled ? 'disabled-option already-in-project' : '');
                     if (company.Disabled) {
                         option.attr('disabled', 'disabled');

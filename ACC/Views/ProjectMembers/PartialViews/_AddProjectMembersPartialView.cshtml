@@ -3,8 +3,7 @@
 @using ACC.ViewModels.ProjectMembersVM
 @model InsertMemberVM
 @{
-    var companies = new SelectList(ViewBag.Companies,"Id","Name");
-    var roles = new SelectList(ViewBag.Roles, "Id", "Name");
+    var members = new SelectList(ViewBag.Members);
 }
 <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -15,42 +14,16 @@
             </div>
             <div class="modal-body">
                 <form id="addMemberForm" method="post">
+                    
                     <div class="mb-3">
-                        <label asp-for="Email" class="form-label">Enter or copy and paste email addresses *</label>
-                        <textarea class="form-control" Asp-for="Email" rows="2" placeholder="person@company.com"></textarea>
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="CompanyId" class="form-label">Company</label>
-                        <select class="form-select" asp-for="CompanyId" asp-items="companies">
+                        <label asp-for="Name" class="form-label">Member</label>
+                        <select class="form-select" asp-for="Name" asp-items="members">
                             <option value="" disabled selected>Please Select Company</option>
 
-                            <option value="" selected>No Company</option>
+                            <option value="" selected>No Members</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="RoleId" class="form-label">Default role</label>
-                        <select class="form-select" asp-for="RoleId" asp-items="roles">
-                            <option value="" disabled selected>Please Select Role</option>
-
-                            <option value="" selected>No Role</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Access level</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" asp-for="adminAccess">
-                            <label class="form-check-label" asp-for="adminAccess">Account administrator</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" asp-for="standardAccess">
-                            <label class="form-check-label" asp-for="standardAccess">Standards administrator</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" asp-for="excutive">
-                            <label class="form-check-label" asp-for="excutive">Excutive</label>
-                        </div>
-                    </div>
+                    
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Add</button>

@@ -1,5 +1,4 @@
 ﻿using DataLayer.Models.Enums;
-using DataLayer.Models.Transmittals;
 
 namespace DataLayer.Models
 {
@@ -15,7 +14,6 @@ namespace DataLayer.Models
         public ICollection<ProjectCompany>? ProjectCompany { get; set; }
 
 
-        public ICollection<TransmittalRecipient>? ReceivedTransmittals { get; set; } // Added for many-to-many
 
     }
 }

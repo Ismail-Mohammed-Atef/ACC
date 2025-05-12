@@ -1,5 +1,4 @@
 ﻿using DataLayer.Models;
-using DataLayer.Models.Transmittals;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -61,19 +60,8 @@ namespace DataLayer
 
 
 
-            ///////////////// TransmittalRecipients /////////////////////////////////////
-            builder.Entity<TransmittalRecipient>()
-                .HasKey(tr => new { tr.TransmittalId, tr.RecipientCompanyId }); // Composite Key
-
-            builder.Entity<TransmittalRecipient>()
-                .HasOne(tr => tr.Transmittal)
-                .WithMany(t => t.Recipients)
-                .HasForeignKey(tr => tr.TransmittalId);
-
-            builder.Entity<TransmittalRecipient>()
-                .HasOne(tr => tr.RecipientCompany)
-                .WithMany(c => c.ReceivedTransmittals) // Assuming a navigation property in Company
-                .HasForeignKey(tr => tr.RecipientCompanyId);
+           
+           
 
         }
         public DbSet<Company> Companies { get; set; }
@@ -82,9 +70,7 @@ namespace DataLayer
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
-        public DbSet<Transmittal> Transmittals { get; set; }
-        public DbSet<TransmittalRecipient> TransmittalRecipients { get; set; }
-        public DbSet<TransmittalFile> TransmittalFiles { get; set; }
+      
 
     }
 }
