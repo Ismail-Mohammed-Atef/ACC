@@ -32,6 +32,11 @@ namespace DataLayer
                 .WithMany(p => p.Members)
                 .HasForeignKey(pm => pm.ProjectId);
 
+            builder.Entity<ProjectActivities>()
+                .HasOne(pm => pm.project)
+                .WithMany(p => p.Activities)
+                .HasForeignKey(pm => pm.projectId);
+
             builder.Entity<ProjectMembers>()
                 .HasOne(pm => pm.Member)
                 .WithMany(u => u.Projects)
@@ -42,5 +47,7 @@ namespace DataLayer
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectMembers> ProjectMembers { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<ProjectActivities> ProjectActivities { get; set; }
+
     }
 }

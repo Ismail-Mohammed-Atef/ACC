@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250310001435_makingTheaccesslevelList")]
-    partial class makingTheaccesslevelList
+    [Migration("20250407201707_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -160,11 +160,17 @@ namespace DataLayer.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("CreationDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("Currency")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -186,6 +192,35 @@ namespace DataLayer.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActivityDetail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActivityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("projectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("projectId");
+
+                    b.ToTable("ProjectActivities");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.Property<int>("ProjectId")
@@ -193,6 +228,9 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("MemberId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.HasKey("ProjectId", "MemberId");
 
@@ -365,6 +403,17 @@ namespace DataLayer.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
+                {
+                    b.HasOne("DataLayer.Models.Project", "project")
+                        .WithMany("Activities")
+                        .HasForeignKey("projectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("project");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.HasOne("DataLayer.Models.ApplicationUser", "Member")
@@ -442,6 +491,8 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
+                    b.Navigation("Activities");
+
                     b.Navigation("Members");
                 });
 

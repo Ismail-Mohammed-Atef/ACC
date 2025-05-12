@@ -189,6 +189,35 @@ namespace DataLayer.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActivityDetail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActivityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("projectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("projectId");
+
+                    b.ToTable("ProjectActivities");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.Property<int>("ProjectId")
@@ -196,6 +225,9 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("MemberId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.HasKey("ProjectId", "MemberId");
 
@@ -368,6 +400,17 @@ namespace DataLayer.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
+                {
+                    b.HasOne("DataLayer.Models.Project", "project")
+                        .WithMany("Activities")
+                        .HasForeignKey("projectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("project");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.HasOne("DataLayer.Models.ApplicationUser", "Member")
@@ -445,6 +488,8 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
+                    b.Navigation("Activities");
+
                     b.Navigation("Members");
                 });
 
