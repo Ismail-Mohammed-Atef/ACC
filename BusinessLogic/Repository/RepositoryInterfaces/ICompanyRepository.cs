@@ -19,5 +19,15 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
         public Company GetCompanyByEmail(string website);
 
 
+        /////////added gr/////////
+        //IEnumerable<Company> GetCompaniesInProjectWithProjectId(int projectId); // New method
+
+
+
+
+        ///added de/////////
+        IEnumerable<Company> GetCompaniesInEacProjectWithPrpjectId(int projectId);
+        void AddCompanyToProject(int companyId, int projectId);
+        void RemoveCompanyFromProject(int companyId, int projectId);
     }
 }
