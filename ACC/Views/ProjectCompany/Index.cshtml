@@ -1,0 +1,362 @@
+﻿@using ACC.ViewModels
+
+@using DataLayer.Models.Enums
+@model IEnumerable<CompanyVM>
+
+@{
+    ViewData["Title"] = "Project Companies";
+    Layout = "_ProjectLayout";
+    int id = ViewBag.Id;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .disabled-option {
+            color: gray;
+        }
+
+        .already-in-project {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h4>Companies</h4>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+                    <i class="fas fa-plus me-2"></i>Add Company
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Phone Number</th>
+                                <th>Website</th>
+                                <th>Country</th>
+                                <th>Trade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var company in Model)
+                            {
+                                <tr>
+                                    <td>@company.Name</td>
+                                    <td>@company.Address</td>
+                                    <td>@company.PhoneNumber</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(company.Website))
+                                        {
+                                            <a href="@company.Website" target="_blank">@company.Website</a>
+                                        }
+                                    </td>
+                                    <td>@company.SelectedCountry</td>
+                                    <td>@company.SelectedCompanyType</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-btn" data-id="@company.Id">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="@company.Id">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { id = id, page = i })">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Company Modal -->
+    <div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addCompanyForm" method="post" action="@Url.Action("SaveNew", "ProjectCompany", new { id = id })">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addCompanyModalLabel">Add Company</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="formErrors" class="alert alert-danger d-none"></div>
+                        <div class="mb-3">
+                            <label for="companySelect" class="form-label">Name</label>
+                            <select class="form-control" id="companySelect" name="selectedCompanyId">
+                                <option value="">-- Select Company --</option>
+                                <!-- Options populated dynamically -->
+                            </select>
+                        </div>
+                        <div id="newCompanyFields">
+                            <div class="mb-3">
+                                <label for="Address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="Address" name="Address" placeholder="Enter address" disabled />
+                            </div>
+                            <div class="mb-3">
+                                <label for="Description" class="form-label">Description</label>
+                                <textarea class="form-control" id="Description" name="Description" placeholder="Enter description" disabled></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Website" class="form-label">Website</label>
+                                <input type="url" class="form-control" id="Website" name="Website" placeholder="Enter website URL" disabled />
+                            </div>
+                            <div class="mb-3">
+                                <label for="PhoneNumber" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="PhoneNumber" name="PhoneNumber" placeholder="Enter phone number" pattern="^\+?\d{10,15}$" disabled />
+                            </div>
+                            <div class="mb-3">
+                                <label for="SelectedCompanyType" class="form-label">Trade</label>
+                                <select class="form-control" id="SelectedCompanyType" name="SelectedCompanyType" disabled>
+                                    <option value="">-- Select Trade --</option>
+                                    @foreach (var type in Enum.GetValues(typeof(CompanyType)))
+                                    {
+                                        <option value="@type">@type</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="SelectedCountry" class="form-label">Country</label>
+                                <select class="form-control" id="SelectedCountry" name="SelectedCountry" disabled>
+                                    <option value="">-- Select Country --</option>
+                                    @foreach (var country in Enum.GetValues(typeof(Country)))
+                                    {
+                                        <option value="@country">@country</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add company</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Company Modal -->
+    <div class="modal fade" id="editCompanyModal" tabindex="-1" aria-labelledby="editCompanyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCompanyModalLabel">Edit Company</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="editModalBody">
+                    <!-- AJAX-loaded content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to remove this company from the project?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="projectId" value="@id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Load companies for combobox
+            $.get('/ProjectCompany/GetCompaniesForProject/' + @id, function (data) {
+                var select = $('#companySelect');
+                select.empty();
+                select.append('<option value="">-- Select Company --</option>');
+                data.forEach(function (company) {
+                    var option = $('<option></option>')
+                        .val(company.Id)
+                        .text(company.Name)
+                        .addClass(company.Disabled ? 'disabled-option already-in-project' : '');
+                    if (company.Disabled) {
+                        option.attr('disabled', 'disabled');
+                    }
+                    select.append(option);
+                });
+                select.append('<option value="new">Add new company</option>');
+            });
+
+            // Toggle input fields based on selection
+            $('#companySelect').change(function () {
+                var selectedValue = $(this).val();
+                var $fields = $('#newCompanyFields input, #newCompanyFields textarea, #newCompanyFields select');
+
+                if (selectedValue === 'new') {
+                    $fields.prop('disabled', false);
+                    $('#newCompanyFields').show();
+                } else if (selectedValue && selectedValue !== '') {
+                    $fields.prop('disabled', true);
+                    $('#newCompanyFields').show();
+                } else {
+                    $fields.prop('disabled', true);
+                    $('#newCompanyFields').hide();
+                }
+            });
+
+            // Form submission handling
+            $('#addCompanyForm').submit(function (e) {
+                e.preventDefault();
+                var form = $(this);
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#addCompanyModal').modal('hide');
+                            window.location.href = response.redirect;
+                        } else {
+                            $('#formErrors').removeClass('d-none').text(response.message || 'An error occurred.');
+                        }
+                    },
+                    error: function () {
+                        $('#formErrors').removeClass('d-none').text('An error occurred while saving the company.');
+                    }
+                });
+            });
+
+            // Edit button click handler
+            $('.edit-btn').click(function () {
+                var companyId = $(this).data('id');
+                $.get('/ProjectCompany/Details/' + companyId, function (data) {
+                    var modalBody = `
+                        <form id="editCompanyForm" method="post">
+                            <input type="hidden" name="id" value="${companyId}" />
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" name="Name" value="${data.name}" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-control" name="Address" value="${data.address}" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="Description">${data.description}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Website</label>
+                                <input type="url" class="form-control" name="Website" value="${data.website}" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" name="PhoneNumber" value="${data.phoneNumber}" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Trade</label>
+                                <select class="form-control" name="SelectedCompanyType" required>
+                                    <option value="">-- Select Trade --</option>
+                                    ${data.companyTypes.map(type => `<option value="${type.Value}" ${type.Value === data.selectedCompanyType ? 'selected' : ''}>${type.Text}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Country</label>
+                                <select class="form-control" name="SelectedCountry" required>
+                                    <option value="">-- Select Country --</option>
+                                    ${data.countries.map(country => `<option value="${country.Value}" ${country.Value === data.selectedCountry ? 'selected' : ''}>${country.Text}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    `;
+                    $('#editModalBody').html(modalBody);
+                    $('#editCompanyModal').modal('show');
+
+                    $('#editCompanyForm').submit(function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        $.ajax({
+                            url: '/ProjectCompany/UpdateCompany/' + companyId,
+                            type: 'POST',
+                            data: form.serialize(),
+                            success: function (response) {
+                                if (response.success) {
+                                    $('#editCompanyModal').modal('hide');
+                                    location.reload();
+                                } else {
+                                    alert(response.message);
+                                }
+                            },
+                            error: function () {
+                                alert('An error occurred while updating the company.');
+                            }
+                        });
+                    });
+                });
+            });
+
+            // Delete button click handler
+            $('.delete-btn').click(function () {
+                var companyId = $(this).data('id');
+                $('#deleteForm').attr('action', '/ProjectCompany/Delete/' + companyId + '?projectId=' + @id);
+                $('#deleteConfirmationModal').modal('show');
+            });
+        });
+    </script>
+</body>
+</html>

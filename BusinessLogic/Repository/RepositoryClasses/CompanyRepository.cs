@@ -2,6 +2,7 @@
 using DataLayer.Models.Enums;
 using DataLayer.Models;
 using DataLayer;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace BusinessLogic.Repository.RepositoryClasses
@@ -42,6 +43,43 @@ namespace BusinessLogic.Repository.RepositoryClasses
         {
             return Context.Companies.FirstOrDefault(c => c.Website.ToLower() == website.ToLower());
         }
+
+
+       
+
+
+        //added de/////////
+        public IEnumerable<Company> GetCompaniesInEacProjectWithPrpjectId(int projectId)
+        {
+            return Context.ProjectCompany
+                .Where(pc => pc.ProjectId == projectId)
+                .Select(pc => pc.Company)
+                .ToList();
+        }
+
+        public void AddCompanyToProject(int companyId, int projectId)
+        {
+            var projectCompany = new ProjectCompany
+            {
+                CompanyId = companyId,
+                ProjectId = projectId
+            };
+            Context.ProjectCompany.Add(projectCompany);
+            Context.SaveChanges();
+        }
+
+        public void RemoveCompanyFromProject(int companyId, int projectId)
+        {
+            var projectCompany = Context.ProjectCompany
+                .FirstOrDefault(pc => pc.CompanyId == companyId && pc.ProjectId == projectId);
+
+            if (projectCompany != null)
+            {
+                Context.ProjectCompany.Remove(projectCompany);
+                Context.SaveChanges();
+            }
+        }
+
     }
 }
 

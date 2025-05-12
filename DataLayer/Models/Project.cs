@@ -21,6 +21,8 @@ namespace DataLayer.Models
         public bool IsArchived { get; set; } = false;
         public ICollection<ProjectMembers>? Members { get; set; }
         public ICollection<ProjectActivities>? Activities { get; set; }
+        public ICollection<ProjectCompany>? ProjectCompany { get; set; }
+
 
     }
 }
