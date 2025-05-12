@@ -1,4 +1,5 @@
 ﻿using DataLayer.Models.Enums;
+using DataLayer.Models.Transmittals;
 
 namespace DataLayer.Models
 {
@@ -11,7 +12,10 @@ namespace DataLayer.Models
         public string? PhoneNumber { get; set; }
         public CompanyType? CompanyType { get; set; }
         public Country? Country { get; set; }
+        public ICollection<ProjectCompany>? ProjectCompany { get; set; }
 
-        
+
+        public ICollection<TransmittalRecipient>? ReceivedTransmittals { get; set; } // Added for many-to-many
+
     }
 }
