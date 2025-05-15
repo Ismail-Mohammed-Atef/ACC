@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -117,6 +117,31 @@ namespace DataLayer.Migrations
                     table.ForeignKey(
                         name: "FK_ProjectActivities_Projects_projectId",
                         column: x => x.projectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectCompany",
+                columns: table => new
+                {
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectCompany", x => new { x.ProjectId, x.CompanyId });
+                    table.ForeignKey(
+                        name: "FK_ProjectCompany_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectCompany_Projects_ProjectId",
+                        column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -329,6 +354,11 @@ namespace DataLayer.Migrations
                 column: "projectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProjectCompany_CompanyId",
+                table: "ProjectCompany",
+                column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectMembers_MemberId",
                 table: "ProjectMembers",
                 column: "MemberId");
@@ -354,6 +384,9 @@ namespace DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProjectActivities");
+
+            migrationBuilder.DropTable(
+                name: "ProjectCompany");
 
             migrationBuilder.DropTable(
                 name: "ProjectMembers");

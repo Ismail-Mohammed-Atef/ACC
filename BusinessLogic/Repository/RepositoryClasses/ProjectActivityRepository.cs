@@ -17,7 +17,7 @@ public class ProjectActivityRepository : GenericRepository<ProjectActivities>, I
     {
         return context.ProjectActivities.Where(p=>p.projectId == Proid).ToList();   
     }
-    public void AddNewActivity(object newObject)
+    public void AddNewActivity(object newObject , int? id)
     {
         ProjectActivities newActivity;
         if (newObject is Project project)
@@ -34,10 +34,10 @@ public class ProjectActivityRepository : GenericRepository<ProjectActivities>, I
             context.SaveChanges();
         }
         else if (newObject is Company company)
-        {
+            {
             newActivity = new ProjectActivities
-            {  
-
+            {
+                projectId = id??0,
                 Date = DateTime.Now,
                 ActivityType = "Company Added",
                 ActivityDetail = $"{company.Name} has been added."
@@ -65,6 +65,7 @@ public class ProjectActivityRepository : GenericRepository<ProjectActivities>, I
         {
             ProjectActivities newActivity = new ProjectActivities
             {
+
                 Date = DateTime.Now,
                 ActivityType = "Company Removed",
                 ActivityDetail = $"{company.Name} has been Removed.",

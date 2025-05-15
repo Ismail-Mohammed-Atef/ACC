@@ -53,7 +53,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     Date = a.Date,
                     ActivityType = a.ActivityType,
                     ActivityDetail = a.ActivityDetail,
-                    ProjectId = a.projectId
+                    ProjectId = a.projectId??0
                 })
                 .Skip((page - 1) * pageSize)  
                 .Take(pageSize)  

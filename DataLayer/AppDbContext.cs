@@ -42,12 +42,35 @@ namespace DataLayer
                 .WithMany(u => u.Projects)
                 .HasForeignKey(pm => pm.MemberId);
 
+
+            ///////////////// ProjectCompany////////////////////////////////////////////
+
+            builder.Entity<ProjectCompany>()
+        .HasKey(pc => new { pc.ProjectId, pc.CompanyId }); // Composite Key
+
+            builder.Entity<ProjectCompany>()
+                .HasOne(pc => pc.Project)
+                .WithMany(p => p.ProjectCompany)
+                .HasForeignKey(pc => pc.ProjectId);
+
+            builder.Entity<ProjectCompany>()
+                .HasOne(pc => pc.Company)
+                .WithMany(c => c.ProjectCompany)
+                .HasForeignKey(pc => pc.CompanyId);
+
+
+
+           
+           
+
         }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectMembers> ProjectMembers { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
+        public DbSet<ProjectCompany> ProjectCompany { get; set; }
+      
 
     }
 }

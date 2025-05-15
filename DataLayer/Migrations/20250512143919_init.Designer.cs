@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250407201707_initial")]
-    partial class initial
+    [Migration("20250512143919_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,6 +221,24 @@ namespace DataLayer.Migrations
                     b.ToTable("ProjectActivities");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectCompany", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId", "CompanyId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("ProjectCompany");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.Property<int>("ProjectId")
@@ -414,6 +432,25 @@ namespace DataLayer.Migrations
                     b.Navigation("project");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.ProjectCompany", b =>
+                {
+                    b.HasOne("DataLayer.Models.Company", "Company")
+                        .WithMany("ProjectCompany")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.Project", "Project")
+                        .WithMany("ProjectCompany")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectMembers", b =>
                 {
                     b.HasOne("DataLayer.Models.ApplicationUser", "Member")
@@ -489,11 +526,18 @@ namespace DataLayer.Migrations
                     b.Navigation("Projects");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Company", b =>
+                {
+                    b.Navigation("ProjectCompany");
+                });
+
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
                     b.Navigation("Activities");
 
                     b.Navigation("Members");
+
+                    b.Navigation("ProjectCompany");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Role", b =>

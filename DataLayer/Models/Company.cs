@@ -11,7 +11,9 @@ namespace DataLayer.Models
         public string? PhoneNumber { get; set; }
         public CompanyType? CompanyType { get; set; }
         public Country? Country { get; set; }
+        public ICollection<ProjectCompany>? ProjectCompany { get; set; }
 
-        
+
+
     }
 }

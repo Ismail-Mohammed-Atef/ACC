@@ -8,6 +8,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using BusinessLogic.Repository.RepositoryClasses;
+using Microsoft.CodeAnalysis;
 
 
 namespace ACC.Controllers
@@ -67,7 +68,7 @@ namespace ACC.Controllers
                 Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToList()
             };
 
-            return View("Index", model);
+            return RedirectToAction("Index");
         }
 
         // POST: Company/SaveNew
@@ -97,7 +98,7 @@ namespace ACC.Controllers
 
                 _companyRepository.Insert(company);
                 _companyRepository.Save();
-                _projectActivityRepository.AddNewActivity(company);
+                _projectActivityRepository.AddNewActivity(company,null);
 
                 return RedirectToAction("Index");
             }
@@ -153,8 +154,8 @@ namespace ACC.Controllers
                 website = company.Website,
                 address = company.Address,
                 description = company.Description,
-                selectedCountry = company.Country,
-                selectedCompanyType = company.CompanyType,
+                selectedCountry = (int)company.Country,
+                selectedCompanyType = (int)company.CompanyType,
 
                 companyTypes = Enum.GetValues(typeof(CompanyType))
                             .Cast<CompanyType>()

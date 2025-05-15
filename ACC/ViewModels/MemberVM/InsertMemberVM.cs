@@ -17,5 +17,8 @@ namespace ACC.ViewModels.MemberVM.MemberVM
         public bool excutive { get; set; }
         public DateTime? AddedOn { get; set; }
 
+        public string? currentCompany {  get; set; }
+        public string? currentRole {  get; set; }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ACC.ViewModels.MemberVM;
 using ACC.ViewModels.MemberVM.MemberVM;
+using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
 using DataLayer.Models.Enums;
@@ -190,7 +191,6 @@ namespace ACC.Controllers
                 {
                     return NotFound();
                 }
-
                 var insertMemberVM = new InsertMemberVM
                 {
                     Email = member.Email,
@@ -199,7 +199,10 @@ namespace ACC.Controllers
                     Status = member.Status,
                     adminAccess = member.AccessLevel?.Contains(AccessLevel.AccountAdmin) ?? false,
                     excutive = member.AccessLevel?.Contains(AccessLevel.Excutive) ?? false,
-                    standardAccess = member.AccessLevel?.Contains(AccessLevel.StandardAccess) ?? false
+                    standardAccess = member.AccessLevel?.Contains(AccessLevel.StandardAccess) ?? false,
+                    currentCompany = _companyRepository.GetById(member.CompanyId??0)?.Name,
+                    currentRole = _roleRepository.GetById(member.RoleId??0)?.Name,
+
                 };
                 ViewBag.Companies = new SelectList(_companyRepository.GetAll(), "Id", "Name");
                 ViewBag.Roles = new SelectList(_roleRepository.GetAll(), "Id", "Name");

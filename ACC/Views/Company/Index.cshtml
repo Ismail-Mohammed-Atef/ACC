@@ -241,11 +241,12 @@
                         // Clear and populate Country dropdown
                         var TypeDropdown = $("#CompanyType");
                         TypeDropdown.empty(); // Clear existing options
-                        TypeDropdown.append('<option value="">Select a country</option>'); // Add default option
+                        TypeDropdown.append('<option value="">Select a type</option>'); // Add default option
                         for (let item of data.companyTypes) {
                             TypeDropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
                         }
-                        TypeDropdown.val(data.selectedCountry); // Set selected value
+                        console.log(data);
+                        TypeDropdown.val(data.selectedCompanyType); // Set selected value
 
 
                         // Clear and populate Country dropdown
@@ -255,6 +256,7 @@
                         for (let item of data.countries) {
                             countryDropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
                         }
+                        console.log(data.selectedCountry);
                         countryDropdown.val(data.selectedCountry); // Set selected value
 
 
@@ -263,6 +265,7 @@
 
                         // Show the panel
                         $("#CompanyDetailsPanel").removeClass("loading hidden").addClass("show");
+
                     },
                     error: function () {
                         alert("Failed to load company details.");
@@ -305,7 +308,6 @@
                 SelectedCompanyType: $("#CompanyType").val(), 
                 SelectedCountry: $("#CompanyCountry").val()  
             };
-
             $.ajax({
                 url: "/Company/UpdateCompany/" + companyId,
                 type: "POST",
@@ -313,10 +315,7 @@
                 data: JSON.stringify(updatedCompany),
                 success: function (response) {
                     if (response.success) {
-                        alert("Company updated successfully!");
                         location.reload(); // Refresh to reflect changes
-                    } else {
-                        alert("Update failed: " + response.message);
                     }
                 },
                 error: function () {
