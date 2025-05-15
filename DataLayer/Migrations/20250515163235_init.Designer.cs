@@ -4,6 +4,7 @@ using DataLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515163235_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,13 +157,6 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FileType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -172,46 +168,14 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
+                    b.Property<double>("Version")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
                     b.HasIndex("FolderId");
 
                     b.ToTable("Documents");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DocumentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UploadedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("VersionNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocumentId");
-
-                    b.ToTable("DocumentVersions");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Folder", b =>
@@ -222,16 +186,6 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FolderId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -239,12 +193,9 @@ namespace DataLayer.Migrations
                     b.Property<int?>("ParentFolderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("FolderId");
+                    b.HasIndex("ParentFolderId");
 
                     b.ToTable("Folders");
                 });
@@ -523,29 +474,22 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Document", b =>
                 {
-                    b.HasOne("DataLayer.Models.Folder", null)
+                    b.HasOne("DataLayer.Models.Folder", "Folder")
                         .WithMany("Documents")
                         .HasForeignKey("FolderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
-                {
-                    b.HasOne("DataLayer.Models.Document", "Document")
-                        .WithMany("Versions")
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Document");
+                    b.Navigation("Folder");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Folder", b =>
                 {
-                    b.HasOne("DataLayer.Models.Folder", null)
+                    b.HasOne("DataLayer.Models.Folder", "ParentFolder")
                         .WithMany("SubFolders")
-                        .HasForeignKey("FolderId");
+                        .HasForeignKey("ParentFolderId");
+
+                    b.Navigation("ParentFolder");
                 });
 
             modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
@@ -654,11 +598,6 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.Company", b =>
                 {
                     b.Navigation("ProjectCompany");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Document", b =>
-                {
-                    b.Navigation("Versions");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Folder", b =>

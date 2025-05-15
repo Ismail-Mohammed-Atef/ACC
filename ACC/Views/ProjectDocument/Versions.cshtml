@@ -1,0 +1,31 @@
+﻿@model Document
+@{
+    ViewBag.Title = "Versions of " + Model.Name;
+}
+
+<h2>Document: @Model.Name</h2>
+<p>Type: @Model.FileType</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Uploaded At</th>
+            <th>Uploaded By</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model.Versions.OrderByDescending(v => v.UploadedAt))
+        {
+            <tr>
+                <td>@v.UploadedAt.ToString("g")</td>
+                <td>@v.UploadedBy</td>
+                <td>
+                    <a class="btn btn-sm btn-success" href="@Url.Action("Download", new { versionId = v.Id })">Download</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a class="btn btn-secondary" href="@Url.Action("Folder", new { id = Model.FolderId })">Back</a>
