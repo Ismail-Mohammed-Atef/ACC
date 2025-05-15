@@ -1,11 +1,11 @@
-﻿using ACC.ViewModels;
+﻿using ACC.ViewModels.ProjectCompanyVM;
 using BusinessLogic.Repository.RepositoryInterfaces;
-using DataLayer.Models.Enums;
 using DataLayer.Models;
+using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using Microsoft.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace ACC.Controllers.ProjectDetailsController
 {
@@ -13,7 +13,7 @@ namespace ACC.Controllers.ProjectDetailsController
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly IProjectActivityRepository _projectActivityRepository;
-        private static int projectId;
+
         public ProjectCompanyController(ICompanyRepository companyRepository, IProjectActivityRepository projectActivityRepository)
         {
             _companyRepository = companyRepository;
@@ -21,13 +21,25 @@ namespace ACC.Controllers.ProjectDetailsController
         }
 
         // GET: /ProjectCompany/Index/{id}
-        public IActionResult Index(int id, int page = 1, int pageSize = 4)
+        public IActionResult Index(int id, int page = 1, int pageSize = 4, string searchTerm = null)
         {
             var companies = _companyRepository.GetCompaniesInEacProjectWithPrpjectId(id);
+
+            // Apply search filter if searchTerm is provided
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                companies = companies.Where(c =>
+                    c.Name.ToLower().Contains(searchTerm) ||
+                    (c.Website != null && c.Website.ToLower().Contains(searchTerm)) ||
+                    c.CompanyType.ToString().ToLower().Contains(searchTerm)
+                ).ToList();
+            }
+
             int totalRecords = companies.Count();
 
             var companyList = companies
-                .Select(c => new CompanyVM
+                .Select(c => new ProjectCompanyVM
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -36,33 +48,32 @@ namespace ACC.Controllers.ProjectDetailsController
                     Website = c.Website,
                     PhoneNumber = c.PhoneNumber,
                     SelectedCountry = c.Country,
-                    SelectedCompanyType = c.CompanyType
+                    SelectedCompanyType = c.CompanyType,
                 })
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
             ViewBag.Id = id;
-            projectId = id;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             ViewBag.CurrentPage = page;
+            ViewBag.SearchTerm = searchTerm; // Pass searchTerm back to the view for persistence
 
             return View(companyList);
         }
 
-        // GET: /ProjectCompany/GetCompaniesForProject/{projectId}
+        // GET: /ProjectCompany/GetCompaniesForProject/{id}
         [HttpGet]
-        public IActionResult GetCompaniesForProject(int projectId)
+        public IActionResult GetCompaniesForProject(int id)
         {
             var allCompanies = _companyRepository.GetAll();
-            var assignedCompanies = _companyRepository.GetCompaniesInEacProjectWithPrpjectId(projectId).Select(c => c.Id).ToList();
+            var assignedCompanies = _companyRepository.GetCompaniesInEacProjectWithPrpjectId(id).Select(c => c.Id).ToList();
 
-
-            var companiesForSelection = allCompanies.Select(c => new CompanyVM
+            var companiesForSelection = allCompanies.Select(c => new
             {
                 Id = c.Id,
                 Name = assignedCompanies.Contains(c.Id) ? $"{c.Name} (Already in project)" : c.Name,
-
+                Disabled = assignedCompanies.Contains(c.Id)
             }).ToList();
 
             return Json(companiesForSelection);
@@ -71,29 +82,31 @@ namespace ACC.Controllers.ProjectDetailsController
         // POST: /ProjectCompany/SaveNew
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SaveNew(CompanyVM model, int id, int? selectedCompanyId)
+        public async Task<IActionResult> SaveNew(int id, [Bind("Name,Address,Description,Website,PhoneNumber,SelectedCountry,SelectedCompanyType")] ProjectCompanyVM model, string selectedCompanyId)
         {
-            if (selectedCompanyId.HasValue)
+            Console.WriteLine($"selectedCompanyId: {selectedCompanyId}");
+            Console.WriteLine($"model.Name: {model.Name}");
+            Console.WriteLine($"model.PhoneNumber: {model.PhoneNumber}");
+            Console.WriteLine($"model.SelectedCountry: {model.SelectedCountry}");
+            Console.WriteLine($"model.SelectedCompanyType: {model.SelectedCompanyType}");
+
+            if (int.TryParse(selectedCompanyId, out int companyId) && companyId != 0)
             {
-                // Assign existing company to project
-                var company = _companyRepository.GetById(selectedCompanyId.Value);
+                var company = _companyRepository.GetById(companyId);
                 if (company == null)
                 {
                     return Json(new { success = false, message = "Company not found." });
                 }
-
                 _companyRepository.AddCompanyToProject(company.Id, id);
-                _projectActivityRepository.AddNewActivity(company,projectId);
+                _projectActivityRepository.AddNewActivity(company, id);
                 return Json(new { success = true, redirect = Url.Action("Index", new { id }) });
             }
             else
             {
-                // Create new company and assign to project
                 if (!ModelState.IsValid)
                 {
-                    var errors = ModelState.Values.SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                    Console.WriteLine("ModelState Errors: " + string.Join(", ", errors));
                     return Json(new { success = false, errors });
                 }
 
@@ -106,19 +119,22 @@ namespace ACC.Controllers.ProjectDetailsController
                         Description = model.Description,
                         Website = model.Website,
                         PhoneNumber = model.PhoneNumber,
-                        Country = model.SelectedCountry,
-                        CompanyType = model.SelectedCompanyType
+                        Country = model.SelectedCountry.Value,
+                        CompanyType = model.SelectedCompanyType.Value
                     };
-
+                    Console.WriteLine("Inserting company...");
                     _companyRepository.Insert(company);
+                    Console.WriteLine("Saving changes...");
                     _companyRepository.Save();
+                    Console.WriteLine("Adding company to project...");
                     _companyRepository.AddCompanyToProject(company.Id, id);
-                    _projectActivityRepository.AddNewActivity(company, projectId);
-
+                    Console.WriteLine("Adding activity...");
+                    _projectActivityRepository.AddNewActivity(company, id);
                     return Json(new { success = true, redirect = Url.Action("Index", new { id }) });
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"Error: {ex.Message}");
                     return Json(new { success = false, message = ex.InnerException?.Message ?? ex.Message });
                 }
             }
@@ -133,22 +149,12 @@ namespace ACC.Controllers.ProjectDetailsController
             {
                 return NotFound();
             }
-
             var company = _companyRepository.GetById(id.Value);
             if (company == null)
             {
                 return NotFound();
             }
-
             _companyRepository.RemoveCompanyFromProject(id.Value, projectId);
-
-            if (company.ProjectCompany == null || !company.ProjectCompany.Any())
-            {
-                _companyRepository.Delete(company);
-                _companyRepository.Save();
-                _projectActivityRepository.RemoveActivity(company);
-            }
-
             TempData["SuccessMessage"] = "Company removed from project successfully.";
             return RedirectToAction("Index", new { id = projectId });
         }
@@ -161,7 +167,6 @@ namespace ACC.Controllers.ProjectDetailsController
             {
                 return NotFound();
             }
-
             return Json(new
             {
                 name = company.Name,
@@ -185,19 +190,17 @@ namespace ACC.Controllers.ProjectDetailsController
         // POST: /ProjectCompany/UpdateCompany
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateCompany(int id, [FromBody] UpdatedCompanyVM model)
+        public IActionResult UpdateCompany(int id, [FromBody] UpdatedProjectCompanyVM model)
         {
             if (!ModelState.IsValid)
             {
                 return Json(new { success = false, message = "Invalid data." });
             }
-
             var company = _companyRepository.GetById(id);
             if (company == null)
             {
                 return NotFound();
             }
-
             try
             {
                 company.Name = model.Name;
@@ -207,10 +210,8 @@ namespace ACC.Controllers.ProjectDetailsController
                 company.PhoneNumber = model.PhoneNumber;
                 company.CompanyType = (CompanyType)Enum.Parse(typeof(CompanyType), model.SelectedCompanyType);
                 company.Country = (Country)Enum.Parse(typeof(Country), model.SelectedCountry);
-
                 _companyRepository.Update(company);
                 _companyRepository.Save();
-
                 return Json(new { success = true, message = "Company updated successfully." });
             }
             catch (Exception ex)
@@ -219,17 +220,15 @@ namespace ACC.Controllers.ProjectDetailsController
             }
         }
 
-        // GET: /ProjectCompany/CheckName
         public IActionResult CheckName(string name)
         {
-            var company = _companyRepository.GetCompanyByName(name);
+            Company company = _companyRepository.GetCompanyByName(name);
             return Json(company == null);
         }
 
-        // GET: /ProjectCompany/CheckWebsite
         public IActionResult CheckWebsite(string website)
         {
-            var company = _companyRepository.GetCompanyByEmail(website);
+            Company company = _companyRepository.GetCompanyByEmail(website);
             return Json(company == null);
         }
     }
