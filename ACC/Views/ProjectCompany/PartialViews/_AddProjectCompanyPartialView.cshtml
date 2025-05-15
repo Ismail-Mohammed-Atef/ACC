@@ -1,0 +1,138 @@
+﻿@using ACC.ViewModels.ProjectCompanyVM
+@using DataLayer.Models.Enums
+@model ProjectCompanyVM
+
+<div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addCompanyForm" asp-action="SaveNew" asp-controller="ProjectCompany" asp-route-id="@ViewBag.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyModalLabel">Add Company</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="formErrors" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="SelectedCompanyId" class="form-label">Select Company</label>
+                        <select class="form-control" id="companySelect" name="SelectedCompanyId">
+                            <option value="">-- Select Company --</option>
+                        </select>
+                    </div>
+                    <div id="newCompanyFields" style="display: none;">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label">Address</label>
+                            <input asp-for="Address" class="form-control" placeholder="Enter address" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" placeholder="Enter description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Website" class="form-label">Website</label>
+                            <input asp-for="Website" class="form-control" placeholder="Enter website" />
+                            <span asp-validation-for="Website" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="SelectedCountry" class="form-label">Country</label>
+                            <select asp-for="SelectedCountry" class="form-control" asp-items="@(new SelectList(Enum.GetValues(typeof(Country))))">
+                                <option value="">-- Select Country --</option>
+                            </select>
+                            <span asp-validation-for="SelectedCountry" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="SelectedCompanyType" class="form-label">Trade</label>
+                            <select asp-for="SelectedCompanyType" class="form-control" asp-items="@(new SelectList(Enum.GetValues(typeof(CompanyType))))">
+                                <option value="">-- Select Trade --</option>
+                            </select>
+                            <span asp-validation-for="SelectedCompanyType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Company</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.get('/ProjectCompany/GetCompaniesForProject/' + @ViewBag.Id, function (data) {
+            console.log(data);
+            var select = $('#companySelect');
+            select.empty();
+            select.append('<option value="">-- Select Company --</option>');
+            data.forEach(function (company) {
+                var option = $('<option></option>')
+                    .val(company.id)
+                    .text(company.name);
+                if (company.disabled) {
+                    option.addClass('already-in-project').prop('disabled', true);
+                }
+                select.append(option);
+            });
+            select.append('<option value="new">Add new company</option>');
+        });
+
+        $('#companySelect').change(function () {
+            var selectedValue = $(this).val();
+            var $fields = $('#newCompanyFields');
+            if (selectedValue === 'new') {
+                $fields.show();
+                $fields.find('input, textarea, select').prop('disabled', false);
+            } else {
+                $fields.hide();
+                $fields.find('input, textarea, select').prop('disabled', true);
+            }
+        });
+
+        $('#addCompanyForm').submit(function (e) {
+            e.preventDefault();
+            var form = $(this);
+            // Ensure fields are enabled before submission
+            $('#newCompanyFields').find('input, textarea, select').prop('disabled', false);
+            var formData = form.serialize();
+            console.log("Serialized Form Data:", formData);
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    console.log("Server Response:", response);
+                    if (response.success) {
+                        $('#addCompanyModal').modal('hide');
+                        window.location.href = response.redirect;
+                    } else {
+                        $('#formErrors').removeClass('d-none');
+                        if (response.errors) {
+                            $('#formErrors').html(response.errors.join('<br/>'));
+                        } else {
+                            $('#formErrors').text(response.message || 'An error occurred.');
+                        }
+                    }
+                },
+                error: function () {
+                    $('#formErrors').removeClass('d-none').text('An error occurred while saving the company.');
+                }
+            });
+        });
+    });
+</script>
