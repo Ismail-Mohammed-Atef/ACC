@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -58,10 +59,13 @@ namespace DataLayer
                 .WithMany(c => c.ProjectCompany)
                 .HasForeignKey(pc => pc.CompanyId);
 
+  /// issue
+            builder.Entity<Issue>()
+                .HasOne(i => i.Project)
+                .WithMany(p => p.Issues)
+                .HasForeignKey(i => i.ProjectId);
 
 
-           
-           
 
         }
         public DbSet<Company> Companies { get; set; }
@@ -73,7 +77,7 @@ namespace DataLayer
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
-      
+        public DbSet<Issue> Issues { get; set; }
 
     }
 }

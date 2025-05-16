@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace DataLayer.Migrations
+namespace ACC.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,7 +37,9 @@ namespace DataLayer.Migrations
                     Website = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CompanyType = table.Column<int>(type: "int", nullable: true),
-                    Country = table.Column<int>(type: "int", nullable: true)
+                    Country = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,14 +53,19 @@ namespace DataLayer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ParentFolderId = table.Column<int>(type: "int", nullable: true)
+                    ParentFolderId = table.Column<int>(type: "int", nullable: true),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FolderId = table.Column<int>(type: "int", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Folders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Folders_Folders_ParentFolderId",
-                        column: x => x.ParentFolderId,
+                        name: "FK_Folders_Folders_FolderId",
+                        column: x => x.FolderId,
                         principalTable: "Folders",
                         principalColumn: "Id");
                 });
@@ -78,7 +85,9 @@ namespace DataLayer.Migrations
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ProjectValue = table.Column<double>(type: "float", nullable: true),
                     Currency = table.Column<int>(type: "int", nullable: true),
-                    IsArchived = table.Column<bool>(type: "bit", nullable: false)
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,7 +100,9 @@ namespace DataLayer.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -128,7 +139,10 @@ namespace DataLayer.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FolderId = table.Column<int>(type: "int", nullable: false),
-                    Version = table.Column<double>(type: "float", nullable: false)
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -142,6 +156,33 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Issues",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Issues", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Issues_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProjectActivities",
                 columns: table => new
                 {
@@ -150,7 +191,9 @@ namespace DataLayer.Migrations
                     projectId = table.Column<int>(type: "int", nullable: true),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ActivityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActivityDetail = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ActivityDetail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -168,7 +211,9 @@ namespace DataLayer.Migrations
                 {
                     ProjectId = table.Column<int>(type: "int", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -227,6 +272,31 @@ namespace DataLayer.Migrations
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DocumentVersions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DocumentId = table.Column<int>(type: "int", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VersionNumber = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentVersions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentVersions_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -320,7 +390,9 @@ namespace DataLayer.Migrations
                 {
                     MemberId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProjectId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -394,9 +466,19 @@ namespace DataLayer.Migrations
                 column: "FolderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Folders_ParentFolderId",
+                name: "IX_DocumentVersions_DocumentId",
+                table: "DocumentVersions",
+                column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Folders_FolderId",
                 table: "Folders",
-                column: "ParentFolderId");
+                column: "FolderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Issues_ProjectId",
+                table: "Issues",
+                column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectActivities_projectId",
@@ -433,7 +515,10 @@ namespace DataLayer.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Documents");
+                name: "DocumentVersions");
+
+            migrationBuilder.DropTable(
+                name: "Issues");
 
             migrationBuilder.DropTable(
                 name: "ProjectActivities");
@@ -448,13 +533,16 @@ namespace DataLayer.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Folders");
+                name: "Documents");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Folders");
 
             migrationBuilder.DropTable(
                 name: "Companies");
