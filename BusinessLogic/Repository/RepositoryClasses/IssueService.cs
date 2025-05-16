@@ -41,7 +41,17 @@ namespace BusinessLogic.Repository.RepositoryClasses
             var existingIssue = _issueRepository.GetById(issue.Id);
             if (existingIssue == null)
                 throw new Exception("Issue not found.");
-            _issueRepository.Update(issue);
+
+            
+            existingIssue.Title = issue.Title;
+            existingIssue.Description = issue.Description;
+            existingIssue.Category = issue.Category;
+            existingIssue.Type = issue.Type;
+            existingIssue.Priority = issue.Priority;
+            existingIssue.Status = issue.Status;
+            existingIssue.ProjectId = issue.ProjectId;
+
+            _issueRepository.Update(existingIssue);
         }
 
         public void DeleteIssue(int id)
