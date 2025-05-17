@@ -1,5 +1,6 @@
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
+using BusinessLogic.Services;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
@@ -36,6 +37,9 @@ namespace ACC
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
+            builder.Services.AddSingleton<Helpers.FileHelper>(); 
+            builder.Services.AddScoped<IfcFileRepository>();
+            builder.Services.AddScoped<IfcFileService>();
 
 
             #endregion

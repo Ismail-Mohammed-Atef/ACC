@@ -13,6 +13,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\ifc-files\" />
+    <Folder Include="wwwroot\lib\dat.gui\" />
+    <Folder Include="wwwroot\lib\stats.js\" />
+    <Folder Include="wwwroot\lib\web-ifc-three\" />
+    <Folder Include="wwwroot\lib\web-ifc\" />
+    <Folder Include="wwwroot\lib\three\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
