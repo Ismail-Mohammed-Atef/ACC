@@ -35,7 +35,9 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\public\" />
+    <Folder Include="ClientApp\src\" />
     <Folder Include="wwwroot\ifc-files\" />
+    <Folder Include="wwwroot\lib\web-ifc\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 

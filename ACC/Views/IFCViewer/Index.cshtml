@@ -6,7 +6,7 @@
     <div class="input-group" style="max-width: 400px; flex: 1;">
         <input type="file" id="ifcFileInput" accept=".ifc" class="form-control"
                style="border-radius: 6px 0 0 6px; height: 100%;" />
-        <button class="btn btn-primary"
+        <button id="ifc-upload-btn" class="btn btn-primary"
                 style="border-radius: 0 6px 6px 0; height: 100%;">
             Upload
         </button>
@@ -14,7 +14,7 @@
 
     <!-- File Select Section -->
     <div class="input-group" style="max-width: 400px; flex: 1;margin-bottom:5px">
-        <select id="fileSelect" onchange="if(this.value) loadIfcFile(this.value)"
+        <select id="fileSelect" onchange="if(this.value) window.loadIfcFile(`/IfcViewer/GetIfcFile?id=${this.value}`)"
                 class="form-select"
                 style="border-radius: 6px; height: 100%; cursor: pointer;">
             <option value="">Select File</option>
@@ -31,22 +31,19 @@
 
 @if (!string.IsNullOrEmpty(Model.ViewerJsFile))
 {
-    <script type="module">
-        import("@(Model.ViewerJsFile)").then(m => {
-            document.querySelector("button").addEventListener("click", () => {
-                m.uploadFile(@Model.ProjectId);
-            });
+    <script src="@Model.ViewerJsFile"></script> <!-- ✅ Import the JS bundle directly -->
+    <script>
+        console.log('hello from index view script');
 
-            const fileId = @Model.FileId;
-            if (fileId > 0) {
-                const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
-                m.loadIfcFile(url);
-            }
+        document.getElementById("ifc-upload-btn").addEventListener("click", () => {
+            console.log("upload button clicked");
+            window.uploadFile(@Model.ProjectId);
         });
-    </script>
-}
 
-else
-{
-    <p style="color:red;">❌ Error: لم يتم العثور على ملف JavaScript. تأكد من أنك قمت بتشغيل `npm run build`.</p>
+        const fileId = @Model.FileId;
+        if (fileId > 0) {
+            const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
+            window.loadIfcFile(url);
+        }
+    </script>
 }
