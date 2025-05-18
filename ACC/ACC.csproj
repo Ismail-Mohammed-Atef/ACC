@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\lib\dat.gui\**" />
+    <Compile Remove="wwwroot\lib\stats.js\**" />
+    <Content Remove="wwwroot\lib\dat.gui\**" />
+    <Content Remove="wwwroot\lib\stats.js\**" />
+    <EmbeddedResource Remove="wwwroot\lib\dat.gui\**" />
+    <EmbeddedResource Remove="wwwroot\lib\stats.js\**" />
+    <None Remove="wwwroot\lib\dat.gui\**" />
+    <None Remove="wwwroot\lib\stats.js\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EPPlus" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -23,12 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ClientApp\public\" />
     <Folder Include="wwwroot\ifc-files\" />
-    <Folder Include="wwwroot\lib\dat.gui\" />
-    <Folder Include="wwwroot\lib\stats.js\" />
-    <Folder Include="wwwroot\lib\web-ifc-three\" />
-    <Folder Include="wwwroot\lib\web-ifc\" />
-    <Folder Include="wwwroot\lib\three\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 

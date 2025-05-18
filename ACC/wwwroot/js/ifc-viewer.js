@@ -1,4 +1,5 @@
-﻿const canvas = document.getElementById('three-canvas');
+﻿console.log('hello');
+const canvas = document.getElementById('three-canvas');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 600, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas });
@@ -8,7 +9,7 @@ camera.position.z = 5;
 const gridHelper = new THREE.GridHelper(10, 10, 0x888888, 0x888888);
 scene.add(gridHelper);
 
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 const ifcLoader = new IFC.IfcLoader();
 
 window.loadIfcFile = async function (fileId) {

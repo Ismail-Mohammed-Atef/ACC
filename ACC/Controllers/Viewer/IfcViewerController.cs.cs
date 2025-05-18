@@ -22,9 +22,17 @@ namespace ACC.Controllers.Viewer
             {
                 FileId = fileId ?? 0,
                 ProjectId = projectId,
-                AvailableFiles = await _ifcFileService.GetIfcFilesByProjectIdAsync(projectId)
+                AvailableFiles = await _ifcFileService.GetIfcFilesByProjectIdAsync(projectId),
+                ViewerJsFile = GetBuiltViewerJsFileName()
             };
             return View(model);
+        }
+
+        private string GetBuiltViewerJsFileName()
+        {
+            var distFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist", "assets");
+            var file = Directory.GetFiles(distFolder, "index-*.js").FirstOrDefault();
+            return file is not null ? "/dist/assets/" + Path.GetFileName(file) : "";
         }
 
         [HttpPost]
