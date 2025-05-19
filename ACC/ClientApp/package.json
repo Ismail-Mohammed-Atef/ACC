@@ -1,19 +1,20 @@
 {
-  "name": "clientapp",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+    "name": "clientapp",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build && copy ./node_modules/web-ifc/web-ifc.wasm ../wwwroot/lib/web-ifc/web-ifc.wasm",
+        "build": "vite build",
         "preview": "vite preview"
     },
-  "devDependencies": {
-    "vite": "^6.3.5"
-  },
-  "dependencies": {
-    "three": "^0.152.2",
-    "web-ifc": "^0.0.68",
-    "web-ifc-three": "^0.0.126"
-  }
+    "devDependencies": {
+        "vite": "^6.3.5",
+        "vite-plugin-static-copy": "^3.0.0"
+    },
+    "dependencies": {
+        "three": "^0.135.0",
+        "web-ifc": "^0.0.36",
+        "web-ifc-three": "0.0.120"
+    }
 }

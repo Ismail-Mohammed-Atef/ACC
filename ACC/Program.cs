@@ -4,6 +4,7 @@ using BusinessLogic.Services;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json.Serialization;
@@ -20,30 +21,24 @@ namespace ACC
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-
-
             #region Dependency injection
             builder.Services.AddControllers().AddJsonOptions(options =>
-               {
-                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-               });
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-              .AddEntityFrameworkStores<AppDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>();
             builder.Services.AddControllersWithViews();
-
 
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
-            builder.Services.AddSingleton<Helpers.FileHelper>(); 
+            builder.Services.AddSingleton<Helpers.FileHelper>();
             builder.Services.AddScoped<IfcFileRepository>();
             builder.Services.AddScoped<IfcFileService>();
-
-
             #endregion
-
 
             var app = builder.Build();
 
@@ -54,10 +49,17 @@ namespace ACC
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings[".wasm"] = "application/wasm";
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = provider,
+                ServeUnknownFileTypes = true
+            });
 
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.MapControllerRoute(

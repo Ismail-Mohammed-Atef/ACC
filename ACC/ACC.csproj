@@ -7,12 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="public\lib\web-ifc\helpers\**" />
+    <Compile Remove="public\lib\web-ifc\web-ifc\**" />
     <Compile Remove="wwwroot\lib\dat.gui\**" />
     <Compile Remove="wwwroot\lib\stats.js\**" />
+    <Content Remove="public\lib\web-ifc\helpers\**" />
+    <Content Remove="public\lib\web-ifc\web-ifc\**" />
     <Content Remove="wwwroot\lib\dat.gui\**" />
     <Content Remove="wwwroot\lib\stats.js\**" />
+    <EmbeddedResource Remove="public\lib\web-ifc\helpers\**" />
+    <EmbeddedResource Remove="public\lib\web-ifc\web-ifc\**" />
     <EmbeddedResource Remove="wwwroot\lib\dat.gui\**" />
     <EmbeddedResource Remove="wwwroot\lib\stats.js\**" />
+    <None Remove="public\lib\web-ifc\helpers\**" />
+    <None Remove="public\lib\web-ifc\web-ifc\**" />
     <None Remove="wwwroot\lib\dat.gui\**" />
     <None Remove="wwwroot\lib\stats.js\**" />
   </ItemGroup>
@@ -34,10 +42,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\public\" />
     <Folder Include="ClientApp\src\" />
+    <Folder Include="public\lib\web-ifc\" />
     <Folder Include="wwwroot\ifc-files\" />
-    <Folder Include="wwwroot\lib\web-ifc\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 

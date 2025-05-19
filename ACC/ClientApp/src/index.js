@@ -1,6 +1,6 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { IFCLoader } from 'web-ifc-three';
+import { IFCLoader } from 'web-ifc-three/IFCLoader';
 
 console.log('hello gaber');
 
@@ -16,13 +16,19 @@ const gridHelper = new THREE.GridHelper(100, 100);
 scene.add(gridHelper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
+
 const ifcLoader = new IFCLoader();
-ifcLoader.ifcManager.setWasmPath('https://localhost:44300/lib/web-ifc/');
-async function loadIfcFile(url) {
-    await ifcLoader.loadAsync(url).then((model) => {
+ifcLoader.ifcManager.setWasmPath('lib/web-ifc/');  
+
+window.loadIfcFile = async function (url) {
+    try {
+        const model = await ifcLoader.loadAsync(url);
+        console.log('IFC model loaded successfully');
         scene.add(model);
-    });
-}
+    } catch (error) {
+        console.error('Error loading IFC file:', error);
+    }
+};
 
 async function uploadFile(projectId = 1) {
     console.log('hello from upload file');
@@ -55,6 +61,5 @@ function animate() {
 }
 animate();
 
-// ✅ Export as globals to ensure browser can access them after Vite build
 window.loadIfcFile = loadIfcFile;
 window.uploadFile = uploadFile;
