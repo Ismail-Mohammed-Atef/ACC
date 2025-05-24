@@ -1,49 +1,167 @@
 ﻿@model IfcViewerModel
-<h2>IFC Viewer</h2>
 
-<div class="mb-4 d-flex align-items-stretch gap-3" style="height: 40px;">
-    <!-- Upload Section -->
-    <div class="input-group" style="max-width: 400px; flex: 1;">
-        <input type="file" id="ifcFileInput" accept=".ifc" class="form-control"
-               style="border-radius: 6px 0 0 6px; height: 100%;" />
-        <button id="ifc-upload-btn" class="btn btn-primary"
-                style="border-radius: 0 6px 6px 0; height: 100%;">
-            Upload
-        </button>
-    </div>
+@{
+    Layout = null;
+}
 
-    <!-- File Select Section -->
-    <div class="input-group" style="max-width: 400px; flex: 1;margin-bottom:5px">
-        <select id="fileSelect" onchange="if(this.value) window.loadIfcFile(`/IfcViewer/GetIfcFile?id=${this.value}`)"
-                class="form-select"
-                style="border-radius: 6px; height: 100%; cursor: pointer;">
-            <option value="">Select File</option>
-            @foreach (var file in Model.AvailableFiles)
-            {
-                <option value="@file.Id">@file.FileName</option>
-            }
-        </select>
-    </div>
+<style>
+    /* Global Styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    /* Container Styles */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+
+    /* Header Styles */
+    .header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Form Controls */
+    .form-control, .form-select {
+        border: 1px solid #ddd;
+        transition: border-color 0.3s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.25);
+        }
+
+    /* Button Styles */
+    .btn-primary {
+        background-color: #4a90e2;
+        border-color: #4a90e2;
+        transition: all 0.3s;
+    }
+
+        .btn-primary:hover {
+            background-color: #3a7bc8;
+            border-color: #3a7bc8;
+        }
+
+    /* Canvas Container */
+    #three-canvas {
+        width: 100%;
+        height: 600px;
+        margin-top: 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+    }
+
+    /* Properties Panel */
+    #properties-panel {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+        line-height: 1.5;
+    }
+
+    /* File Upload Section */
+    .input-group {
+        transition: all 0.3s;
+    }
+
+        .input-group:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+    .top-toolbar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 999;
+        background-color: rgba(30, 30, 30, 0.9);
+        border-radius: 8px;
+        padding: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.4);
+        max-width: 250px;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .mb-4.d-flex
+
+    {
+        flex-direction: column;
+        height: auto !important;
+    }
+
+    .input-group {
+        max-width: 100% !important;
+        margin-bottom: 10px !important;
+    }
+
+    #three-canvas {
+        height: 400px;
+    }
+
+    }
+</style>
+
+<div class="toolbar-container">
+    <input type="file" id="ifcFileInput" accept=".ifc" />
+    <button id="ifc-upload-btn">Upload</button>
+    <select id="fileSelect" onchange="if(this.value) window.loadIfcFile(`/IfcViewer/GetIfcFile?id=${this.value}`)">
+        <option value="">Select File</option>
+        @foreach (var file in Model.AvailableFiles)
+        {
+            <option value="@file.Id">@file.FileName</option>
+        }
+    </select>
 </div>
 
-<canvas id="three-canvas" style="width: 100%; height: 600px; margin-top: 15px;"></canvas>
-<div id="properties-panel" style="margin-top: 10px; white-space: pre-wrap;"></div>
+<canvas id="three-canvas"></canvas>
+<div id="properties-panel"></div>
 
 @if (!string.IsNullOrEmpty(Model.ViewerJsFile))
 {
-    <script src="@Model.ViewerJsFile"></script> <!-- ✅ Import the JS bundle directly -->
+    <script type="module" src="/dist/assets/viewer.js"></script>
     <script>
         console.log('hello from index view script');
 
+        function waitFor(fnName, callback, tries = 50, delay = 500) {
+            if (window[fnName]) {
+                callback();
+            } else if (tries > 0) {
+                setTimeout(() => waitFor(fnName, callback, tries - 1, delay), delay);
+            } else {
+                console.warn(`${fnName} not ready after waiting`);
+            }
+        }
+
         document.getElementById("ifc-upload-btn").addEventListener("click", () => {
             console.log("upload button clicked");
-            window.uploadFile(@Model.ProjectId);
+            setTimeout(() => waitFor("uploadFile", () => window.uploadFile(@Model.ProjectId), 50, 500), 1000);
         });
 
         const fileId = @Model.FileId;
         if (fileId > 0) {
-            const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
-            window.loadIfcFile(url);
+            setTimeout(() => waitFor("loadIfcFile", () => {
+                const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
+                window.loadIfcFile(url);
+            }, 10, 500), 1000);
         }
     </script>
 }

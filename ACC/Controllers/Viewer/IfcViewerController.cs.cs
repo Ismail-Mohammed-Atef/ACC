@@ -31,9 +31,15 @@ namespace ACC.Controllers.Viewer
         private string GetBuiltViewerJsFileName()
         {
             var distFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist", "assets");
-            var file = Directory.GetFiles(distFolder, "index-*.js").FirstOrDefault();
-            return file is not null ? "/dist/assets/" + Path.GetFileName(file) : "";
+
+            var files = Directory.GetFiles(distFolder, "index-*.js");
+
+            // رجع أكبر فايل في الحجم (لأنه الغالب entry)
+            var biggestFile = files.OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+
+            return biggestFile is not null ? "/dist/assets/" + Path.GetFileName(biggestFile) : "";
         }
+
 
         [HttpPost]
         public async Task<IActionResult> UploadIfcFile(IFormFile file, int projectId)

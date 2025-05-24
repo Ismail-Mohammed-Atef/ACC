@@ -1,65 +1,166 @@
 ﻿import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { IFCLoader } from 'web-ifc-three/IFCLoader';
 
-console.log('hello gaber');
+console.log('🔥 IFC Viewer Initializing 🔥');
 
-const canvas = document.getElementById('three-canvas');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('white');
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 600, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ canvas });
-renderer.setSize(window.innerWidth, 600);
-camera.position.z = 5;
+let OBC, BManager, BComponent, html;
 
-const gridHelper = new THREE.GridHelper(100, 100);
-scene.add(gridHelper);
+try {
+    const obcModule = await import('@thatopen/components');
+    const uiModule = await import('@thatopen/ui');
 
-const controls = new OrbitControls(camera, renderer.domElement);
+    OBC = obcModule;
+    BManager = uiModule.Manager;
+    BComponent = uiModule.Component;
+    html = uiModule.html;
 
-const ifcLoader = new IFCLoader();
-ifcLoader.ifcManager.setWasmPath('lib/web-ifc/');  
+    console.log('Libraries loaded successfully');
+    console.log('Available OBC exports:', Object.keys(OBC));
+    console.log('Available UI exports:', Object.keys(uiModule));
+} catch (error) {
+    console.error('❌ Error loading libraries:', error);
+    alert('❌ Error loading required libraries. Check console.');
+    throw error;
+}
 
-window.loadIfcFile = async function (url) {
+(async () => {
     try {
-        const model = await ifcLoader.loadAsync(url);
-        console.log('IFC model loaded successfully');
-        scene.add(model);
+        const canvas = document.getElementById('three-canvas');
+        if (!canvas) throw new Error('Canvas with ID "three-canvas" not found');
+
+        canvas.style.width = '100%';
+        canvas.style.height = '600px';
+        canvas.style.marginTop = '15px';
+
+        const components = new OBC.Components();
+        await components.init();
+        console.log('✅ Components initialized');
+
+        const world = new OBC.Worlds(components).create();
+        world.scene = new OBC.SimpleScene(components);
+        world.scene.setup();
+
+        world.renderer = new OBC.SimpleRenderer(components, canvas);
+        world.renderer.setup();
+        components.renderer = world.renderer;
+        components.renderer.setAnimationLoop(() => components.update());
+        console.log('✅ Renderer setup and animation loop started');
+
+        world.camera = new OBC.SimpleCamera(components);
+        world.camera.setup();
+        console.log('📷 Camera setup complete');
+
+        world.camera.controls.setLookAt(12, 6, 8, 0, 0, 0);
+
+        const grid = components.get(OBC.SimpleGrid);
+        grid.create(world);
+        console.log('✅ Grid added to scene');
+
+        const ifcLoader = components.get(OBC.IfcLoader);
+        if (!ifcLoader) throw new Error("❌ IfcLoader not found in components");
+        await ifcLoader.setup();
+        console.log('🧱 IFC Loader ready');
+
+        const raycaster = components.get(OBC.SimpleRaycaster);
+        if (!raycaster) throw new Error("❌ SimpleRaycaster not found in components");
+
+        let measurementEnabled = false;
+        let measurements = [];
+
+        const measurementTool = {
+            enabled: false,
+            points: [],
+            currentLine: null,
+
+            toggle() {
+                this.enabled = !this.enabled;
+                measurementEnabled = this.enabled;
+                if (!this.enabled) this.cleanup();
+                console.log("📏 Measurement toggled:", this.enabled);
+            },
+
+            cleanup() {
+                this.points = [];
+                if (this.currentLine) {
+                    world.scene.three.remove(this.currentLine);
+                    this.currentLine = null;
+                }
+            },
+
+            addPoint(point) {
+                this.points.push(point);
+                const sphere = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1),
+                    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+                );
+                sphere.position.copy(point);
+                world.scene.three.add(sphere);
+
+                if (this.points.length === 2) {
+                    const distance = this.points[0].distanceTo(this.points[1]);
+                    this.drawMeasurementLine(this.points[0], this.points[1]);
+                    measurements.push({
+                        start: this.points[0].clone(),
+                        end: this.points[1].clone(),
+                        distance
+                    });
+                    console.log(`📐 Distance: ${distance.toFixed(2)} units`);
+                    this.points = [];
+                }
+            },
+
+            drawMeasurementLine(start, end) {
+                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+                const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+                const line = new THREE.Line(geometry, material);
+                world.scene.three.add(line);
+                this.currentLine = line;
+            }
+        };
+
+        canvas.addEventListener('click', event => {
+            if (!measurementEnabled) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const mouse = new THREE.Vector2(
+                ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                -((event.clientY - rect.top) / rect.height) * 2 + 1
+            );
+
+            raycaster.setFromCamera(mouse, world.camera);
+            const intersects = raycaster.castRay(world.scene.three.children);
+
+            if (intersects.length > 0) {
+                measurementTool.addPoint(intersects[0].point);
+            }
+        });
+
+        if (BManager && BManager.init) {
+            BManager.init();
+            const panel = BComponent.create(() => html`
+                <bim-panel active label="IFC Tools">
+                    <bim-panel-section label="Viewer Tools">
+                        <bim-button label="📏 Measure" @click="${() => measurementTool.toggle()}"></bim-button>
+                        <bim-button label="🗑️ Clear" @click="${() => {
+                    measurements.forEach(() => {
+                        world.scene.three.children.forEach(child => {
+                            if (child.material?.color?.getHex() === 0xff0000) {
+                                world.scene.three.remove(child);
+                            }
+                        });
+                    });
+                    measurements = [];
+                    measurementTool.cleanup();
+                }}"></bim-button>
+                    </bim-panel-section>
+                </bim-panel>
+            `);
+            document.body.append(panel);
+        }
+
+        console.log('✅ IFC Viewer fully initialized');
+
     } catch (error) {
-        console.error('Error loading IFC file:', error);
+        console.error('❌ Error initializing viewer:', error);
+        alert('❌ Failed to initialize viewer. Check console.');
     }
-};
-
-async function uploadFile(projectId = 1) {
-    console.log('hello from upload file');
-    const input = document.getElementById('ifcFileInput');
-    const file = input?.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('projectId', projectId);
-
-    const response = await fetch('/IfcViewer/UploadIfcFile', {
-        method: 'POST',
-        body: formData
-    });
-
-    const result = await response.json();
-    if (result.success) {
-        const url = `/IfcViewer/GetIfcFile?id=${result.fileId}`;
-        await loadIfcFile(url);
-    } else {
-        alert('Upload failed.');
-    }
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
-animate();
-
-window.loadIfcFile = loadIfcFile;
-window.uploadFile = uploadFile;
+})();
