@@ -4,26 +4,61 @@
     Layout = null;
 }
  <style>
-      #container{
-        height: 90vh;
-        width: 100%;
-      }
+    #container {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .toolsBar {
+        position: absolute;
+        right: 2rem;
+        top: 2rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bar_btn {
+        /* background-color: transparent; */
+        position: relative;
+        padding: 5px;
+        justify-content: center;
+        border: none;
+        border-radius: 8px;
+        align-content: center;
+        align-items: center;
+        width: 35px;
+        height: 35px;
+        background-color: beige;
+        margin: 8px;
+        box-shadow: 0 4px 15px rgba(212, 208, 208, 0.3);
+        cursor: pointer;
+    }
+
+        .bar_btn:hover {
+            background-color: gray;
+        }
+
+        .bar_btn.active {
+            background-color: #e5e7eb;
+            /* Light gray background when active */
+        }
  </style>
 
-@* <div class="toolbar-container"> *@
-@*     <input type="file" id="ifcFileInput" accept=".ifc" /> *@
-@*     <button id="ifc-upload-btn">Upload</button> *@
-@*     <select id="fileSelect" onchange="if(this.value) window.loadIfcFile(`/IfcViewer/GetIfcFile?id=${this.value}`)"> *@
-@*         <option value="">Select File</option> *@
-@*         @foreach (var file in Model.AvailableFiles) *@
-@*         { *@
-@*             <option value="@file.Id">@file.FileName</option> *@
-@*         } *@
-@*     </select> *@
-@* </div> *@
 
-<div id="container"></div>
-
+<div id="container">
+    <div id="toolsBar" class="toolsBar">
+      <button id="loadBtn" class="bar_btn">
+        <iconify-icon icon="iconoir:upload" width="24" height="24" height="25"></iconify-icon>
+      </button>
+      <button id="SectionBtn" class="bar_btn">
+        <iconify-icon icon="icon-park-solid:cutting-one" width="24" height="24" height="25"></iconify-icon>
+      </button>
+      <button id="LengthBtn" class="bar_btn">
+        <iconify-icon icon="lets-icons:line-in" width="24" height="24" height="25"></iconify-icon>
+      </button>
+    </div>
+  </div>
     <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
     <script>
         console.log('hello from index view script');

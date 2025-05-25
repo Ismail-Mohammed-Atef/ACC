@@ -1,93 +1,104 @@
 ﻿import * as BUI from "@thatopen/ui";
 import * as OBC from "@thatopen/components";
+import * as BUIC from "@thatopen/ui-obc";
+import * as THREE from "three";
+import * as OBCF from "@thatopen/components-front";
 
-console.log('starting viewer initalization');
-
+console.log('initialize the viewer');
 debugger;
-const container = document.getElementById("container");
+// Import part  -------- >>
+const viewport = document.getElementById("container");
+const loaderBtn = document.getElementById("loadBtn");
 
+
+
+// Setup Part ---------- >>
 const components = new OBC.Components();
-
 const worlds = components.get(OBC.Worlds);
-
 const world = worlds.create();
+const fragments = new OBC.FragmentsManager(components); 
 
-world.scene = new OBC.SimpleScene(components);
-world.renderer = new OBC.SimpleRenderer(components, container);
-world.camera = new OBC.SimpleCamera(components);
+
+const IfcLoader = new OBC.IfcLoader(components);           
+const Cullers = new OBC.Cullers(components);               
+const highLighter = new OBCF.Highlighter(components);      
+const clipper = components.get(OBC.Clipper);               
+const edges = components.get(OBCF.ClipEdges);             
+const length_component = components.get(OBCF.LengthMeasurement);
+
+
+const sceneComponent = new OBC.SimpleScene(components);
+sceneComponent.three.background = new THREE.Color("#1e1e1e"); 
+
+sceneComponent.setup();
+world.scene = sceneComponent;
+
+const rendererComponent = new OBC.SimpleRenderer(components, viewport);
+world.renderer = rendererComponent;
+
+const cameraComponent = new OBC.SimpleCamera(components);
+world.camera = cameraComponent;
+
+cameraComponent.controls.setLookAt(10, 10, 10, 0, 0, 0);
+
+viewport.addEventListener("resize", () => {
+  rendererComponent.resize();
+  cameraComponent.updateAspect();
+});
+
+const viewerGrids = components.get(OBC.Grids);
+viewerGrids.create(world);
 
 components.init();
 
-world.camera.controls.setLookAt(12, 6, 8, 0, 0, -10);
 
-world.scene.setup();
-
-const grids = components.get(OBC.Grids);
-grids.create(world);
-
-world.scene.three.background = null;
-
-
-
-// --------------------------------------------------------------------------
+const culler = Cullers.create(world);
+length_component.world = world;
+highLighter.setup({
+  world: world,
+  autoHighlightOnClick: true,                  
+  hoverColor: new THREE.Color("blue"),         
+  selectionColor: new THREE.Color("black"),   
+});
 
 
-const fragments = components.get(OBC.FragmentsManager);
-const file = await fetch(
-  "https://thatopen.github.io/engine_components/resources/small.frag",
-);
-const data = await file.arrayBuffer();
-const buffer = new Uint8Array(data);
-const model = fragments.load(buffer);
-world.scene.three.add(model);
+highLighter.zoomToSelection = true;
+// Functionaity Part ------ >>
+loaderBtn?.addEventListener("click", async () => {
+  console.log('upload button is clicked');
+  await ifcloader(IfcLoader, world); 
+});
 
 
-const fragmentBbox = components.get(OBC.BoundingBoxer);
-fragmentBbox.add(model);
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-const bbox = fragmentBbox.getMesh();
-fragmentBbox.reset();
+//Functions Part  ---------- >> 
 
-debugger;
-BUI.Manager.init();
+async function ifcloader(ifcloaderFragment, World) {
+  
+  debugger;
+  console.log('upload function is called');
+  ifcloaderFragment.settings.webIfc.COORDINATE_TO_ORIGIN = false;
 
+  await ifcloaderFragment.setup();
 
-// const panel = BUI.Component.create(() => {
-//   return BUI.html`
-//     <bim-panel active label="Bounding Boxes Tutorial" class="options-menu">
-//       <bim-panel-section collapsed label="Controls">
+  const fileOpener = document.createElement("input");
+  fileOpener.type = "file";
+  fileOpener.accept = ".ifc";
 
-//         <bim-button 
-//           label="Fit BIM model" 
-//           @click="${() => {
-//             world.camera.controls.fitToSphere(bbox, true);
-//           }}">
-//         </bim-button>  
+  fileOpener.onchange = async () => {
+    if (fileOpener.files === null || fileOpener.files.length === 0) return;
 
-//       </bim-panel-section>
-//     </bim-panel>
-//   `;
-// });
+    const file = fileOpener.files[0];
+    fileOpener.remove();
 
-// document.body.append(panel);
+    const buffer = await file.arrayBuffer();
+    const data = new Uint8Array(buffer);
+    const model = await ifcloaderFragment.load(data);
 
-// debugger;
+    World.scene.three.add(model);
+  };
 
-// const button = BUI.Component.create(() => {
-//   return BUI.html`
-//     <bim-button class="phone-menu-toggler" icon="solar:settings-bold"
-//       @click="${() => {
-//         if (panel.classList.contains("options-menu-visible")) {
-//           panel.classList.remove("options-menu-visible");
-//         } else {
-//           panel.classList.add("options-menu-visible");
-//         }
-//       }}">
-//     </bim-button>
-//   `;
-// });
-
-// document.body.append(button);
-
-
-
+  fileOpener.click();
+}
