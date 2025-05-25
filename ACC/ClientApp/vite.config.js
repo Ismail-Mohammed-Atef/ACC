@@ -8,17 +8,18 @@ export default defineConfig({
         outDir: '../wwwroot/dist',
         emptyOutDir: true,
         assetsDir: 'assets',
+         minify: false,
         rollupOptions: {
             input: 'src/index.js',
             output: {
                 manualChunks: undefined,
                 entryFileNames: 'assets/viewer.js', 
-                chunkFileNames: 'assets/[name]-[hash].js',
-                assetFileNames: 'assets/[name]-[hash].[ext]'
+                chunkFileNames: 'assets/[name].js',
+                assetFileNames: 'assets/[name].[ext]'
             },
         },
         chunkSizeWarningLimit: 2000,
-        minify: 'esbuild'
+     
     },
     assetsInclude: ['**/*.wasm'],
     publicDir: 'public',

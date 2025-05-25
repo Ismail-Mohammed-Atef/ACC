@@ -1,14 +1,14 @@
 ﻿import * as THREE from 'three';
-
+import * as  OBC from '@thatopen/components';
+import * as  uiModule from '@thatopen/ui';
+ debugger
 console.log('🔥 IFC Viewer Initializing 🔥');
-
-let OBC, BManager, BComponent, html;
-
+console.log('🔥 IFC Viewer Initializing updated🔥');
+let   BManager, BComponent, html;
+   
 try {
-    const obcModule = await import('@thatopen/components');
-    const uiModule = await import('@thatopen/ui');
 
-    OBC = obcModule;
+  
     BManager = uiModule.Manager;
     BComponent = uiModule.Component;
     html = uiModule.html;
@@ -17,6 +17,8 @@ try {
     console.log('Available OBC exports:', Object.keys(OBC));
     console.log('Available UI exports:', Object.keys(uiModule));
 } catch (error) {
+    debugger;
+    console.log(error);
     console.error('❌ Error loading libraries:', error);
     alert('❌ Error loading required libraries. Check console.');
     throw error;
@@ -34,25 +36,18 @@ try {
         const components = new OBC.Components();
         await components.init();
         console.log('✅ Components initialized');
-
-        const world = new OBC.Worlds(components).create();
-        world.scene = new OBC.SimpleScene(components);
-        world.scene.setup();
-
-        world.renderer = new OBC.SimpleRenderer(components, canvas);
-        world.renderer.setup();
-        components.renderer = world.renderer;
-        components.renderer.setAnimationLoop(() => components.update());
-        console.log('✅ Renderer setup and animation loop started');
-
-        world.camera = new OBC.SimpleCamera(components);
-        world.camera.setup();
-        console.log('📷 Camera setup complete');
+    const worlds = components.get(OBC.Worlds);
+    const world = worlds.create();
+world.scene = new OBC.SimpleScene(components);
+world.renderer = new OBC.SimpleRenderer(components, canvas);
+world.camera = new OBC.SimpleCamera(components);
+    components.init();
+        debugger;
 
         world.camera.controls.setLookAt(12, 6, 8, 0, 0, 0);
 
-        const grid = components.get(OBC.SimpleGrid);
-        grid.create(world);
+    const grids = components.get(OBC.Grids);
+     const grid = grids.create(world);
         console.log('✅ Grid added to scene');
 
         const ifcLoader = components.get(OBC.IfcLoader);
@@ -88,6 +83,7 @@ try {
 
             addPoint(point) {
                 this.points.push(point);
+                
                 const sphere = new THREE.Mesh(
                     new THREE.SphereGeometry(0.1),
                     new THREE.MeshBasicMaterial({ color: 0xff0000 })
