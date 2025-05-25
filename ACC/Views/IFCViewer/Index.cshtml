@@ -135,9 +135,8 @@
 <canvas id="three-canvas"></canvas>
 <div id="properties-panel"></div>
 
-@if (!string.IsNullOrEmpty(Model.ViewerJsFile))
-{
-    <script type="module" src="/dist/assets/viewer.js"></script>
+
+    <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
     <script>
         console.log('hello from index view script');
 
@@ -164,4 +163,3 @@
             }, 10, 500), 1000);
         }
     </script>
-}

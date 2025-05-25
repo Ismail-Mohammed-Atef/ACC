@@ -13,12 +13,9 @@
         "vite-plugin-static-copy": "^3.0.0"
     },
     "dependencies": {
-        "@thatopen/components": "^2.4.0",
-        "@thatopen/components-front": "^2.4.0",
-        "@thatopen/fragments": "^2.4.0",
-        "@thatopen/ui": "^2.4.0",
-        "@types/three": "^0.173.0",
-        "three": "^0.160.1",
-        "web-ifc": "^0.0.66"
+        "@thatopen/components": "^2.4.11",
+        "@thatopen/components-front": "^2.4.11",
+        "@thatopen/fragments": "^3.0.7",
+        "@thatopen/ui": "^2.4.5"
     }
 }
