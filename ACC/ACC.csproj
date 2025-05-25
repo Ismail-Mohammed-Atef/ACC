@@ -49,8 +49,4 @@
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cd &quot;$(ProjectDir)ClientApp&quot; &amp;&amp; npm run build" />
-  </Target>
-
 </Project>

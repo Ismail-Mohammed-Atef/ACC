@@ -1,162 +1,93 @@
-﻿import * as THREE from 'three';
-import * as  OBC from '@thatopen/components';
-import * as  uiModule from '@thatopen/ui';
- debugger
-console.log('🔥 IFC Viewer Initializing 🔥');
-console.log('🔥 IFC Viewer Initializing updated🔥');
-let   BManager, BComponent, html;
-   
-try {
+﻿import * as BUI from "@thatopen/ui";
+import * as OBC from "@thatopen/components";
 
-  
-    BManager = uiModule.Manager;
-    BComponent = uiModule.Component;
-    html = uiModule.html;
+console.log('starting viewer initalization');
 
-    console.log('Libraries loaded successfully');
-    console.log('Available OBC exports:', Object.keys(OBC));
-    console.log('Available UI exports:', Object.keys(uiModule));
-} catch (error) {
-    debugger;
-    console.log(error);
-    console.error('❌ Error loading libraries:', error);
-    alert('❌ Error loading required libraries. Check console.');
-    throw error;
-}
+debugger;
+const container = document.getElementById("container");
 
-(async () => {
-    try {
-        const canvas = document.getElementById('three-canvas');
-        if (!canvas) throw new Error('Canvas with ID "three-canvas" not found');
+const components = new OBC.Components();
 
-        canvas.style.width = '100%';
-        canvas.style.height = '600px';
-        canvas.style.marginTop = '15px';
+const worlds = components.get(OBC.Worlds);
 
-        const components = new OBC.Components();
-        await components.init();
-        console.log('✅ Components initialized');
-    const worlds = components.get(OBC.Worlds);
-    const world = worlds.create();
+const world = worlds.create();
+
 world.scene = new OBC.SimpleScene(components);
-world.renderer = new OBC.SimpleRenderer(components, canvas);
+world.renderer = new OBC.SimpleRenderer(components, container);
 world.camera = new OBC.SimpleCamera(components);
-    components.init();
-        debugger;
 
-        world.camera.controls.setLookAt(12, 6, 8, 0, 0, 0);
+components.init();
 
-    const grids = components.get(OBC.Grids);
-     const grid = grids.create(world);
-        console.log('✅ Grid added to scene');
+world.camera.controls.setLookAt(12, 6, 8, 0, 0, -10);
 
-        const ifcLoader = components.get(OBC.IfcLoader);
-        if (!ifcLoader) throw new Error("❌ IfcLoader not found in components");
-        await ifcLoader.setup();
-        console.log('🧱 IFC Loader ready');
+world.scene.setup();
 
-        const raycaster = components.get(OBC.SimpleRaycaster);
-        if (!raycaster) throw new Error("❌ SimpleRaycaster not found in components");
+const grids = components.get(OBC.Grids);
+grids.create(world);
 
-        let measurementEnabled = false;
-        let measurements = [];
+world.scene.three.background = null;
 
-        const measurementTool = {
-            enabled: false,
-            points: [],
-            currentLine: null,
 
-            toggle() {
-                this.enabled = !this.enabled;
-                measurementEnabled = this.enabled;
-                if (!this.enabled) this.cleanup();
-                console.log("📏 Measurement toggled:", this.enabled);
-            },
 
-            cleanup() {
-                this.points = [];
-                if (this.currentLine) {
-                    world.scene.three.remove(this.currentLine);
-                    this.currentLine = null;
-                }
-            },
+// --------------------------------------------------------------------------
 
-            addPoint(point) {
-                this.points.push(point);
-                
-                const sphere = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.1),
-                    new THREE.MeshBasicMaterial({ color: 0xff0000 })
-                );
-                sphere.position.copy(point);
-                world.scene.three.add(sphere);
 
-                if (this.points.length === 2) {
-                    const distance = this.points[0].distanceTo(this.points[1]);
-                    this.drawMeasurementLine(this.points[0], this.points[1]);
-                    measurements.push({
-                        start: this.points[0].clone(),
-                        end: this.points[1].clone(),
-                        distance
-                    });
-                    console.log(`📐 Distance: ${distance.toFixed(2)} units`);
-                    this.points = [];
-                }
-            },
+const fragments = components.get(OBC.FragmentsManager);
+const file = await fetch(
+  "https://thatopen.github.io/engine_components/resources/small.frag",
+);
+const data = await file.arrayBuffer();
+const buffer = new Uint8Array(data);
+const model = fragments.load(buffer);
+world.scene.three.add(model);
 
-            drawMeasurementLine(start, end) {
-                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-                const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-                const line = new THREE.Line(geometry, material);
-                world.scene.three.add(line);
-                this.currentLine = line;
-            }
-        };
 
-        canvas.addEventListener('click', event => {
-            if (!measurementEnabled) return;
+const fragmentBbox = components.get(OBC.BoundingBoxer);
+fragmentBbox.add(model);
 
-            const rect = canvas.getBoundingClientRect();
-            const mouse = new THREE.Vector2(
-                ((event.clientX - rect.left) / rect.width) * 2 - 1,
-                -((event.clientY - rect.top) / rect.height) * 2 + 1
-            );
+const bbox = fragmentBbox.getMesh();
+fragmentBbox.reset();
 
-            raycaster.setFromCamera(mouse, world.camera);
-            const intersects = raycaster.castRay(world.scene.three.children);
+debugger;
+BUI.Manager.init();
 
-            if (intersects.length > 0) {
-                measurementTool.addPoint(intersects[0].point);
-            }
-        });
 
-        if (BManager && BManager.init) {
-            BManager.init();
-            const panel = BComponent.create(() => html`
-                <bim-panel active label="IFC Tools">
-                    <bim-panel-section label="Viewer Tools">
-                        <bim-button label="📏 Measure" @click="${() => measurementTool.toggle()}"></bim-button>
-                        <bim-button label="🗑️ Clear" @click="${() => {
-                    measurements.forEach(() => {
-                        world.scene.three.children.forEach(child => {
-                            if (child.material?.color?.getHex() === 0xff0000) {
-                                world.scene.three.remove(child);
-                            }
-                        });
-                    });
-                    measurements = [];
-                    measurementTool.cleanup();
-                }}"></bim-button>
-                    </bim-panel-section>
-                </bim-panel>
-            `);
-            document.body.append(panel);
-        }
+// const panel = BUI.Component.create(() => {
+//   return BUI.html`
+//     <bim-panel active label="Bounding Boxes Tutorial" class="options-menu">
+//       <bim-panel-section collapsed label="Controls">
 
-        console.log('✅ IFC Viewer fully initialized');
+//         <bim-button 
+//           label="Fit BIM model" 
+//           @click="${() => {
+//             world.camera.controls.fitToSphere(bbox, true);
+//           }}">
+//         </bim-button>  
 
-    } catch (error) {
-        console.error('❌ Error initializing viewer:', error);
-        alert('❌ Failed to initialize viewer. Check console.');
-    }
-})();
+//       </bim-panel-section>
+//     </bim-panel>
+//   `;
+// });
+
+// document.body.append(panel);
+
+// debugger;
+
+// const button = BUI.Component.create(() => {
+//   return BUI.html`
+//     <bim-button class="phone-menu-toggler" icon="solar:settings-bold"
+//       @click="${() => {
+//         if (panel.classList.contains("options-menu-visible")) {
+//           panel.classList.remove("options-menu-visible");
+//         } else {
+//           panel.classList.add("options-menu-visible");
+//         }
+//       }}">
+//     </bim-button>
+//   `;
+// });
+
+// document.body.append(button);
+
+
+
