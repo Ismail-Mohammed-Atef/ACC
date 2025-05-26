@@ -40,7 +40,7 @@
         }
 
         .bar_btn.active {
-            background-color: #e5e7eb;
+            background-color: red;
             /* Light gray background when active */
         }
  </style>
@@ -60,29 +60,4 @@
     </div>
   </div>
     <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
-    <script>
-        console.log('hello from index view script');
-
-        function waitFor(fnName, callback, tries = 50, delay = 500) {
-            if (window[fnName]) {
-                callback();
-            } else if (tries > 0) {
-                setTimeout(() => waitFor(fnName, callback, tries - 1, delay), delay);
-            } else {
-                console.warn(`${fnName} not ready after waiting`);
-            }
-        }
-
-        document.getElementById("ifc-upload-btn").addEventListener("click", () => {
-            console.log("upload button clicked");
-            setTimeout(() => waitFor("uploadFile", () => window.uploadFile(@Model.ProjectId), 50, 500), 1000);
-        });
-
-        const fileId = @Model.FileId;
-        if (fileId > 0) {
-            setTimeout(() => waitFor("loadIfcFile", () => {
-                const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
-                window.loadIfcFile(url);
-            }, 10, 500), 1000);
-        }
-    </script>
+    
