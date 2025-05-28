@@ -1,5 +1,5 @@
 ﻿using DataLayer.Models.Enums;
-
+using Microsoft.AspNetCore.Http;
 namespace ACC.ViewModels
 {
     public class ProjectIssueVM
@@ -12,6 +12,7 @@ namespace ACC.ViewModels
         public IssuePriority Priority { get; set; }
         public IssueStatus Status { get; set; }
         public int ProjectId { get; set; }
+        public IFormFile Attachment { get; set; }
        
     }
 }

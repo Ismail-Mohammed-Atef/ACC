@@ -48,7 +48,7 @@ namespace ACC
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<IIssueRepository, IssueRepository>();
             builder.Services.AddScoped<IIssueService, IssueService>();
-
+            builder.Services.AddSingleton<IWebHostEnvironment>(env => builder.Environment);
             #endregion
 
 
