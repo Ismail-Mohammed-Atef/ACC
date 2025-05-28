@@ -48,6 +48,7 @@
     <Folder Include="public\lib\web-ifc\" />
     <Folder Include="wwwroot\ifc-files\" />
     <Folder Include="wwwroot\Converted\" />
+    <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\pdfs\" />
   </ItemGroup>
 
