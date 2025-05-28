@@ -12,5 +12,8 @@ namespace DataLayer.Models
         public Enums.IssueStatus Status { get; set; }
         public int ProjectId { get; set; }
         public Project Project { get; set; }
+        public int? DocumentId { get; set; } // Foreign Key للـ Document
+        public Document Document { get; set; } // Navigation Property
+
     }
 }

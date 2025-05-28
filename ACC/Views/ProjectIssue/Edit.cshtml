@@ -7,7 +7,7 @@
 
 <h2>Edit Project Issue</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
         <label asp-for="Title"></label>
@@ -37,8 +37,24 @@
     </div>
     <div class="form-group">
         <label asp-for="ProjectId">Project</label>
-        <input asp-for="ProjectId" class="form-control" />
+        <input asp-for="ProjectId" class="form-control" readonly />
         <span asp-validation-for="ProjectId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Current Attachment</label>
+        @if (Model.DocumentId.HasValue)
+        {
+            <a asp-controller="ProjectDocument" asp-action="Download" asp-route-versionId="@Model.DocumentId" asp-route-projectId="@Model.ProjectId" class="btn btn-info">Download Current Attachment</a>
+        }
+        else
+        {
+            <span>No Attachment</span>
+        }
+    </div>
+    <div class="form-group">
+        <label asp-for="Attachment">New Attachment (optional)</label>
+        <input asp-for="Attachment" type="file" class="form-control" />
+        <span asp-validation-for="Attachment" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>

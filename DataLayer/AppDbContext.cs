@@ -65,7 +65,11 @@ namespace DataLayer
                 .WithMany(p => p.Issues)
                 .HasForeignKey(i => i.ProjectId);
 
-
+            builder.Entity<Issue>()
+           .HasOne(i => i.Document)
+           .WithMany() 
+           .HasForeignKey(i => i.DocumentId)
+           .OnDelete(DeleteBehavior.SetNull);
 
         }
         public DbSet<Company> Companies { get; set; }

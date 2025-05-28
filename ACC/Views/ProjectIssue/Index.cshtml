@@ -19,6 +19,7 @@
             <th>Priority</th>
             <th>Status</th>
             <th>Project ID</th>
+            <th>Attachment</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -33,6 +34,16 @@
                 <td>@issue.Priority</td>
                 <td>@issue.Status</td>
                 <td>@issue.ProjectId</td>
+                <td>
+                    @if (issue.DocumentId.HasValue)
+                    {
+                        <a asp-controller="ProjectDocument" asp-action="Download" asp-route-versionId="@issue.DocumentId" asp-route-projectId="@issue.ProjectId">Download</a>
+                    }
+                    else
+                    {
+                        <span>No Attachment</span>
+                    }
+                </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@issue.Id" class="btn btn-warning">Edit</a>
                     <a asp-action="Delete" asp-route-id="@issue.Id" class="btn btn-danger">Delete</a>

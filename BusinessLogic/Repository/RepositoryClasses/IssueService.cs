@@ -50,6 +50,7 @@ namespace BusinessLogic.Repository.RepositoryClasses
             existingIssue.Priority = issue.Priority;
             existingIssue.Status = issue.Status;
             existingIssue.ProjectId = issue.ProjectId;
+            existingIssue.DocumentId = issue.DocumentId;
 
             _issueRepository.Update(existingIssue);
         }

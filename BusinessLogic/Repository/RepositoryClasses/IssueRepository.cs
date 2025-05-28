@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BusinessLogic.Repository.RepositoryInterfaces;
-using DataLayer;
+﻿using DataLayer;
 using DataLayer.Models;
+using Microsoft.EntityFrameworkCore;
+using BusinessLogic.Repository.RepositoryInterfaces;
 
 namespace BusinessLogic.Repository.RepositoryClasses
 {
@@ -50,12 +46,12 @@ namespace BusinessLogic.Repository.RepositoryClasses
 
         public List<Issue> GetAll()
         {
-            return _context.Issues.ToList();
+            return _context.Issues.Include(i => i.Document).ToList();
         }
+
         public List<Issue> GetIssuesByProjectId(int projectId)
         {
-            return _context.Issues.Where(i => i.ProjectId == projectId).ToList();
+            return _context.Issues.Include(i => i.Document).Where(i => i.ProjectId == projectId).ToList();
         }
-     
     }
 }

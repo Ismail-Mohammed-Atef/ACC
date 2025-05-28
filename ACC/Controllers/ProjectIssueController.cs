@@ -44,7 +44,8 @@ namespace ACC.Controllers
                 Type = i.Type,
                 Priority = i.Priority,
                 Status = i.Status,
-                ProjectId = i.ProjectId
+                ProjectId = i.ProjectId,
+                DocumentId = i.DocumentId
             }).ToList();
             return View(issueViewModels);
         }
@@ -71,42 +72,43 @@ namespace ACC.Controllers
                 };
                 _issueService.CreateIssue(issue);
 
-                // التعامل مع الـ Attachment
                 if (model.Attachment != null && model.Attachment.Length > 0)
                 {
-                    // تحديد الـ ProjectId
                     int projectId = model.ProjectId;
-
-                    // البحث عن Root Folder باسم "ProjectRoot"
-                    var rootFolder = await _context.Folders
-                        .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.ParentFolderId == null && f.Name == "ProjectRoot");
-
-                    if (rootFolder == null)
+                    var project = await _context.Projects.FindAsync(projectId);
+                    if (project == null)
                     {
-                        // لو مش موجود، اعمل Root Folder جديد
-                        rootFolder = new Folder
+                        ModelState.AddModelError("ProjectId", "Project not found.");
+                        return View(model);
+                    }
+                    string projectFolderName = project.Name;
+
+                    var projectFolder = await _context.Folders
+                        .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.ParentFolderId == null && f.Name == projectFolderName);
+
+                    if (projectFolder == null)
+                    {
+                        projectFolder = new Folder
                         {
-                            Name = "ProjectRoot",
+                            Name = projectFolderName,
                             ParentFolderId = null,
                             ProjectId = projectId,
                             CreatedAt = DateTime.UtcNow,
                             CreatedBy = User.Identity.Name ?? "System"
                         };
-                        _context.Folders.Add(rootFolder);
+                        _context.Folders.Add(projectFolder);
                         await _context.SaveChangesAsync();
                     }
 
-                    // البحث عن SubFolder باسم "Issues"
                     var issuesFolder = await _context.Folders
-                        .FirstOrDefaultAsync(f => f.ParentFolderId == rootFolder.Id && f.Name == "Issues");
+                        .FirstOrDefaultAsync(f => f.ParentFolderId == projectFolder.Id && f.Name == "Issues");
 
                     if (issuesFolder == null)
                     {
-                        // لو مش موجود، اعمل SubFolder جديد باسم "Issues"
                         issuesFolder = new Folder
                         {
                             Name = "Issues",
-                            ParentFolderId = rootFolder.Id,
+                            ParentFolderId = projectFolder.Id,
                             ProjectId = projectId,
                             CreatedAt = DateTime.UtcNow,
                             CreatedBy = User.Identity.Name ?? "System"
@@ -115,7 +117,6 @@ namespace ACC.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    // رفع الـ Attachment وإضافته كـ Document
                     var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png" };
                     var extension = Path.GetExtension(model.Attachment.FileName).ToLower();
                     if (!allowedExtensions.Contains(extension))
@@ -157,6 +158,9 @@ namespace ACC.Controllers
                     document.Versions.Add(version);
                     _context.Documents.Add(document);
                     await _context.SaveChangesAsync();
+
+                    issue.DocumentId = document.Id;
+                    _issueService.UpdateIssue(issue);
                 }
 
                 return RedirectToAction("Index");
@@ -167,6 +171,11 @@ namespace ACC.Controllers
         public IActionResult Edit(int id)
         {
             var issue = _issueService.GetIssueById(id);
+            if (issue == null)
+            {
+                return NotFound();
+            }
+
             var model = new ProjectIssueVM
             {
                 Id = issue.Id,
@@ -176,13 +185,14 @@ namespace ACC.Controllers
                 Type = issue.Type,
                 Priority = issue.Priority,
                 Status = issue.Status,
-                ProjectId = issue.ProjectId
+                ProjectId = issue.ProjectId,
+                DocumentId = issue.DocumentId // جلب الـ DocumentId الحالي
             };
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult Edit(ProjectIssueVM model)
+        public async Task<IActionResult> Edit(ProjectIssueVM model)
         {
             if (ModelState.IsValid)
             {
@@ -195,8 +205,101 @@ namespace ACC.Controllers
                     Type = model.Type,
                     Priority = model.Priority,
                     Status = model.Status,
-                    ProjectId = model.ProjectId
+                    ProjectId = model.ProjectId,
+                    DocumentId = model.DocumentId // الـ DocumentId الحالي
                 };
+
+                // التعامل مع الـ Attachment الجديد
+                if (model.Attachment != null && model.Attachment.Length > 0)
+                {
+                    int projectId = model.ProjectId;
+                    var project = await _context.Projects.FindAsync(projectId);
+                    if (project == null)
+                    {
+                        ModelState.AddModelError("ProjectId", "Project not found.");
+                        return View(model);
+                    }
+                    string projectFolderName = project.Name;
+
+                    var projectFolder = await _context.Folders
+                        .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.ParentFolderId == null && f.Name == projectFolderName);
+
+                    if (projectFolder == null)
+                    {
+                        projectFolder = new Folder
+                        {
+                            Name = projectFolderName,
+                            ParentFolderId = null,
+                            ProjectId = projectId,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = User.Identity.Name ?? "System"
+                        };
+                        _context.Folders.Add(projectFolder);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var issuesFolder = await _context.Folders
+                        .FirstOrDefaultAsync(f => f.ParentFolderId == projectFolder.Id && f.Name == "Issues");
+
+                    if (issuesFolder == null)
+                    {
+                        issuesFolder = new Folder
+                        {
+                            Name = "Issues",
+                            ParentFolderId = projectFolder.Id,
+                            ProjectId = projectId,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = User.Identity.Name ?? "System"
+                        };
+                        _context.Folders.Add(issuesFolder);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png" };
+                    var extension = Path.GetExtension(model.Attachment.FileName).ToLower();
+                    if (!allowedExtensions.Contains(extension))
+                    {
+                        ModelState.AddModelError("Attachment", "Invalid file type. Allowed types: PDF, DOCX, JPG, PNG.");
+                        return View(model);
+                    }
+
+                    var uploadFolder = Path.Combine(_env.WebRootPath, "uploads", projectId.ToString(), issuesFolder.Id.ToString());
+                    Directory.CreateDirectory(uploadFolder);
+
+                    var fileName = $"{Guid.NewGuid()}_{model.Attachment.FileName}";
+                    var filePath = Path.Combine(uploadFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.Attachment.CopyToAsync(stream);
+                    }
+
+                    var document = new Document
+                    {
+                        Name = Path.GetFileNameWithoutExtension(model.Attachment.FileName),
+                        FileType = extension,
+                        FolderId = issuesFolder.Id,
+                        ProjectId = projectId,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = User.Identity.Name ?? "System",
+                        Versions = new List<DocumentVersion>()
+                    };
+
+                    var version = new DocumentVersion
+                    {
+                        FilePath = filePath,
+                        UploadedAt = DateTime.UtcNow,
+                        UploadedBy = User.Identity.Name ?? "System",
+                        VersionNumber = 1
+                    };
+
+                    document.Versions.Add(version);
+                    _context.Documents.Add(document);
+                    await _context.SaveChangesAsync();
+
+                    issue.DocumentId = document.Id; 
+                }
+
                 _issueService.UpdateIssue(issue);
                 return RedirectToAction("Index");
             }
