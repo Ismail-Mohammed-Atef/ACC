@@ -1,4 +1,5 @@
-﻿using BusinessLogic.Repository.RepositoryClasses;
+﻿using System.Text.Json.Serialization;
+using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using BusinessLogic.Services;
 using DataLayer;
@@ -6,9 +7,7 @@ using DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using System.Text.Json.Serialization;
 
 namespace ACC
 {
@@ -56,6 +55,8 @@ namespace ACC
             provider.Mappings[".ifc"] = "application/octet-stream";
             provider.Mappings[".json"] = "application/json";
             provider.Mappings[".bin"] = "application/octet-stream";
+            provider.Mappings[".dwg"] = "application/octet-stream";
+
 
             // Serve normal static files from wwwroot/
             app.UseStaticFiles(new StaticFileOptions
@@ -117,6 +118,8 @@ namespace ACC
             });
 
             app.UseRouting();
+            app.UseCookiePolicy();
+
             app.UseAuthentication();
             app.UseAuthorization();
 

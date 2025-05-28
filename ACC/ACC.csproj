@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspose.CAD" Version="25.5.0" />
     <PackageReference Include="EPPlus" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -46,7 +47,7 @@
     <Folder Include="ClientApp\src\" />
     <Folder Include="public\lib\web-ifc\" />
     <Folder Include="wwwroot\ifc-files\" />
-    <Folder Include="wwwroot\uploads\" />
+    <Folder Include="wwwroot\Converted\" />
   </ItemGroup>
 
 </Project>

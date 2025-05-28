@@ -1,0 +1,63 @@
+﻿@model string
+
+<style>
+    .iframe-container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 10px auto;
+        max-width: 1200px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .iframe-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .iframe-title {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .iframe-content {
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .iframe-footer {
+        margin-top: 15px;
+        text-align: right;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    iframe {
+        border: none;
+        display: block;
+        background: white;
+    }
+</style>
+
+<div class="iframe-container">
+    <div class="iframe-header">
+        <h2 class="iframe-title">DWG File Viewer</h2>
+    </div>
+
+    <div class="iframe-content">
+        <iframe src="@Model" width="100%" height="800px"></iframe>
+    </div>
+
+    <div class="iframe-footer">
+        Powered by Your Application
+    </div>
+</div>
