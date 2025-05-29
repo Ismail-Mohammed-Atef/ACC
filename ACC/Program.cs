@@ -1,8 +1,10 @@
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
+using BusinessLogic.Services;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json.Serialization;
@@ -25,18 +27,15 @@ namespace ACC
              )
                 );
 
-
-
             #region Dependency injection
             builder.Services.AddControllers().AddJsonOptions(options =>
-               {
-                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-               });
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-              .AddEntityFrameworkStores<AppDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>();
             builder.Services.AddControllersWithViews();
-
 
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
@@ -51,7 +50,6 @@ namespace ACC
             builder.Services.AddSingleton<IWebHostEnvironment>(env => builder.Environment);
             #endregion
 
-
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())
@@ -61,10 +59,17 @@ namespace ACC
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings[".wasm"] = "application/wasm";
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = provider,
+                ServeUnknownFileTypes = true
+            });
 
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.MapControllerRoute(

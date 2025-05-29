@@ -20,12 +20,17 @@ namespace DataLayer
             
         }
 
+        protected AppDbContext()
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             // Define Composite Primary Key for Many-to-Many
-            builder.Entity<ProjectMembers>().HasKey(pm => new { pm.ProjectId, pm.MemberId });
+            builder.Entity<ProjectMembers>()
+                .HasKey(pm => new { pm.ProjectId, pm.MemberId });
 
             // Configure Relationships
             builder.Entity<ProjectMembers>()
@@ -43,8 +48,7 @@ namespace DataLayer
                 .WithMany(u => u.Projects)
                 .HasForeignKey(pm => pm.MemberId);
 
-
-            ///////////////// ProjectCompany////////////////////////////////////////////
+            ///////////////// ProjectCompany ///////////////////////////
 
             builder.Entity<ProjectCompany>()
         .HasKey(pc => new { pc.ProjectId, pc.CompanyId }); // Composite Key
@@ -71,6 +75,8 @@ namespace DataLayer
            .HasForeignKey(i => i.DocumentId)
            .OnDelete(DeleteBehavior.SetNull);
 
+                .HasForeignKey(pc => pc.CompanyId);         
+           
         }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Folder> Folders { get; set; }
@@ -82,6 +88,8 @@ namespace DataLayer
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
         public DbSet<Issue> Issues { get; set; }
+        public DbSet<IfcFile> IfcFiles { get; set; }
+
 
     }
 }

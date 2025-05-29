@@ -7,12 +7,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="public\lib\web-ifc\helpers\**" />
+    <Compile Remove="public\lib\web-ifc\web-ifc\**" />
+    <Compile Remove="wwwroot\lib\dat.gui\**" />
+    <Compile Remove="wwwroot\lib\stats.js\**" />
+    <Content Remove="public\lib\web-ifc\helpers\**" />
+    <Content Remove="public\lib\web-ifc\web-ifc\**" />
+    <Content Remove="wwwroot\lib\dat.gui\**" />
+    <Content Remove="wwwroot\lib\stats.js\**" />
+    <EmbeddedResource Remove="public\lib\web-ifc\helpers\**" />
+    <EmbeddedResource Remove="public\lib\web-ifc\web-ifc\**" />
+    <EmbeddedResource Remove="wwwroot\lib\dat.gui\**" />
+    <EmbeddedResource Remove="wwwroot\lib\stats.js\**" />
+    <None Remove="public\lib\web-ifc\helpers\**" />
+    <None Remove="public\lib\web-ifc\web-ifc\**" />
+    <None Remove="wwwroot\lib\dat.gui\**" />
+    <None Remove="wwwroot\lib\stats.js\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EPPlus" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +42,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ClientApp\src\" />
+    <Folder Include="public\lib\web-ifc\" />
+    <Folder Include="wwwroot\ifc-files\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
