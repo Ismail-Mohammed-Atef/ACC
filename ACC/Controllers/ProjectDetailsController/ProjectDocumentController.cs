@@ -1,4 +1,5 @@
-﻿using BusinessLogic.Repository.RepositoryInterfaces;
+﻿using ACC.Services;
+using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -441,8 +442,13 @@ namespace ACC.Controllers.ProjectDetailsController
         [HttpGet]
         public async Task<IActionResult> Versions(int documentId, int projectId)
         {
+
             try
             {
+                if(projectId == 0)
+                {
+                    projectId = id;
+                }
                 var document = await _documentRepository.GetAllQueryable()
                     .Include(d => d.Versions)
                     .FirstOrDefaultAsync(d => d.Id == documentId && d.ProjectId == projectId);
@@ -461,6 +467,22 @@ namespace ACC.Controllers.ProjectDetailsController
                 TempData["Error"] = "An error occurred while loading document versions.";
                 return RedirectToAction("Index", new { projectId });
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetFolderDetails(int id)
+        {
+            var folder = await _folderRepository.GetAllQueryable()
+                    .Include(f => f.SubFolders).ThenInclude(sf => sf.SubFolders)
+                    .Include(f => f.Documents)
+                    .ThenInclude(d => d.Versions)
+                    .FirstOrDefaultAsync(f => f.Id == id && f.ProjectId == ProjectDocumentController.id);
+
+            if (folder == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_FolderDetails", folder);
         }
     }
 }

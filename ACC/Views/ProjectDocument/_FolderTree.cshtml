@@ -1,62 +1,125 @@
-﻿@model Folder
+﻿@model DataLayer.Models.Folder
 
-<li class="list-group-item px-0">
-    <div class="d-flex align-items-center w-100 ps-3">
-        @if (Model.SubFolders.Any() || Model.Documents.Any())
-        {
-            <button class="btn btn-sm btn-link text-decoration-none me-1 p-0"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#folder-@Model.Id"
-                    aria-expanded="false"
-                    aria-controls="folder-@Model.Id">
-                <i class="bi bi-chevron-right collapsed" data-toggle-icon></i>
-            </button>
+<style>
+    .folder-label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .toggle-arrow.collapsed {
+        transform: rotate(0deg);
+        transition: transform 0.2s ease;
+    }
+
+    .toggle-arrow:not(.collapsed) {
+        transform: rotate(90deg);
+        transition: transform 0.2s ease;
+    }
+
+    .document-item {
+        user-select: none;
+    }
+
+        .document-item:hover {
+            background-color: #f0f0f0;
         }
-        else
-        {
-            <span class="me-4"></span> <!-- Placeholder for alignment -->
-        }
 
-        <a asp-action="Folder" asp-route-id="@Model.Id" asp-route-projectId="@ViewBag.ProjectId" class="text-decoration-none fw-semibold text-dark">
-            <i class="bi bi-folder-fill me-2 text-primary"></i>@Model.Name
-        </a>
+</style>
 
-        <div class="ms-auto d-flex align-items-center">
-            @if (Model.Documents.Any())
-            {
-                <span class="badge bg-info me-2">@Model.Documents.Count Document@(Model.Documents.Count > 1 ? "s" : "")</span>
-            }
-            @if (Model.SubFolders.Any())
-            {
-                <span class="badge bg-secondary me-2">@Model.SubFolders.Count Subfolder@(Model.SubFolders.Count > 1 ? "s" : "")</span>
-            }
-            <a asp-action="DeleteFolder" asp-route-FolderId="@Model.Id" class="btn btn-danger btn-sm">Delete</a>
-        </div>
+<li class="list-group-item d-flex justify-content-between align-items-center folder-item" data-folder-id="@Model.Id">
+    <div class="folder-label d-flex align-items-center gap-2">
+        <i class="bi bi-chevron-right toggle-arrow collapsed"
+           style="cursor:pointer;"
+           data-bs-toggle="collapse"
+           data-bs-target="#folder-@Model.Id"
+           aria-expanded="false"
+           aria-controls="folder-@Model.Id"></i>
+        <div class="folder-name folder-clickable" data-folder-id="@Model.Id">@Model.Name</div>
+
     </div>
 
-    @if (Model.SubFolders.Any() || Model.Documents.Any())
-    {
-        <ul class="list-group collapse ms-3 mt-2 border-start ps-2" id="folder-@Model.Id">
-            @* Render subfolders *@
-            @foreach (var subFolder in Model.SubFolders)
-            {
-                @await Html.PartialAsync("_FolderTree", subFolder)
-            }
+    <div class="dropdown">
+        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-@Model.Id" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-three-dots"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-@Model.Id">
+            <li><a class="dropdown-item add-subfolder" href="#" data-folder-id="@Model.Id">Add Subfolder</a></li>
+            <li>
+                <a class="dropdown-item"
+                   href="@Url.Action("Upload", "ProjectDocument", new { folderId = Model.Id, projectId = ViewBag.ProjectId })">
+                    Upload Document
+                </a>
+            </li>
+            <li>
+                <button type="button"
+                        class="dropdown-item delete-folder-btn"
+                        data-folder-id="@Model.Id"
+                        data-folder-name="@Model.Name">
+                    Delete Folder
+                </button>
+            </li>
 
-            @* Render documents *@
+        </ul>
+
+    </div>
+</li>
+
+@if ((Model.SubFolders != null && Model.SubFolders.Any()) || (Model.Documents != null && Model.Documents.Any()))
+{
+    <ul class="list-group folder-tree collapse" id="folder-@Model.Id">
+        @* Render documents as list items at the same level *@
+        @if (Model.Documents != null && Model.Documents.Any())
+        {
             @foreach (var doc in Model.Documents)
             {
-                <li class="list-group-item px-0 ps-4">
-                    <div class="d-flex align-items-center w-100">
-                        <i class="bi bi-file-earmark-text-fill me-2 text-secondary"></i>
-                        <span class="text-dark">@doc.Name</span>
-                        <div class="ms-auto">
-                            <a asp-action="Download" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary me-1">Download</a>
-                            <a asp-action="DeleteDocument" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                        </div>
-                    </div>
+                <li class="list-group-item d-flex align-items-center document-item" data-document-id="@doc.Id">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    <span>@doc.Name</span>
                 </li>
             }
-        </ul>
-    }
-</li>
+        }
+        @* Render subfolders as list items (recursively) *@
+        @if (Model.SubFolders != null && Model.SubFolders.Any())
+        {
+            @foreach (var subfolder in Model.SubFolders)
+            {
+                @await Html.PartialAsync("_FolderTree", subfolder)
+            }
+        }
+
+    </ul>
+}
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toggle arrow rotation on collapse show/hide
+        document.querySelectorAll('.toggle-arrow').forEach(arrow => {
+            arrow.addEventListener('click', function () {
+                this.classList.toggle('collapsed');
+            });
+        });
+    });
+        document.addEventListener('DOMContentLoaded', function () {
+        // Existing toggle arrow handler here...
+
+        // Handle document click to load document details (customize URL and target div)
+        document.querySelectorAll('.document-item').forEach(docItem => {
+            docItem.addEventListener('click', function () {
+                const documentId = this.getAttribute('data-document-id');
+                if (!documentId) return;
+
+                // For example, load document details into a right panel div with id="folderContent"
+                const contentDiv = document.getElementById('folderContent');
+                contentDiv.innerHTML = `<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>`;
+
+                fetch(`/ProjectDocument/GetDocumentDetails/${documentId}`)
+                    .then(res => res.ok ? res.text() : Promise.reject('Failed to load'))
+                    .then(html => contentDiv.innerHTML = html)
+                    .catch(err => contentDiv.innerHTML = `<div class="text-danger">Error loading document details</div>`);
+            });
+        });
+    });
+   
+</script>
