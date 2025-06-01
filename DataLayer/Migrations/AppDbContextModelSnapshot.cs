@@ -160,7 +160,7 @@ namespace DataLayer.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<string>("FilePath");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
