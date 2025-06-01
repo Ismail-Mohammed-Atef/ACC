@@ -40,6 +40,9 @@ namespace ACC
             builder.Services.AddScoped<IfcFileRepository>();
             builder.Services.AddScoped<IfcFileService>();
 
+            builder.Services.AddScoped<ITransmittalRepository, TransmittalRepository>();
+
+
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())
@@ -93,6 +96,13 @@ namespace ACC
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist")),
                 RequestPath = "/dist",
+
+
+            // Serve normal static files from wwwroot/
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
                 ContentTypeProvider = provider,
                 ServeUnknownFileTypes = true,
                 OnPrepareResponse = ctx =>
@@ -115,6 +125,38 @@ namespace ACC
                     ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
                     ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
                 }
+
+            });
+
+            // Serve static files from /dist
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist")),
+                RequestPath = "/dist",
+                ContentTypeProvider = provider,
+                ServeUnknownFileTypes = true,
+                OnPrepareResponse = ctx =>
+                {
+                    var ext = Path.GetExtension(ctx.File.Name).ToLowerInvariant();
+
+                    if (ext == ".js" || ext == ".mjs")
+                    {
+                        ctx.Context.Response.Headers["Content-Type"] = "application/javascript";
+                    }
+                    else if (ext == ".wasm")
+                    {
+                        ctx.Context.Response.Headers["Content-Type"] = "application/wasm";
+                    }
+                    else if (ext == ".ifc")
+                    {
+                        ctx.Context.Response.Headers["Content-Type"] = "application/octet-stream";
+                    }
+
+                    ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+                    ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
+                }
+
             });
 
             app.UseRouting();
