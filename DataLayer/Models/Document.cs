@@ -16,5 +16,7 @@ namespace DataLayer.Models
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }
         public List<DocumentVersion> Versions { get; set; }
+
+        public List <ReviewDocument> ReviewDocuments { get; set; } = new List<ReviewDocument>();
     }
 }
