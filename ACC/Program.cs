@@ -1,10 +1,10 @@
+using ACC.Services;
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
-using BusinessLogic.Services;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json.Serialization;
@@ -20,16 +20,28 @@ namespace ACC
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            builder.Services
+                .AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    options.Password.RequiredLength = 3;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                })
+                .AddEntityFrameworkStores<AppDbContext>();
+
+
 
             #region Dependency injection
             builder.Services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+               {
+                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+               });
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>();
+          
             builder.Services.AddControllersWithViews();
+
 
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
@@ -41,7 +53,18 @@ namespace ACC
             builder.Services.AddScoped<ITransmittalRepository, TransmittalRepository>();
 
 
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+            builder.Services.AddScoped<IWorkFlowStepRepository, WorkflowStepRepository>();
+            builder.Services.AddScoped<FolderService>();
+            builder.Services.AddScoped<ReviewFolderService>();
+            builder.Services.AddScoped<ReviewDocumentService>();
+            builder.Services.AddScoped<WorkflowStepsUsersService>();
+            builder.Services.AddScoped<ReviewStepUsersService>();
+
+
             #endregion
+
 
             var app = builder.Build();
 
@@ -52,17 +75,10 @@ namespace ACC
             }
 
             app.UseHttpsRedirection();
-
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings[".wasm"] = "application/wasm";
-
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                ContentTypeProvider = provider,
-                ServeUnknownFileTypes = true
-            });
+            app.UseStaticFiles();
 
             app.UseRouting();
+
             app.UseAuthorization();
 
             app.MapControllerRoute(

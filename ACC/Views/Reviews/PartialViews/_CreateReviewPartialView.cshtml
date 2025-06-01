@@ -1,0 +1,52 @@
+﻿@model ACC.ViewModels.ReviewsVM.CreateReviewVM
+
+
+
+
+<div class="modal fade" id="CreateReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addReviewModalLabel">Create Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Reviews" asp-action="SaveReview" method="post">
+                    <div class="form-group">
+                        <label asp-for="Name"></label>
+                        <input asp-for="Name" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="SelectedWorkflowId">Workflow Template</label>
+                        <select asp-for="SelectedWorkflowId" asp-items="@(new SelectList(Model.WorkflowTemplates, "Id", "Name"))" class="form-control">
+                            <option value="">-- Select Workflow --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Folders and Documents</label>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                            <partial name="_FolderTree" model="Model.AllFolders">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="SelectedFinalReviewStatus">Final Status</label>
+                        <select asp-for="SelectedFinalReviewStatus" asp-items="@(new SelectList(Model.FinalReviewStatuses))" class="form-control">
+                            <option value="">-- Select Final Status --</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+

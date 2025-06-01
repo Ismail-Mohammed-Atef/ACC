@@ -1,5 +1,4 @@
-﻿using BusinessLogic.Repository.RepositoryInterfaces;
-using DataLayer;
+﻿using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,101 +13,47 @@ namespace ACC.Controllers.ProjectDetailsController
 {
     public class ProjectDocumentController : Controller
     {
-        public static int id;
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
-        private readonly IProjetcRepository _projetcRepository;
-        private readonly IFolderRepository _folderRepository;
-        private readonly IDocumentVersionRepository _documentVersionRepository;
-        private readonly IDocumentRepository _documentRepository;
 
-        public ProjectDocumentController(AppDbContext context, IWebHostEnvironment env, IProjetcRepository projetcRepository, IFolderRepository folderRepository, IDocumentVersionRepository documentVersionRepository, IDocumentRepository documentRepository)
+        public ProjectDocumentController(AppDbContext context, IWebHostEnvironment env)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _env = env ?? throw new ArgumentNullException(nameof(env));
-            _projetcRepository = projetcRepository;
-            _folderRepository = folderRepository;
-            _documentVersionRepository = documentVersionRepository;
-            _documentRepository = documentRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(int Id)
         {
-            if (Id == 0)
-            {
-                Id = id; // Ensure 'id' is defined; consider validating or clarifying its source
-            }
-
             try
             {
                 // Check if project exists
-                var project = _projetcRepository.GetById(Id); // Typo: '_projetcRepository' should be '_projectRepository'
+                var project = await _context.Projects.FindAsync(Id);
                 if (project == null)
                 {
                     return NotFound("Project not found.");
                 }
 
-                // Get all root folders for the project
-                var folders = await _folderRepository.GetAllQueryable()
-                    .Where(f => f.ParentFolderId == null && f.ProjectId == Id)
-                    .Include(f => f.Documents) // Include documents for root folders
+                // Get all folders for the project
+                var folders = await _context.Folders
+                    .Where(f => f.ProjectId == Id)
+                    .Include(f => f.SubFolders)
+                    .Include(f => f.Documents)
                     .ToListAsync();
 
-                // Recursively load subfolders and their documents
-                foreach (var folder in folders)
-                {
-                    await LoadSubFoldersAsync(folder, _folderRepository);
-                }
-
                 ViewBag.ProjectId = Id;
-                id = Id; // Ensure 'id' is defined; consider clarifying its purpose
 
                 if (!folders.Any())
                 {
-                    // Create default folders if none exist
-                    var workInProgress = new Folder
+                    // Return an empty folder model to indicate no folders exist
+                    var emptyFolder = new Folder
                     {
-                        Name = "Work In Progress",
+                        Name = "No Folders",
                         ProjectId = Id,
                         SubFolders = new List<Folder>(),
-                        Documents = new List<Document>(),
-                        CreatedBy = "System"
+                        Documents = new List<Document>()
                     };
-                    var shared = new Folder
-                    {
-                        Name = "Shared",
-                        ProjectId = Id,
-                        SubFolders = new List<Folder>(),
-                        Documents = new List<Document>(),
-                        CreatedBy = "System"
-                    };
-                    var published = new Folder
-                    {
-                        Name = "Published",
-                        ProjectId = Id,
-                        SubFolders = new List<Folder>(),
-                        Documents = new List<Document>(),
-                        CreatedBy = "System"
-                    };
-                    var archive = new Folder
-                    {
-                        Name = "Archive",
-                        ProjectId = Id,
-                        SubFolders = new List<Folder>(),
-                        Documents = new List<Document>(),
-                        CreatedBy = "System"
-                    };
-                    var initialFolders = new List<Folder> { workInProgress, shared, published, archive };
-
-                    // Insert default folders
-                    foreach (var folder in initialFolders)
-                    {
-                        _folderRepository.Insert(folder);
-                    }
-                     _folderRepository.Save(); // Use async SaveAsync for consistency
-
-                    return View(initialFolders);
+                    return View(new List<Folder> { emptyFolder });
                 }
                 return View(folders);
             }
@@ -120,24 +65,6 @@ namespace ACC.Controllers.ProjectDetailsController
             }
         }
 
-        // Helper method to recursively load subfolders and documents
-        private async Task LoadSubFoldersAsync(Folder folder, IFolderRepository folderRepository)
-        {
-            // Load subfolders and documents for the current folder
-            var subFolders = await folderRepository.GetAllQueryable()
-                .Where(f => f.ParentFolderId == folder.Id)
-                .Include(f => f.Documents)
-                .ToListAsync();
-
-            folder.SubFolders = subFolders;
-
-            // Recursively load subfolders for each child folder
-            foreach (var subFolder in subFolders)
-            {
-                await LoadSubFoldersAsync(subFolder, folderRepository);
-            }
-        }
-
         [HttpGet]
         public async Task<IActionResult> Folder(int? id, int projectId)
         {
@@ -145,18 +72,31 @@ namespace ACC.Controllers.ProjectDetailsController
             {
                 Folder? folder;
 
+                if (id == null)
+                {
+                    // Check if a root folder exists for the project
+                    folder = await _context.Folders
+                        .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.ParentFolderId == null);
 
-                folder = await _folderRepository.GetAllQueryable()
-                    .Include(f => f.SubFolders).ThenInclude(sf=>sf.SubFolders)
-                    .Include(f => f.Documents)
-                    .ThenInclude(d => d.Versions)
-                    .FirstOrDefaultAsync(f => f.Id == id && f.ProjectId == projectId);
+                    if (folder == null)
+                    {
+                        return RedirectToAction("CreateRoot", new { projectId });
+                    }
+                }
+                else
+                {
+                    folder = await _context.Folders
+                        .Include(f => f.SubFolders)
+                        .Include(f => f.Documents)
+                        .ThenInclude(d => d.Versions)
+                        .FirstOrDefaultAsync(f => f.Id == id && f.ProjectId == projectId);
+                }
 
                 if (folder == null)
                 {
                     return NotFound("Folder not found or you don't have access.");
                 }
-                
+
                 ViewBag.ProjectId = projectId;
                 return View(folder);
             }
@@ -166,42 +106,6 @@ namespace ACC.Controllers.ProjectDetailsController
                 TempData["Error"] = "An error occurred while loading the folder.";
                 return RedirectToAction("Index", new { projectId });
             }
-        }
-        [HttpGet]
-        public async Task<IActionResult> DeleteFolder(int? folderId)
-        {
-            if (folderId == null)
-                return NotFound();
-
-            var folder = await _folderRepository.GetAllQueryable()
-                .FirstOrDefaultAsync(f => f.Id == folderId);
-
-            if (folder == null)
-                return NotFound();
-
-            ViewBag.ProjectId = id;
-
-            return View(folder);
-        }
-
-        [HttpPost, ActionName("DeleteFolder")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteFolderConfirmed(int folderId)
-        {
-            var folder =  _folderRepository.GetAllQueryable().Include(f=>f.SubFolders).Include(f=>f.Documents).Where(f=>f.Id == folderId).FirstOrDefault();
-            if (folder == null)
-                return NotFound();
-
-            if (folder.SubFolders.Any())
-            {
-                TempData["Error"] = "Cannot delete a folder that has subfolders.";
-                return RedirectToAction(nameof(Index), id);
-            }
-
-            _folderRepository.Delete(folder);
-            _folderRepository.Save();
-
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -224,12 +128,17 @@ namespace ACC.Controllers.ProjectDetailsController
                     return View();
                 }
 
-                var project = _projetcRepository.GetById(projectId);
+                var project = await _context.Projects.FindAsync(projectId);
                 if (project == null)
                 {
                     return NotFound("Project not found.");
                 }
 
+                if (await _context.Folders.AnyAsync(f => f.ProjectId == projectId && f.ParentFolderId == null))
+                {
+                    TempData["Error"] = "A root folder already exists for this project.";
+                    return RedirectToAction("Index", new { projectId });
+                }
 
                 var root = new Folder
                 {
@@ -240,8 +149,8 @@ namespace ACC.Controllers.ProjectDetailsController
                     CreatedBy = User.Identity.Name ?? "System"
                 };
 
-                _folderRepository.Insert(root);
-                _folderRepository.Save();
+                _context.Folders.Add(root);
+                await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Root folder created successfully.";
                 return RedirectToAction("Folder", new { id = root.Id, projectId });
@@ -267,8 +176,9 @@ namespace ACC.Controllers.ProjectDetailsController
                     return RedirectToAction("Folder", new { id = parentFolderId, projectId });
                 }
 
-                var parentFolder = await _folderRepository.GetAllQueryable()
+                var parentFolder = await _context.Folders
                     .FirstOrDefaultAsync(f => f.Id == parentFolderId && f.ProjectId == projectId);
+
                 if (parentFolder == null)
                 {
                     return NotFound("Parent folder not found.");
@@ -279,25 +189,12 @@ namespace ACC.Controllers.ProjectDetailsController
                     Name = folderName,
                     ParentFolderId = parentFolderId,
                     ProjectId = projectId,
-                    SubFolders = new List<Folder>(),
-                    Documents = new List<Document>(),
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = User.Identity.Name ?? "System"
                 };
 
-                if(parentFolder.SubFolders == null)
-                {
-                    parentFolder.SubFolders = new List<Folder>();
-                }
-                if (parentFolder.Documents == null)
-                {
-                    parentFolder.Documents = new List<Document>();
-                }
-                parentFolder.SubFolders.Add(folder);
-                
-                _folderRepository.Update(parentFolder);
-                _folderRepository.Insert(folder);
-                _folderRepository.Save();
+                _context.Folders.Add(folder);
+                await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Folder created successfully.";
                 return RedirectToAction("Folder", new { id = parentFolderId, projectId });
@@ -340,7 +237,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return View();
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png", ".dwg", ".ifc", ".rvt" };
+                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png" };
                 var extension = Path.GetExtension(file.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
                 {
@@ -350,7 +247,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return View();
                 }
 
-                var folder = await _folderRepository.GetAllQueryable()
+                var folder = await _context.Folders
                     .FirstOrDefaultAsync(f => f.Id == folderId && f.ProjectId == projectId);
 
                 if (folder == null)
@@ -369,7 +266,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     await file.CopyToAsync(stream);
                 }
 
-                var document = await _documentRepository.GetAllQueryable()
+                var document = await _context.Documents
                     .Include(d => d.Versions)
                     .FirstOrDefaultAsync(d => d.FolderId == folderId && d.Name == Path.GetFileNameWithoutExtension(file.FileName));
 
@@ -385,7 +282,7 @@ namespace ACC.Controllers.ProjectDetailsController
                         CreatedBy = User.Identity.Name ?? "System",
                         Versions = new List<DocumentVersion>()
                     };
-                    _documentRepository.Insert(document);
+                    _context.Documents.Add(document);
                 }
 
                 var version = new DocumentVersion
@@ -397,7 +294,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 };
 
                 document.Versions.Add(version);
-                _documentRepository.Save();
+                await _context.SaveChangesAsync();
 
                 TempData["Success"] = "File uploaded successfully.";
                 return RedirectToAction("Folder", new { id = folderId, projectId });
@@ -417,7 +314,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             try
             {
-                var version = await _documentVersionRepository.GetAllQueryable()
+                var version = await _context.DocumentVersions
                     .Include(v => v.Document)
                     .FirstOrDefaultAsync(v => v.Id == versionId && v.Document.ProjectId == projectId);
 
@@ -443,7 +340,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             try
             {
-                var document = await _documentRepository.GetAllQueryable()
+                var document = await _context.Documents
                     .Include(d => d.Versions)
                     .FirstOrDefaultAsync(d => d.Id == documentId && d.ProjectId == projectId);
 

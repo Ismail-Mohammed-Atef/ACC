@@ -1,0 +1,131 @@
+﻿@using ACC.ViewModels.ReviewsVM
+@model List<DocumentUponAction>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review Details</title>
+    <link href="/css/site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/Company.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Custom CSS for loading indicator */
+        #CompanyDetailsPanel.loading::after {
+            content: "Loading...";
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .selected {
+            background-color: #f8d7da !important; /* Light red for selection */
+        }
+
+
+        /* Pagination styling */
+        .pagination .btn {
+            margin: 0 2px;
+        }
+
+        .pagination .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .pagination .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .action-menu {
+            min-width: 80px;
+            max-width: 100px;
+            padding: 8px;
+            font-size: 14px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .company-row {
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid p-4">
+        <h2>@ViewBag.ReviewName</h2>
+
+        <!-- Review Form Start -->
+        <form asp-controller="Reviews" asp-action="Submit" asp-route-ReviewId="@ViewBag.ReviewId" method="post">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Comment</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <td>@Model[i].Name</td>
+                            <td>@Model[i].Comment</td>
+                            <td>@Model[i].State</td>
+                            <td>
+                                <!-- Preserve other properties -->
+                                <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
+                                <input type="hidden" name="[@i].Name" value="@Model[i].Name" />
+                                <input type="hidden" name="[@i].Comment" value="@Model[i].Comment" />
+                                <input type="hidden" name="[@i].State" value="@Model[i].State" />
+
+                                <!-- Approval Checkbox -->
+                                <input type="checkbox" name="[@i].IsApproved" value="true" />
+                                <input type="hidden" name="[@i].IsApproved" value="false" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <a href="/Reviews/Index?page=@i"
+                   class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+                    @i
+                </a>
+            }
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".company-row").click(function (e) {
+                if (!$(e.target).is("button") && !$(e.target).is("a") && !$(e.target).closest("form").length) {
+                    const url = $(this).data("url");
+                    if (url) {
+                        window.location.href = url;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
