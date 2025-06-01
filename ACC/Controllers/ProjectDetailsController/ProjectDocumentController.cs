@@ -508,7 +508,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 return NotFound();
             }
 
-            return PartialView("_FolderDetails", folder);
+            return PartialView("_DocumentDetails", folder);
         }
 
 
