@@ -418,6 +418,10 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             try
             {
+                if(projectId ==0)
+                {
+                    projectId = id;
+                }
                 var version = await _documentVersionRepository.GetAllQueryable()
                     .Include(v => v.Document)
                     .FirstOrDefaultAsync(v => v.Id == versionId && v.Document.ProjectId == projectId);
@@ -427,7 +431,9 @@ namespace ACC.Controllers.ProjectDetailsController
                     return NotFound("File not found.");
                 }
 
-                var fileName = Path.GetFileName(version.FilePath);
+                var fullFileName = Path.GetFileName(version.FilePath);
+                var fileName = fullFileName.Substring(fullFileName.IndexOf('_') + 1);
+
                 var fileBytes = await System.IO.File.ReadAllBytesAsync(version.FilePath);
                 return File(fileBytes, "application/octet-stream", fileName);
             }
