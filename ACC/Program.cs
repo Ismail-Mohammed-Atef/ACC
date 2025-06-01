@@ -47,6 +47,13 @@ namespace ACC
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
+            builder.Services.AddSingleton<Helpers.FileHelper>();
+            builder.Services.AddScoped<IfcFileRepository>();
+            builder.Services.AddScoped<IfcFileService>();
+            builder.Services.AddScoped<ITransmittalRepository, TransmittalRepository>();
+
+
+
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IWorkflowRepository, WorkflowRepository>();
             builder.Services.AddScoped<IWorkFlowStepRepository, WorkflowStepRepository>();
