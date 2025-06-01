@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class initMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,16 +51,37 @@ namespace DataLayer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ParentFolderId = table.Column<int>(type: "int", nullable: true)
+                    ParentFolderId = table.Column<int>(type: "int", nullable: true),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FolderId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Folders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Folders_Folders_ParentFolderId",
-                        column: x => x.ParentFolderId,
+                        name: "FK_Folders_Folders_FolderId",
+                        column: x => x.FolderId,
                         principalTable: "Folders",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "IfcFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IfcFiles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -128,7 +149,9 @@ namespace DataLayer.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FolderId = table.Column<int>(type: "int", nullable: false),
-                    Version = table.Column<double>(type: "float", nullable: false)
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -227,6 +250,29 @@ namespace DataLayer.Migrations
                         column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DocumentVersions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DocumentId = table.Column<int>(type: "int", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VersionNumber = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentVersions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentVersions_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -394,9 +440,14 @@ namespace DataLayer.Migrations
                 column: "FolderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Folders_ParentFolderId",
+                name: "IX_DocumentVersions_DocumentId",
+                table: "DocumentVersions",
+                column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Folders_FolderId",
                 table: "Folders",
-                column: "ParentFolderId");
+                column: "FolderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectActivities_projectId",
@@ -433,7 +484,10 @@ namespace DataLayer.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Documents");
+                name: "DocumentVersions");
+
+            migrationBuilder.DropTable(
+                name: "IfcFiles");
 
             migrationBuilder.DropTable(
                 name: "ProjectActivities");
@@ -448,13 +502,16 @@ namespace DataLayer.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Folders");
+                name: "Documents");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Folders");
 
             migrationBuilder.DropTable(
                 name: "Companies");
