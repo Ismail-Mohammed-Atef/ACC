@@ -1,7 +1,15 @@
 ﻿@model DataLayer.Models.Folder
-
+<div class="mb-3">
+    <h4 class="text-primary fw-bold">
+        <i class="bi bi-folder-fill me-2"></i>
+        Folder: @Model.Name
+    </h4>
+    <hr />
+</div>
 @if (Model.Documents != null && Model.Documents.Any())
 {
+
+
     <table class="table table-striped table-bordered">
         <thead>
             <tr>

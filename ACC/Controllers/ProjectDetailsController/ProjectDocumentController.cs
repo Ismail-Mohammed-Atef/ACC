@@ -501,6 +501,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             var folder = await _documentRepository.GetAllQueryable()
                     .Include(d => d.Versions)
+                    .Include(d=>d.Folder)
                     .FirstOrDefaultAsync(f => f.Id == id && f.ProjectId == ProjectDocumentController.id);
 
             if (folder == null)
