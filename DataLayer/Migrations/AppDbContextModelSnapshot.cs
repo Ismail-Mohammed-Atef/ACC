@@ -198,7 +198,7 @@ namespace DataLayer.Migrations
                     b.HasIndex("FolderId");
 
                     b.ToTable("Documents");
-                });
+                }));
 
             modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
                 {
