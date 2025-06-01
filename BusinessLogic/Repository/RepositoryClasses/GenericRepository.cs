@@ -1,6 +1,8 @@
 ﻿using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
 using DataLayer.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +23,15 @@ namespace BusinessLogic.Repository.RepositoryClasses
         {
             var model = _context.Set<T>().Remove(obj);
         }
-       
+
         public IList<T> GetAll()
         {
             return _context.Set<T>().ToList();
         }
-
+        public IQueryable<T> GetAllQueryable()
+        {
+            return _context.Set<T>().AsQueryable();
+        }
         public T GetById(int id)
         {
             return _context.Set<T>().Find(id);

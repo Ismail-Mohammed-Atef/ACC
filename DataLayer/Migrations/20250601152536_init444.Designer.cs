@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250601085308_AddTransmittal")]
-    partial class AddTransmittal
+    [Migration("20250601152536_init444")]
+    partial class init444
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,7 +33,7 @@ namespace DataLayer.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("AccessLevel")
+                    b.PrimitiveCollection<string>("AccessLevel")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("AddedOn")
@@ -252,6 +252,34 @@ namespace DataLayer.Migrations
                     b.ToTable("Folders");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.IfcFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UploadedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IfcFiles");
+                });
+
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -360,6 +388,116 @@ namespace DataLayer.Migrations
                     b.ToTable("ProjectMembers");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CurrentStepId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FinalReviewStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InitiatorUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WorkflowTemplateId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrentStepId");
+
+                    b.HasIndex("InitiatorUserId");
+
+                    b.HasIndex("WorkflowTemplateId");
+
+                    b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.ReviewDocument", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ReviewId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("ReviewDocuments");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.ReviewFolder", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ReviewId", "FolderId");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("ReviewsFolders");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.ReviewStepUser", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId", "StepId", "ReviewId");
+
+                    b.HasIndex("ReviewId");
+
+                    b.HasIndex("StepId");
+
+                    b.ToTable("ReviewStepUsers");
+                });
+
             modelBuilder.Entity("DataLayer.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -432,6 +570,86 @@ namespace DataLayer.Migrations
                     b.HasIndex("TransmittalId");
 
                     b.ToTable("TransmittalDocuments");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowStepTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("MinReviewers")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MultiReviewerOptions")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReviewersType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StepOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimeAllowed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkflowTemplateId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("WorkflowTemplateId");
+
+                    b.ToTable("WorkflowStepTemplates");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowStepUser", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId", "StepId");
+
+                    b.HasIndex("StepId");
+
+                    b.ToTable("WorkflowStepUsers");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StepCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkflowTemplates");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -656,6 +874,96 @@ namespace DataLayer.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Review", b =>
+                {
+                    b.HasOne("DataLayer.Models.WorkflowStepTemplate", "CurrentStep")
+                        .WithMany()
+                        .HasForeignKey("CurrentStepId");
+
+                    b.HasOne("DataLayer.Models.ApplicationUser", "InitiatorUser")
+                        .WithMany()
+                        .HasForeignKey("InitiatorUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.WorkflowTemplate", "WorkflowTemplate")
+                        .WithMany("Reviews")
+                        .HasForeignKey("WorkflowTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CurrentStep");
+
+                    b.Navigation("InitiatorUser");
+
+                    b.Navigation("WorkflowTemplate");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.ReviewDocument", b =>
+                {
+                    b.HasOne("DataLayer.Models.Document", "Document")
+                        .WithMany("ReviewDocuments")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.Review", "Review")
+                        .WithMany("ReviewDocuments")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.ReviewFolder", b =>
+                {
+                    b.HasOne("DataLayer.Models.Folder", "Folder")
+                        .WithMany("ReviewFolders")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.Review", "Review")
+                        .WithMany("ReviewFolders")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
+
+                    b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.ReviewStepUser", b =>
+                {
+                    b.HasOne("DataLayer.Models.Review", "Review")
+                        .WithMany("ReviewStepUsers")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.WorkflowStepTemplate", "Step")
+                        .WithMany("ReviewStepUsers")
+                        .HasForeignKey("StepId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.ApplicationUser", "User")
+                        .WithMany("ReviewStepUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("Step");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DataLayer.Models.TransmittalDocument", b =>
                 {
                     b.HasOne("DataLayer.Models.DocumentVersion", "DocumentVersion")
@@ -673,6 +981,40 @@ namespace DataLayer.Migrations
                     b.Navigation("DocumentVersion");
 
                     b.Navigation("Transmittal");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowStepTemplate", b =>
+                {
+                    b.HasOne("DataLayer.Models.ApplicationUser", null)
+                        .WithMany("WorkflowSteps")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("DataLayer.Models.WorkflowTemplate", "WorkflowTemplate")
+                        .WithMany("Steps")
+                        .HasForeignKey("WorkflowTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorkflowTemplate");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowStepUser", b =>
+                {
+                    b.HasOne("DataLayer.Models.WorkflowStepTemplate", "Step")
+                        .WithMany("workflowStepUsers")
+                        .HasForeignKey("StepId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.ApplicationUser", "User")
+                        .WithMany("workflowStepUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Step");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -729,6 +1071,12 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Projects");
+
+                    b.Navigation("ReviewStepUsers");
+
+                    b.Navigation("WorkflowSteps");
+
+                    b.Navigation("workflowStepUsers");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Company", b =>
@@ -738,12 +1086,16 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Document", b =>
                 {
+                    b.Navigation("ReviewDocuments");
+
                     b.Navigation("Versions");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Folder", b =>
                 {
                     b.Navigation("Documents");
+
+                    b.Navigation("ReviewFolders");
 
                     b.Navigation("SubFolders");
                 });
@@ -757,6 +1109,15 @@ namespace DataLayer.Migrations
                     b.Navigation("ProjectCompany");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Review", b =>
+                {
+                    b.Navigation("ReviewDocuments");
+
+                    b.Navigation("ReviewFolders");
+
+                    b.Navigation("ReviewStepUsers");
+                });
+
             modelBuilder.Entity("DataLayer.Models.Role", b =>
                 {
                     b.Navigation("Members");
@@ -765,6 +1126,20 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.Transmittal", b =>
                 {
                     b.Navigation("TransmittalDocuments");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowStepTemplate", b =>
+                {
+                    b.Navigation("ReviewStepUsers");
+
+                    b.Navigation("workflowStepUsers");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowTemplate", b =>
+                {
+                    b.Navigation("Reviews");
+
+                    b.Navigation("Steps");
                 });
 #pragma warning restore 612, 618
         }

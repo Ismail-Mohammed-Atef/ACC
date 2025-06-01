@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init444 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,6 +68,23 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IfcFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IfcFiles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
                 {
@@ -100,6 +117,23 @@ namespace DataLayer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transmittals",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Recipient = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transmittals", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -414,6 +448,33 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TransmittalDocuments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TransmittalId = table.Column<int>(type: "int", nullable: false),
+                    DocumentVersionId = table.Column<int>(type: "int", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransmittalDocuments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TransmittalDocuments_DocumentVersions_DocumentVersionId",
+                        column: x => x.DocumentVersionId,
+                        principalTable: "DocumentVersions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TransmittalDocuments_Transmittals_TransmittalId",
+                        column: x => x.TransmittalId,
+                        principalTable: "Transmittals",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
@@ -674,6 +735,16 @@ namespace DataLayer.Migrations
                 column: "StepId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TransmittalDocuments_DocumentVersionId",
+                table: "TransmittalDocuments",
+                column: "DocumentVersionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TransmittalDocuments_TransmittalId",
+                table: "TransmittalDocuments",
+                column: "TransmittalId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WorkflowStepTemplates_ApplicationUserId",
                 table: "WorkflowStepTemplates",
                 column: "ApplicationUserId");
@@ -708,7 +779,7 @@ namespace DataLayer.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "DocumentVersions");
+                name: "IfcFiles");
 
             migrationBuilder.DropTable(
                 name: "ProjectActivities");
@@ -729,6 +800,9 @@ namespace DataLayer.Migrations
                 name: "ReviewStepUsers");
 
             migrationBuilder.DropTable(
+                name: "TransmittalDocuments");
+
+            migrationBuilder.DropTable(
                 name: "WorkflowStepUsers");
 
             migrationBuilder.DropTable(
@@ -738,22 +812,28 @@ namespace DataLayer.Migrations
                 name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "Documents");
-
-            migrationBuilder.DropTable(
                 name: "Reviews");
 
             migrationBuilder.DropTable(
-                name: "Folders");
+                name: "DocumentVersions");
+
+            migrationBuilder.DropTable(
+                name: "Transmittals");
 
             migrationBuilder.DropTable(
                 name: "WorkflowStepTemplates");
+
+            migrationBuilder.DropTable(
+                name: "Documents");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "WorkflowTemplates");
+
+            migrationBuilder.DropTable(
+                name: "Folders");
 
             migrationBuilder.DropTable(
                 name: "Companies");
