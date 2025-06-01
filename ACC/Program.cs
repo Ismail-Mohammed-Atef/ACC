@@ -41,6 +41,9 @@ namespace ACC
             builder.Services.AddScoped<IfcFileService>();
 
             builder.Services.AddScoped<ITransmittalRepository, TransmittalRepository>();
+            builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+            builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+            builder.Services.AddScoped<IDocumentVersionRepository, DocumentVersionRepository>();
 
 
             var app = builder.Build();
@@ -90,15 +93,7 @@ namespace ACC
                 }
             });
 
-            // Serve static files from /dist
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist")),
-                RequestPath = "/dist",
-
-
-            // Serve normal static files from wwwroot/
+            // Serve static files from wwwroot/
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
@@ -125,7 +120,6 @@ namespace ACC
                     ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
                     ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
                 }
-
             });
 
             // Serve static files from /dist
@@ -156,7 +150,6 @@ namespace ACC
                     ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
                     ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
                 }
-
             });
 
             app.UseRouting();
