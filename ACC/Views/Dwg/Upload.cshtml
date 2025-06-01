@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Upload DWG";
+}
+
+<style>
+    .upload-container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 600px;
+        margin: 30px auto;
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 25px;
+        font-weight: 400;
+    }
+
+    .upload-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        flex-grow: 1;
+    }
+
+        .file-input-wrapper::before {
+            content: 'Click to choose a DWG file please';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: #6c757d;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+    .file-input {
+        width: 100%;
+        height: 40px;
+        opacity: 0;
+    }
+
+    .upload-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 0 25px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 15px;
+        transition: background 0.2s;
+    }
+
+        .upload-btn:hover {
+            background: #2980b9;
+        }
+
+    /* Spinner styles */
+    .processing-indicator {
+        margin-top: 25px;
+        display: none;
+        text-align: center;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+
+    .spinner {
+        margin: 0 auto 15px;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+</style>
+
+<div class="upload-container">
+    <h2>Upload a DWG File</h2>
+    <form asp-action="UploadDWG" asp-controller="Dwg" method="post" enctype="multipart/form-data" class="upload-form" onsubmit="showProcessing();">
+        <div class="file-input-wrapper">
+            <input type="file" name="file" accept=".dwg" required class="file-input" />
+        </div>
+        <button type="submit" class="upload-btn">Upload and View</button>
+    </form>
+
+    <div class="processing-indicator" id="processingBox">
+        <div class="spinner"></div>
+        <div>Processing your file... Please wait.</div>
+    </div>
+</div>
+
+<script>
+    function showProcessing() {
+        document.querySelector('.upload-form').style.display = 'none';
+        document.getElementById('processingBox').style.display = 'block';
+    }
+</script>
