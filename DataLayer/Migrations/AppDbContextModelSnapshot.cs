@@ -1,4 +1,3 @@
-
 using System;
 using DataLayer;
 using Microsoft.EntityFrameworkCore;
@@ -160,7 +159,7 @@ namespace DataLayer.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<string>("FilePath");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -198,7 +197,7 @@ namespace DataLayer.Migrations
                     b.HasIndex("FolderId");
 
                     b.ToTable("Documents");
-                });
+                }));
 
             modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
                 {
