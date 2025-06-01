@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,7 +61,21 @@ namespace DataLayer
             builder.Entity<ProjectCompany>()
                 .HasOne(pc => pc.Company)
                 .WithMany(c => c.ProjectCompany)
-                .HasForeignKey(pc => pc.CompanyId);         
+                .HasForeignKey(pc => pc.CompanyId);
+
+  /// issue
+            builder.Entity<Issue>()
+                .HasOne(i => i.Project)
+                .WithMany(p => p.Issues)
+                .HasForeignKey(i => i.ProjectId);
+
+            builder.Entity<Issue>()
+           .HasOne(i => i.Document)
+           .WithMany()
+           .HasForeignKey(i => i.DocumentId)
+           .OnDelete(DeleteBehavior.SetNull);
+
+               // .HasForeignKey(pc => pc.CompanyId);         
            
         }
         public DbSet<Company> Companies { get; set; }
@@ -72,6 +87,7 @@ namespace DataLayer
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
+        public DbSet<Issue> Issues { get; set; }
         public DbSet<IfcFile> IfcFiles { get; set; }
 
 
