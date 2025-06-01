@@ -59,6 +59,7 @@ namespace DataLayer
                 .WithMany(c => c.ProjectCompany)
                 .HasForeignKey(pc => pc.CompanyId);
 
+<<<<<<< HEAD
             builder.Entity<Review>()
               .HasOne(wf => wf.WorkflowTemplate)
               .WithMany(u => u.Reviews)
@@ -131,6 +132,37 @@ namespace DataLayer
                 .OnDelete(DeleteBehavior.Restrict);
 
 
+=======
+  /// issue
+            builder.Entity<Issue>()
+                .HasOne(i => i.Project)
+                .WithMany(p => p.Issues)
+                .HasForeignKey(i => i.ProjectId);
+
+            builder.Entity<Issue>()
+           .HasOne(i => i.Document)
+           .WithMany()
+           .HasForeignKey(i => i.DocumentId)
+           .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<IssueReviwers>()
+      .HasKey(w => new { w.ReviewerId, w.IssueId });
+
+            builder.Entity<IssueReviwers>()
+                .HasOne(rd => rd.Issue)
+                .WithMany(r => r.IssueReviwers)
+                .HasForeignKey(rd => rd.IssueId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<IssueReviwers>()
+                .HasOne(rd => rd.Reviewer)
+                .WithMany(d => d.IssueReviwers)
+                .HasForeignKey(rd => rd.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // .HasForeignKey(pc => pc.CompanyId);         
+>>>>>>> ibrahim-isuue
 
         }
 
@@ -143,7 +175,9 @@ namespace DataLayer
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
+        public DbSet<Issue> Issues { get; set; }
         public DbSet<IfcFile> IfcFiles { get; set; }
+<<<<<<< HEAD
         public DbSet<Transmittal> Transmittals { get; set; }
         public DbSet<TransmittalDocument> TransmittalDocuments { get; set; }
 
@@ -157,6 +191,9 @@ namespace DataLayer
 
 
 
+=======
+        public DbSet<IssueReviwers> IssueReviwers { get; set; }
+>>>>>>> ibrahim-isuue
 
 
     }

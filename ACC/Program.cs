@@ -17,6 +17,16 @@ namespace ACC
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            //builder.Services.AddDbContext<AppDbContext>((options) =>
+            //{
+            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            //});
+            builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.MigrationsAssembly("ACC") 
+             )
+                );
             builder.Services.AddDbContext<AppDbContext>((options) =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -48,6 +58,13 @@ namespace ACC
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
+             // Add services to the container of isuue//
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddScoped<IIssueRepository, IssueRepository>();
+            builder.Services.AddScoped<IIssueService, IssueService>();
+            builder.Services.AddSingleton<IWebHostEnvironment>(env => builder.Environment);
             builder.Services.AddSingleton<Helpers.FileHelper>();
             builder.Services.AddScoped<IfcFileRepository>();
             builder.Services.AddScoped<IfcFileService>();

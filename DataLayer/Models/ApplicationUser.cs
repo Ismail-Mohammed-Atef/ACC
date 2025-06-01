@@ -28,11 +28,15 @@ namespace DataLayer.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
 
+<<<<<<< HEAD
         public List<WorkflowStepTemplate>? WorkflowSteps { get; set; }
 
         public List<WorkflowStepUser> workflowStepUsers { get; set; }
 
         public List<ReviewStepUser> ReviewStepUsers { get; set; } = new List<ReviewStepUser> { };
+=======
+        public List<IssueReviwers>? IssueReviwers { get; set; }
+>>>>>>> ibrahim-isuue
 
 
     }

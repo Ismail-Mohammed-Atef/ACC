@@ -1,0 +1,54 @@
+﻿@model List<ACC.ViewModels.ProjectIssueVM>
+
+@{
+    ViewData["Title"] = "Project Issues";
+    Layout = "~/Views/Shared/_ProjectLayout.cshtml";
+}
+
+<h2>Project Issues</h2>
+
+<a asp-action="Create" class="btn btn-primary">Create New Issue</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Project ID</th>
+            <th>Attachment</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var issue in Model)
+        {
+            <tr>
+                <td>@issue.Title</td>
+                <td>@issue.Description</td>
+                <td>@issue.Category</td>
+                <td>@issue.Type</td>
+                <td>@issue.Priority</td>
+                <td>@issue.Status</td>
+                <td>@issue.ProjectId</td>
+                <td>
+                    @if (issue.DocumentId.HasValue)
+                    {
+                        <a asp-controller="ProjectDocument" asp-action="Download" asp-route-versionId="@issue.DocumentId" asp-route-projectId="@issue.ProjectId">Download</a>
+                    }
+                    else
+                    {
+                        <span>No Attachment</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@issue.Id" class="btn btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@issue.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
