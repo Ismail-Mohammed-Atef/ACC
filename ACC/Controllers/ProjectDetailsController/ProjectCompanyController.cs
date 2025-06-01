@@ -14,6 +14,7 @@ namespace ACC.Controllers.ProjectDetailsController
         private readonly ICompanyRepository _companyRepository;
         private readonly IProjectActivityRepository _projectActivityRepository;
 
+        //hello
         public ProjectCompanyController(ICompanyRepository companyRepository, IProjectActivityRepository projectActivityRepository)
         {
             _companyRepository = companyRepository;
@@ -84,11 +85,11 @@ namespace ACC.Controllers.ProjectDetailsController
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveNew(int id, [Bind("Name,Address,Description,Website,PhoneNumber,SelectedCountry,SelectedCompanyType")] ProjectCompanyVM model, string selectedCompanyId)
         {
-            Console.WriteLine($"selectedCompanyId: {selectedCompanyId}");
-            Console.WriteLine($"model.Name: {model.Name}");
-            Console.WriteLine($"model.PhoneNumber: {model.PhoneNumber}");
-            Console.WriteLine($"model.SelectedCountry: {model.SelectedCountry}");
-            Console.WriteLine($"model.SelectedCompanyType: {model.SelectedCompanyType}");
+            //Console.WriteLine($"selectedCompanyId: {selectedCompanyId}");
+            //Console.WriteLine($"model.Name: {model.Name}");
+            //Console.WriteLine($"model.PhoneNumber: {model.PhoneNumber}");
+            //Console.WriteLine($"model.SelectedCountry: {model.SelectedCountry}");
+            //Console.WriteLine($"model.SelectedCompanyType: {model.SelectedCompanyType}");
 
             if (int.TryParse(selectedCompanyId, out int companyId) && companyId != 0)
             {
@@ -106,7 +107,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                    Console.WriteLine("ModelState Errors: " + string.Join(", ", errors));
+                    //Console.WriteLine("ModelState Errors: " + string.Join(", ", errors));
                     return Json(new { success = false, errors });
                 }
 
@@ -122,13 +123,13 @@ namespace ACC.Controllers.ProjectDetailsController
                         Country = model.SelectedCountry.Value,
                         CompanyType = model.SelectedCompanyType.Value
                     };
-                    Console.WriteLine("Inserting company...");
+                    //Console.WriteLine("Inserting company...");
                     _companyRepository.Insert(company);
-                    Console.WriteLine("Saving changes...");
+                    //Console.WriteLine("Saving changes...");
                     _companyRepository.Save();
-                    Console.WriteLine("Adding company to project...");
+                    //Console.WriteLine("Adding company to project...");
                     _companyRepository.AddCompanyToProject(company.Id, id);
-                    Console.WriteLine("Adding activity...");
+                    //Console.WriteLine("Adding activity...");
                     _projectActivityRepository.AddNewActivity(company, id);
                     return Json(new { success = true, redirect = Url.Action("Index", new { id }) });
                 }
