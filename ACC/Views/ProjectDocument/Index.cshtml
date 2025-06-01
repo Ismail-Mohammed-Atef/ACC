@@ -1,0 +1,67 @@
+﻿@model List<DataLayer.Models.Folder>
+@{
+    ViewBag.Title = "Project Folders";
+    var projectId = ViewBag.ProjectId;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <h2>Project Folders</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Count == 1 && Model[0].Name == "No Folders")
+    {
+        <div class="alert alert-info">
+            No folders exist for this project.
+            <a asp-action="CreateRoot" asp-route-projectId="@projectId" class="btn btn-primary btn-sm ms-2">Create Root Folder</a>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                <h5>Folders</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    @foreach (var folder in Model)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a asp-action="Folder" asp-route-id="@folder.Id" asp-route-projectId="@projectId">
+                                <i class="bi bi-folder-fill me-2"></i>@folder.Name
+                            </a>
+                            <span>
+                                @if (folder.SubFolders.Any())
+                                {
+                                    <span class="badge bg-secondary me-2">@folder.SubFolders.Count Subfolders</span>
+                                }
+                                @if (folder.Documents.Any())
+                                {
+                                    <span class="badge bg-info">@folder.Documents.Count Documents</span>
+                                }
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>

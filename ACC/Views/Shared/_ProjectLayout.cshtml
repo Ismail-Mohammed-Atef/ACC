@@ -113,7 +113,9 @@
         </button>
         <div class="container-fluid d-flex align-items-center">
             <i class="fa-solid fa-user-gear text-primary fs-5"></i>
-            <span class="ms-2 fw-semibold">Account Admin</span>
+            <a href="@Url.Action("Index", "Home")" class="ms-2 fw-semibold text-decoration-none text-dark">
+                Account Admin
+            </a>
         </div>
     </nav>
 
@@ -128,6 +130,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a asp-controller="ProjectDocument" asp-action="Index" asp-route-id="@id" class="nav-link text-dark">
+
+                        <i class="fa-solid fa-users me-3"></i> <span>Docs</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a asp-controller="ProjectMembers" asp-action="Index" asp-route-id="@id" class="nav-link text-dark">
 
                         <i class="fa-solid fa-building me-3"></i> <span>Members</span>
@@ -139,12 +147,7 @@
                         <i class="fa-solid fa-list-check me-3"></i> <span>Activities</span>
                     </a>
                 </li>
-                @* <li class="nav-item">
-                    <a asp-controller="ProjectNotification" asp-action="index" class="nav-link text-dark">
 
-                        <i class="fa-solid fa-bell me-3"></i> <span>Notifications</span>
-                    </a>
-                </li> *@
                 <li class="nav-item">
                     <a asp-controller="ProjectSetting" asp-action="index" asp-route-id="@id" class="nav-link text-dark">
 
