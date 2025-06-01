@@ -39,6 +39,10 @@ namespace ACC
             builder.Services.AddSingleton<Helpers.FileHelper>();
             builder.Services.AddScoped<IfcFileRepository>();
             builder.Services.AddScoped<IfcFileService>();
+            builder.Services.AddScoped<ITransmittalRepository, TransmittalRepository>();
+
+
+
 
             var app = builder.Build();
 
