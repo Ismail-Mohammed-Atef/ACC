@@ -48,7 +48,7 @@ namespace BusinessLogic.Repository.RepositoryClasses
        
 
 
-        //added for ProjectCompany Controller/////////
+        //added de/////////
         public IEnumerable<Company> GetCompaniesInEacProjectWithPrpjectId(int projectId)
         {
             return Context.ProjectCompany

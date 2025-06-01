@@ -118,7 +118,7 @@
                             <option value=" " >Display All</option>
                             @foreach (var item in ViewBag.ActivitTypeList)
                             {
-                                <option value="@item.Text.ToString()">@item.Text.ToString()</option>
+                                <option value="@item.Value">@item.Text</option>
                             }
 
                         </select>
@@ -154,7 +154,6 @@
             </tbody>
         </table>
 
-        <!-- التصفح بين الصفحات -->
         <div class="pagination">
             @for (int i = 1; i <= ViewBag.TotalPages; i++)
             {
