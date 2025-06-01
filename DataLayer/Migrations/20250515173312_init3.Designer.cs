@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250512143919_init")]
-    partial class init
+    [Migration("20250515173312_init3")]
+    partial class init3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,6 +149,109 @@ namespace DataLayer.Migrations
                     b.ToTable("Companies");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Document", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentVersions");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.Folder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentFolderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("Folders");
+                });
+
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -211,7 +314,7 @@ namespace DataLayer.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("projectId")
+                    b.Property<int?>("projectId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -421,13 +524,38 @@ namespace DataLayer.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Document", b =>
+                {
+                    b.HasOne("DataLayer.Models.Folder", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
+                {
+                    b.HasOne("DataLayer.Models.Document", "Document")
+                        .WithMany("Versions")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.Folder", b =>
+                {
+                    b.HasOne("DataLayer.Models.Folder", null)
+                        .WithMany("SubFolders")
+                        .HasForeignKey("FolderId");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
                 {
                     b.HasOne("DataLayer.Models.Project", "project")
                         .WithMany("Activities")
-                        .HasForeignKey("projectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("projectId");
 
                     b.Navigation("project");
                 });
@@ -529,6 +657,18 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.Company", b =>
                 {
                     b.Navigation("ProjectCompany");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.Document", b =>
+                {
+                    b.Navigation("Versions");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.Folder", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("SubFolders");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>

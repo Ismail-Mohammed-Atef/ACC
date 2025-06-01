@@ -1,0 +1,62 @@
+﻿@model Folder
+
+<li class="list-group-item px-0">
+    <div class="d-flex align-items-center w-100 ps-3">
+        @if (Model.SubFolders.Any() || Model.Documents.Any())
+        {
+            <button class="btn btn-sm btn-link text-decoration-none me-1 p-0"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#folder-@Model.Id"
+                    aria-expanded="false"
+                    aria-controls="folder-@Model.Id">
+                <i class="bi bi-chevron-right collapsed" data-toggle-icon></i>
+            </button>
+        }
+        else
+        {
+            <span class="me-4"></span> <!-- Placeholder for alignment -->
+        }
+
+        <a asp-action="Folder" asp-route-id="@Model.Id" asp-route-projectId="@ViewBag.ProjectId" class="text-decoration-none fw-semibold text-dark">
+            <i class="bi bi-folder-fill me-2 text-primary"></i>@Model.Name
+        </a>
+
+        <div class="ms-auto d-flex align-items-center">
+            @if (Model.Documents.Any())
+            {
+                <span class="badge bg-info me-2">@Model.Documents.Count Document@(Model.Documents.Count > 1 ? "s" : "")</span>
+            }
+            @if (Model.SubFolders.Any())
+            {
+                <span class="badge bg-secondary me-2">@Model.SubFolders.Count Subfolder@(Model.SubFolders.Count > 1 ? "s" : "")</span>
+            }
+            <a asp-action="DeleteFolder" asp-route-FolderId="@Model.Id" class="btn btn-danger btn-sm">Delete</a>
+        </div>
+    </div>
+
+    @if (Model.SubFolders.Any() || Model.Documents.Any())
+    {
+        <ul class="list-group collapse ms-3 mt-2 border-start ps-2" id="folder-@Model.Id">
+            @* Render subfolders *@
+            @foreach (var subFolder in Model.SubFolders)
+            {
+                @await Html.PartialAsync("_FolderTree", subFolder)
+            }
+
+            @* Render documents *@
+            @foreach (var doc in Model.Documents)
+            {
+                <li class="list-group-item px-0 ps-4">
+                    <div class="d-flex align-items-center w-100">
+                        <i class="bi bi-file-earmark-text-fill me-2 text-secondary"></i>
+                        <span class="text-dark">@doc.Name</span>
+                        <div class="ms-auto">
+                            <a asp-action="Download" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-primary me-1">Download</a>
+                            <a asp-action="DeleteDocument" asp-route-id="@doc.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</li>

@@ -1,0 +1,108 @@
+﻿@model List<DataLayer.Models.Folder>
+@{
+    ViewBag.Title = "Project Folders";
+    var projectId = ViewBag.ProjectId;
+}
+<style>
+    .folder-tree {
+        list-style: none;
+        padding-left: 0;
+    }
+
+        .folder-tree .list-group-item {
+            border: none;
+            padding: 0.5rem 1rem;
+            background-color: transparent;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+            .folder-tree .list-group-item:hover {
+                background-color: #f8f9fa;
+            }
+
+            .folder-tree .list-group-item > div {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+        .folder-tree .list-group {
+            padding-left: 1.5rem;
+            margin-top: 0.25rem;
+            border-left: 2px solid #dee2e6;
+        }
+
+    .bi-chevron-right {
+        transition: transform 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+        .bi-chevron-right.collapsed {
+            transform: rotate(0deg);
+        }
+
+        .bi-chevron-right:not(.collapsed) {
+            transform: rotate(90deg);
+        }
+
+    .folder-name {
+        font-weight: 500;
+        color: #333;
+    }
+</style>
+
+
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <h2>Project Folders</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="alert alert-info">
+        Create New Folder.
+        <a asp-action="CreateRoot" asp-route-projectId="@projectId" class="btn btn-primary btn-sm ms-2">Create Folder</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Folders</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group folder-tree">
+                @foreach (var folder in Model)
+                {
+                    @await Html.PartialAsync("_FolderTree", folder)
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(toggle => {
+            toggle.addEventListener('click', function () {
+                const icon = this.querySelector('[data-toggle-icon]');
+                icon?.classList.toggle('collapsed');
+            });
+        });
+    });
+</script>

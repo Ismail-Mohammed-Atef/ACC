@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Title = "Upload Document";
+    var folderId = ViewBag.FolderId;
+    var projectId = ViewBag.ProjectId;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <h2>Upload Document</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Upload" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="folderId" value="@folderId" />
+        <input type="hidden" name="projectId" value="@projectId" />
+        <div class="mb-3">
+            <label for="file" class="form-label">Select File (PDF, DOCX, JPG, PNG, max 10MB)</label>
+            <input type="file" name="file" id="file" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+        <a asp-action="Folder" asp-route-id="@folderId" asp-route-projectId="@projectId" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
