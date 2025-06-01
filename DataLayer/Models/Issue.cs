@@ -14,6 +14,10 @@ namespace DataLayer.Models
         public Project Project { get; set; }
         public int? DocumentId { get; set; } // Foreign Key للـ Document
         public Document Document { get; set; } // Navigation Property
+        public string? InitiatorID { get; set; } 
+        public ApplicationUser Initiator { get; set; }
+
+        public List<IssueReviwers>? IssueReviwers { get; set; }
 
     }
 }

@@ -75,8 +75,24 @@ namespace DataLayer
            .HasForeignKey(i => i.DocumentId)
            .OnDelete(DeleteBehavior.SetNull);
 
-               // .HasForeignKey(pc => pc.CompanyId);         
-           
+            builder.Entity<IssueReviwers>()
+      .HasKey(w => new { w.ReviewerId, w.IssueId });
+
+            builder.Entity<IssueReviwers>()
+                .HasOne(rd => rd.Issue)
+                .WithMany(r => r.IssueReviwers)
+                .HasForeignKey(rd => rd.IssueId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<IssueReviwers>()
+                .HasOne(rd => rd.Reviewer)
+                .WithMany(d => d.IssueReviwers)
+                .HasForeignKey(rd => rd.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // .HasForeignKey(pc => pc.CompanyId);         
+
         }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Folder> Folders { get; set; }
@@ -89,6 +105,7 @@ namespace DataLayer
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
         public DbSet<Issue> Issues { get; set; }
         public DbSet<IfcFile> IfcFiles { get; set; }
+        public DbSet<IssueReviwers> IssueReviwers { get; set; }
 
 
     }
