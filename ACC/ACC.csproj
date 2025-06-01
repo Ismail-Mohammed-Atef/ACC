@@ -7,32 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="public\lib\web-ifc\helpers\**" />
-    <Compile Remove="public\lib\web-ifc\web-ifc\**" />
-    <Compile Remove="wwwroot\lib\dat.gui\**" />
-    <Compile Remove="wwwroot\lib\stats.js\**" />
-    <Content Remove="public\lib\web-ifc\helpers\**" />
-    <Content Remove="public\lib\web-ifc\web-ifc\**" />
-    <Content Remove="wwwroot\lib\dat.gui\**" />
-    <Content Remove="wwwroot\lib\stats.js\**" />
-    <EmbeddedResource Remove="public\lib\web-ifc\helpers\**" />
-    <EmbeddedResource Remove="public\lib\web-ifc\web-ifc\**" />
-    <EmbeddedResource Remove="wwwroot\lib\dat.gui\**" />
-    <EmbeddedResource Remove="wwwroot\lib\stats.js\**" />
-    <None Remove="public\lib\web-ifc\helpers\**" />
-    <None Remove="public\lib\web-ifc\web-ifc\**" />
-    <None Remove="wwwroot\lib\dat.gui\**" />
-    <None Remove="wwwroot\lib\stats.js\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EPPlus" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,10 +24,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\" />
-    <Folder Include="public\lib\web-ifc\" />
-    <Folder Include="wwwroot\ifc-files\" />
+    <Folder Include="Data\" />
+    <Folder Include="Models\" />
+    <Folder Include="wwwroot\css\" />
+    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\js\" />
+    <Folder Include="wwwroot\lib\bootstrap\" />
+    <Folder Include="wwwroot\lib\bootstrap\dist\js\" />
+    <Folder Include="wwwroot\lib\jquery-validation-unobtrusive\" />
+    <Folder Include="wwwroot\lib\jquery-validation\" />
+    <Folder Include="wwwroot\lib\jquery-validation\dist\" />
+    <Folder Include="wwwroot\lib\jquery\" />
+    <Folder Include="wwwroot\lib\jquery\dist\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

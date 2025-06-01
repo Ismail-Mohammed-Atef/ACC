@@ -16,5 +16,7 @@ namespace DataLayer.Models
         public string CreatedBy { get; set; }
         public List<Folder> SubFolders { get; set; }
         public List<Document> Documents { get; set; }
+
+        public List<ReviewFolder> ReviewFolders { get; set; } = new List<ReviewFolder>();
     }
 }

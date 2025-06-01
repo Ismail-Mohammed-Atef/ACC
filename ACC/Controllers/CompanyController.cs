@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using BusinessLogic.Repository.RepositoryClasses;
 using Microsoft.CodeAnalysis;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace ACC.Controllers
@@ -25,6 +26,10 @@ namespace ACC.Controllers
         }
 
         // GET: Company/Index
+
+
+
+        [Authorize]
         public IActionResult Index(int page = 1, int pageSize = 4)
         {
             var query = _companyRepository.GetAll();
