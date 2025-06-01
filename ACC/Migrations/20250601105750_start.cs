@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ACC.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDocument : Migration
+    public partial class start : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -68,6 +68,23 @@ namespace ACC.Migrations
                         column: x => x.FolderId,
                         principalTable: "Folders",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "IfcFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IfcFiles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -528,6 +545,9 @@ namespace ACC.Migrations
 
             migrationBuilder.DropTable(
                 name: "DocumentVersions");
+
+            migrationBuilder.DropTable(
+                name: "IfcFiles");
 
             migrationBuilder.DropTable(
                 name: "Issues");

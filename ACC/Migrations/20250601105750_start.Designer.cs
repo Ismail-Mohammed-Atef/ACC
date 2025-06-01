@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ACC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250528220943_AddDocument")]
-    partial class AddDocument
+    [Migration("20250601105750_start")]
+    partial class start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -268,6 +268,34 @@ namespace ACC.Migrations
                     b.HasIndex("FolderId");
 
                     b.ToTable("Folders");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.IfcFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UploadedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IfcFiles");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Issue", b =>

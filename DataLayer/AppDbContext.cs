@@ -71,11 +71,11 @@ namespace DataLayer
 
             builder.Entity<Issue>()
            .HasOne(i => i.Document)
-           .WithMany() 
+           .WithMany()
            .HasForeignKey(i => i.DocumentId)
            .OnDelete(DeleteBehavior.SetNull);
 
-                .HasForeignKey(pc => pc.CompanyId);         
+               // .HasForeignKey(pc => pc.CompanyId);         
            
         }
         public DbSet<Company> Companies { get; set; }
