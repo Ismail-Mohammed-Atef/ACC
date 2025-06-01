@@ -72,6 +72,9 @@ namespace DataLayer
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
+        public DbSet<Transmittal> Transmittals { get; set; }
+        public DbSet<TransmittalDocument> TransmittalDocuments { get; set; }
+
         public DbSet<IfcFile> IfcFiles { get; set; }
 
 

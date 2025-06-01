@@ -4,6 +4,7 @@ using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.IO;
 using System.Linq;
@@ -109,7 +110,6 @@ namespace ACC.Controllers.ProjectDetailsController
 
                     return View(initialFolders);
                 }
-
                 return View(folders);
             }
             catch (Exception ex)

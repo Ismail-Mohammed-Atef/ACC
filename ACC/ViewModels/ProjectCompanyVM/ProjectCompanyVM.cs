@@ -9,6 +9,7 @@ namespace ACC.ViewModels.ProjectCompanyVM
 
         public int? Id { get; set; }
 
+        [Remote(action: "CheckName", controller: "ProjectCompany", ErrorMessage = "Company is already existed.")]
         [Required(ErrorMessage = "Company name is required.")]
         [StringLength(100, ErrorMessage = "Company name cannot exceed 100 characters.")]
         public string? Name { get; set; }
@@ -19,6 +20,7 @@ namespace ACC.ViewModels.ProjectCompanyVM
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters.")]
         public string? Description { get; set; }
 
+        [Remote(action: "CheckWebsite", controller: "ProjectCompany", ErrorMessage = "Website is already existed.")]
         [Url(ErrorMessage = "Please enter a valid website URL.")]
         public string? Website { get; set; }
 
@@ -28,11 +30,16 @@ namespace ACC.ViewModels.ProjectCompanyVM
 
         [Required(ErrorMessage = "Company trade is required.")]
         public CompanyType? SelectedCompanyType { get; set; }
-        public List<CompanyType>? CompanyTypes { get; set; }
+
+        public List<CompanyType>? CompanyTypes { get; set; } = Enum.GetValues(typeof(CompanyType)).Cast<CompanyType>().ToList();
 
         [Required(ErrorMessage = "Country selection is required.")]
         public Country? SelectedCountry { get; set; }
-        public List<Country>? Countries { get; set; }
+
+        public List<Country>? Countries { get; set; } = Enum.GetValues<Country>().Cast<Country>().ToList();
+
+
+    
 
     }
 }

@@ -1,0 +1,45 @@
+﻿@model ACC.ViewModels.TransmittalsVM.TransmittalVM
+@{
+    ViewBag.Title = "Create Transmittal";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <h2>Create Transmittal</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Create" method="post">
+        <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="Title" value="@Model.Title" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Recipient</label>
+            <input type="text" name="Recipient" value="@Model.Recipient" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Documents</label>
+            @for (int i = 0; i < Model.AvailableDocumentVersions.Count; i++)
+            {
+                <div class="form-check">
+                    <input type="checkbox" name="DocumentVersionIds" value="@Model.AvailableDocumentVersions[i].Id" class="form-check-input" />
+                    <label class="form-check-label">@Model.AvailableDocumentVersions[i].Document.Name (v@Model.AvailableDocumentVersions[i].VersionNumber)</label>
+                    <input type="text" name="Notes" class="form-control mt-1" placeholder="Notes for this document" />
+                </div>
+            }
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a asp-action="Index" asp-route-Id="@Model.ProjectId" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
