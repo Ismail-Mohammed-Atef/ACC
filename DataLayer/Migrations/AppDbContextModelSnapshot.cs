@@ -149,7 +149,6 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.IfcFile", b =>
 
             modelBuilder.Entity("DataLayer.Models.Document", b =>
-
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -160,7 +159,7 @@ namespace DataLayer.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<string>("FilePath");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -178,7 +177,7 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-  
+
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProjectId")
@@ -198,7 +197,7 @@ namespace DataLayer.Migrations
                     b.HasIndex("FolderId");
 
                     b.ToTable("Documents");
-                });
+                }));
 
             modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
                 {
