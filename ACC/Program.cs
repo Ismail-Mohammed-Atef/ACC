@@ -1,13 +1,13 @@
-﻿using System.Text.Json.Serialization;
+using ACC.Services;
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
-using BusinessLogic.Services;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json.Serialization;
 
 namespace ACC
 {
@@ -16,34 +16,48 @@ namespace ACC
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            builder.Services.AddDbContext<AppDbContext>((options) =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+            builder.Services
+                .AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    options.Password.RequiredLength = 3;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                })
                 .AddEntityFrameworkStores<AppDbContext>();
 
-            builder.Services.AddControllers()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                });
 
+
+            #region Dependency injection
+            builder.Services.AddControllers().AddJsonOptions(options =>
+               {
+                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+               });
+
+          
             builder.Services.AddControllersWithViews();
+
 
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
             builder.Services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
-            builder.Services.AddSingleton<Helpers.FileHelper>();
-            builder.Services.AddScoped<IfcFileRepository>();
-            builder.Services.AddScoped<IfcFileService>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+            builder.Services.AddScoped<IWorkFlowStepRepository, WorkflowStepRepository>();
+            builder.Services.AddScoped<FolderService>();
+            builder.Services.AddScoped<ReviewFolderService>();
+            builder.Services.AddScoped<ReviewDocumentService>();
+            builder.Services.AddScoped<WorkflowStepsUsersService>();
+            builder.Services.AddScoped<ReviewStepUsersService>();
 
-            builder.Services.AddScoped<ITransmittalRepository, TransmittalRepository>();
-            builder.Services.AddScoped<IFolderRepository, FolderRepository>();
-            builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-            builder.Services.AddScoped<IDocumentVersionRepository, DocumentVersionRepository>();
+
+            #endregion
 
 
             var app = builder.Build();
@@ -54,108 +68,11 @@ namespace ACC
                 app.UseHsts();
             }
 
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings[".js"] = "application/javascript";
-            provider.Mappings[".mjs"] = "application/javascript";
-            provider.Mappings[".wasm"] = "application/wasm";
-            provider.Mappings[".ifc"] = "application/octet-stream";
-            provider.Mappings[".json"] = "application/json";
-            provider.Mappings[".bin"] = "application/octet-stream";
-            provider.Mappings[".dwg"] = "application/octet-stream";
-
-
-            // Serve normal static files from wwwroot/
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-                ContentTypeProvider = provider,
-                ServeUnknownFileTypes = true,
-                OnPrepareResponse = ctx =>
-                {
-                    var ext = Path.GetExtension(ctx.File.Name).ToLowerInvariant();
-
-                    if (ext == ".js" || ext == ".mjs")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/javascript";
-                    }
-                    else if (ext == ".wasm")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/wasm";
-                    }
-                    else if (ext == ".ifc")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/octet-stream";
-                    }
-
-                    ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-                    ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
-                }
-            });
-
-            // Serve static files from wwwroot/
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-                ContentTypeProvider = provider,
-                ServeUnknownFileTypes = true,
-                OnPrepareResponse = ctx =>
-                {
-                    var ext = Path.GetExtension(ctx.File.Name).ToLowerInvariant();
-
-                    if (ext == ".js" || ext == ".mjs")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/javascript";
-                    }
-                    else if (ext == ".wasm")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/wasm";
-                    }
-                    else if (ext == ".ifc")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/octet-stream";
-                    }
-
-                    ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-                    ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
-                }
-            });
-
-            // Serve static files from /dist
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist")),
-                RequestPath = "/dist",
-                ContentTypeProvider = provider,
-                ServeUnknownFileTypes = true,
-                OnPrepareResponse = ctx =>
-                {
-                    var ext = Path.GetExtension(ctx.File.Name).ToLowerInvariant();
-
-                    if (ext == ".js" || ext == ".mjs")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/javascript";
-                    }
-                    else if (ext == ".wasm")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/wasm";
-                    }
-                    else if (ext == ".ifc")
-                    {
-                        ctx.Context.Response.Headers["Content-Type"] = "application/octet-stream";
-                    }
-
-                    ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-                    ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000";
-                }
-            });
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseCookiePolicy();
 
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
