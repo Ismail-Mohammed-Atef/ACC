@@ -60,10 +60,18 @@
                 <ul class="list-group">
                     @foreach (var subfolder in Model.SubFolders)
                     {
-                        <li class="list-group-item">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
                             <a asp-action="Folder" asp-route-id="@subfolder.Id" asp-route-projectId="@projectId">
                                 <i class="bi bi-folder-fill me-2"></i>@subfolder.Name
                             </a>
+                            <span>
+                                @if (subfolder.SubFolders.Any())
+                                {
+                                    <span class="badge bg-secondary me-2">@subfolder.SubFolders.Count Subfolders</span>
+                                }
+                                
+                            </span>
+                            <a asp-action="DeleteFolder" asp-route-FolderId="@subfolder.Id" class="btn btn-danger">Delete</a>
                         </li>
                     }
                 </ul>

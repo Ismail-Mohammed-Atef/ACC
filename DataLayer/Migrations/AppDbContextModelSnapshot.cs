@@ -149,6 +149,7 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.Models.IfcFile", b =>
 
             modelBuilder.Entity("DataLayer.Models.Document", b =>
+
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

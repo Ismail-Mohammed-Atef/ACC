@@ -16,7 +16,7 @@ export default defineConfig({
                 entryFileNames: 'assets/viewer.js', 
                 chunkFileNames: 'assets/[name].js',
                 assetFileNames: 'assets/[name].[ext]'
-            },
+    },
         },
         chunkSizeWarningLimit: 2000,
      

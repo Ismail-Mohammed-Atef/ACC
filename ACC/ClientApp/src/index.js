@@ -188,7 +188,7 @@ window.addEventListener("keydown", (event) => {
   if (event.code === "Escape" && faceDimensions.enabled) {
     savedFaces = faceDimensions.get();
     faceDimensions.deleteAll();
-  }
+    }
 });
 
 
@@ -212,7 +212,7 @@ VolumeBtn?.addEventListener("click", () => {
 
     volumeOnClearHandler = () => {
       volumeDimensions.clear();
-    };
+};
 
     // Attach handlers
     highLighter.events.select.onHighlight.add(volumeOnHighlightHandler);
@@ -476,7 +476,7 @@ async function ifcloader(ifcloaderFragment, world) {
     panelSection.append(exitButton);
   };
   input.click();
-}
+    }
 
 
 
@@ -493,7 +493,7 @@ const panel2 = BUI.Component.create(() => {
               alert("First person is not compatible with ortho!");
               target.value[0] = world.camera.mode.id;
               return;
-            }
+}
             world.camera.set(selected);
           }}">
           <bim-option checked label="Orbit"></bim-option>
@@ -510,7 +510,7 @@ const panel2 = BUI.Component.create(() => {
               alert("First person is not compatible with ortho!");
               target.value[0] = world.camera.projection.current;
               return;
-            }
+}
             world.camera.projection.set(selected);
           }}">
           <bim-option checked label="Perspective"></bim-option>

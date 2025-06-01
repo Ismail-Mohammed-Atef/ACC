@@ -103,23 +103,23 @@
         <div class="tooltip">
             <button id="SectionBtn" class="bar_btn">
                 <iconify-icon icon="icon-park-solid:cutting-one" width="24" height="24"></iconify-icon>
-            </button>
+        </button>
             <span class="tooltiptext">Toggle Section Cut</span>
-        </div>
+    </div>
 
         <div class="tooltip">
             <button id="LengthBtn" class="bar_btn">
                 <iconify-icon icon="lets-icons:line-in" width="24" height="24"></iconify-icon>
             </button>
             <span class="tooltiptext">Measure Lengths</span>
-        </div>
+    </div>
 
         <div class="tooltip">
             <button id="AreaBtn" class="bar_btn">
                 <iconify-icon icon="material-symbols:area-chart-rounded" width="24" height="24"></iconify-icon>
             </button>
             <span class="tooltiptext">Measure Area (Double Click + Right Click)</span>
-        </div>
+</div>
 
         <div class="tooltip">
             <button id="EdgeBtn" class="bar_btn">
@@ -144,4 +144,11 @@
     </div>
 </div>
     <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
-    
+
+        const fileId = @Model.FileId;
+        if (fileId > 0) {
+            const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
+            window.loadIfcFile(url);
+        }
+    </script>
+}
