@@ -154,6 +154,11 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -180,7 +185,7 @@ namespace DataLayer.Migrations
                     b.HasIndex("FolderId");
 
                     b.ToTable("Documents");
-                });
+                }));
 
             modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
                 {
