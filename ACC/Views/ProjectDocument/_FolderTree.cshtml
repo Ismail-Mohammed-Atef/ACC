@@ -51,6 +51,12 @@
                 </a>
             </li>
             <li>
+                <a class="dropdown-item"
+                   href="@Url.Action("Upload", "ProjectDocument", new { folderId = Model.Id, projectId = ViewBag.ProjectId })">
+                    Add To Review
+                </a>
+            </li>
+            <li>    
                 <button type="button"
                         class="dropdown-item delete-folder-btn"
                         data-folder-id="@Model.Id"
