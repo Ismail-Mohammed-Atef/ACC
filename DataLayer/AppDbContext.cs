@@ -44,7 +44,7 @@ namespace DataLayer
                 .HasForeignKey(pm => pm.MemberId);
 
 
-            ///////////////// ProjectCompany////////////////////////////////////////////
+           
 
             builder.Entity<ProjectCompany>()
         .HasKey(pc => new { pc.ProjectId, pc.CompanyId }); // Composite Key
@@ -59,7 +59,7 @@ namespace DataLayer
                 .WithMany(c => c.ProjectCompany)
                 .HasForeignKey(pc => pc.CompanyId);
 
-<<<<<<< HEAD
+
             builder.Entity<Review>()
               .HasOne(wf => wf.WorkflowTemplate)
               .WithMany(u => u.Reviews)
@@ -132,7 +132,7 @@ namespace DataLayer
                 .OnDelete(DeleteBehavior.Restrict);
 
 
-=======
+
   /// issue
             builder.Entity<Issue>()
                 .HasOne(i => i.Project)
@@ -161,8 +161,7 @@ namespace DataLayer
                 .HasForeignKey(rd => rd.ReviewerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // .HasForeignKey(pc => pc.CompanyId);         
->>>>>>> ibrahim-isuue
+                 
 
         }
 
@@ -177,7 +176,7 @@ namespace DataLayer
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
         public DbSet<Issue> Issues { get; set; }
         public DbSet<IfcFile> IfcFiles { get; set; }
-<<<<<<< HEAD
+
         public DbSet<Transmittal> Transmittals { get; set; }
         public DbSet<TransmittalDocument> TransmittalDocuments { get; set; }
 
@@ -191,9 +190,9 @@ namespace DataLayer
 
 
 
-=======
+
         public DbSet<IssueReviwers> IssueReviwers { get; set; }
->>>>>>> ibrahim-isuue
+
 
 
     }

@@ -1,40 +1,41 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BusinessLogic.Repository.RepositoryInterfaces;
-using DataLayer.Models;
+﻿using ACC.Services;
 using ACC.ViewModels;
-using Microsoft.EntityFrameworkCore;
+using BusinessLogic.Repository.RepositoryClasses;
+using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
+using DataLayer.Models;
 using Microsoft.AspNetCore.Hosting;
-using System.IO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ACC.Controllers
 {
     public class ProjectIssueController : Controller
     {
-        private readonly IIssueService _issueService;
+        private readonly IIssueRepository issueRepository;
+        private readonly IssueReviewersService issueReviewersService;
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public ProjectIssueController(IIssueService issueService, AppDbContext context, IWebHostEnvironment env)
+        public ProjectIssueController(IIssueRepository issueRepository, IssueReviewersService issueReviewersService, AppDbContext context, IWebHostEnvironment env , UserManager<ApplicationUser> userManager)
         {
-            _issueService = issueService;
+            this.issueRepository = issueRepository;
+            this.issueReviewersService = issueReviewersService;
             _context = context;
             _env = env;
+            this.userManager = userManager;
         }
 
-        public IActionResult Index(int? projectId)
+        public async Task <IActionResult> Index(int id)
         {
-            List<Issue> issues;
-            if (projectId.HasValue)
-            {
-                issues = _issueService.GetIssuesByProjectId(projectId.Value);
-            }
-            else
-            {
-                issues = _issueService.GetAllIssues();
-            }
+            var CurrentUser = await userManager.GetUserAsync(User);
+            List<Issue> issues = issueRepository.GetIssuesByUserId(CurrentUser.Id, id);
+           
             var issueViewModels = issues.Select(i => new ProjectIssueVM
             {
                 Id = i.Id,
@@ -47,19 +48,24 @@ namespace ACC.Controllers
                 ProjectId = i.ProjectId,
                 DocumentId = i.DocumentId
             }).ToList();
+
+            ViewBag.Id = id;
             return View(issueViewModels);
         }
 
         public IActionResult Create()
         {
-            return View();
+            ProjectIssueVM vm = new ProjectIssueVM();
+            vm.applicationUsers =  userManager.Users.ToList();
+            return View("Create" , vm);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(ProjectIssueVM model)
         {
-            if (ModelState.IsValid)
-            {
+            var CurrentUser = await userManager.GetUserAsync(User);
+
+            
                 var issue = new Issue
                 {
                     Title = model.Title,
@@ -68,9 +74,29 @@ namespace ACC.Controllers
                     Type = model.Type,
                     Priority = model.Priority,
                     Status = model.Status,
-                    ProjectId = model.ProjectId
+                    ProjectId = model.ProjectId,
+                    InitiatorID = CurrentUser.Id,
+                    
                 };
-                _issueService.CreateIssue(issue);
+                issueRepository.Insert(issue);
+                issueRepository.Save();
+                
+
+                
+
+                foreach (var id in model.SelectedReviewerIds)
+                {
+                    IssueReviwers issueReviwers = new IssueReviwers()
+                    {
+                        IssueId = issue.Id,
+                        ReviewerId = id,
+                    };
+
+                    issueReviewersService.Insert(issueReviwers ); 
+
+
+                }
+                issueReviewersService.Save();
 
                 if (model.Attachment != null && model.Attachment.Length > 0)
                 {
@@ -160,17 +186,35 @@ namespace ACC.Controllers
                     await _context.SaveChangesAsync();
 
                     issue.DocumentId = document.Id;
-                    _issueService.UpdateIssue(issue);
-                }
 
-                return RedirectToAction("Index");
+                    var existingIssue = issueRepository.GetById(issue.Id);
+                    if (existingIssue == null)
+                        throw new Exception("Issue not found.");
+                  
+                  
+                    existingIssue.Title = issue.Title;
+                    existingIssue.Description = issue.Description;
+                    existingIssue.Category = issue.Category;
+                    existingIssue.Type = issue.Type;
+                    existingIssue.Priority = issue.Priority;
+                    existingIssue.Status = issue.Status;
+                    existingIssue.ProjectId = issue.ProjectId;
+                    existingIssue.DocumentId = issue.DocumentId;
+                  
+                    issueRepository.Update(existingIssue);
+
+
+
             }
-            return View(model);
+
+                return RedirectToAction("Index" , new {id = model.ProjectId });
+            
+            
         }
 
         public IActionResult Edit(int id)
         {
-            var issue = _issueService.GetIssueById(id);
+            var issue = issueRepository.GetById(id);
             if (issue == null)
             {
                 return NotFound();
@@ -186,7 +230,7 @@ namespace ACC.Controllers
                 Priority = issue.Priority,
                 Status = issue.Status,
                 ProjectId = issue.ProjectId,
-                DocumentId = issue.DocumentId // جلب الـ DocumentId الحالي
+                DocumentId = issue.DocumentId 
             };
             return View(model);
         }
@@ -194,8 +238,7 @@ namespace ACC.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(ProjectIssueVM model)
         {
-            if (ModelState.IsValid)
-            {
+            
                 var issue = new Issue
                 {
                     Id = model.Id,
@@ -209,7 +252,7 @@ namespace ACC.Controllers
                     DocumentId = model.DocumentId // الـ DocumentId الحالي
                 };
 
-                // التعامل مع الـ Attachment الجديد
+                
                 if (model.Attachment != null && model.Attachment.Length > 0)
                 {
                     int projectId = model.ProjectId;
@@ -300,16 +343,32 @@ namespace ACC.Controllers
                     issue.DocumentId = document.Id; 
                 }
 
-                _issueService.UpdateIssue(issue);
-                return RedirectToAction("Index");
-            }
+                var existingIssue = issueRepository.GetById(issue.Id);
+                if (existingIssue == null)
+                    throw new Exception("Issue not found.");
+               
+               
+                existingIssue.Title = issue.Title;
+                existingIssue.Description = issue.Description;
+                existingIssue.Category = issue.Category;
+                existingIssue.Type = issue.Type;
+                existingIssue.Priority = issue.Priority;
+                existingIssue.Status = issue.Status;
+                existingIssue.ProjectId = issue.ProjectId;
+                existingIssue.DocumentId = issue.DocumentId;
+               
+                issueRepository.Update(existingIssue);
+            issueRepository.Save();
+                return RedirectToAction("Index" , new {id = issue.ProjectId});
+            
             return View(model);
         }
 
         public IActionResult Delete(int id)
         {
-            _issueService.DeleteIssue(id);
-            return RedirectToAction("Index");
+            var issue =  issueRepository.GetById(id);
+            issueRepository.Delete(issue);
+            return RedirectToAction("Index", new { id = issue.ProjectId });
         }
     }
 }

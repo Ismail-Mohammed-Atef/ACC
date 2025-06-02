@@ -44,5 +44,14 @@
         <input asp-for="Attachment" type="file" class="form-control" />
         <span asp-validation-for="Attachment" class="text-danger"></span>
     </div>
+    <div class="form-group">
+       <label class="form-label">Reviewers</label>
+        <select asp-for="SelectedReviewerIds" class="form-control" multiple>
+           @foreach (var user in Model.applicationUsers)
+           {
+               <option value="@user.Id">@user.UserName</option>
+           }
+       </select>
+    </div>
     <button type="submit" class="btn btn-primary">Create</button>
 </form>

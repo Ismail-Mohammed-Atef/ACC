@@ -1,4 +1,5 @@
-﻿using DataLayer.Models.Enums;
+﻿using DataLayer.Models;
+using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Http;
 namespace ACC.ViewModels
 {
@@ -14,6 +15,12 @@ namespace ACC.ViewModels
         public int ProjectId { get; set; }
         public IFormFile Attachment { get; set; }
         public int? DocumentId { get; set; }
+
+        public string InitiatorId { get; set; }
+
+        public List<ApplicationUser>? applicationUsers { get; set; }
+        public List<string>? SelectedReviewerIds { get; set; } 
+
 
     }
 }

@@ -7,13 +7,10 @@ using DataLayer.Models;
 
 namespace BusinessLogic.Repository.RepositoryInterfaces
 {
-    public interface IIssueRepository
+    public interface IIssueRepository : IGenericRepository<Issue>
     {
-        void Add(Issue issue);
-        Issue GetById(int id);
-        void Update(Issue issue);
-        void Delete(int id);
-        List<Issue> GetAll();
-        List<Issue> GetIssuesByProjectId(int projectId);
+
+        List<Issue> GetIssuesByUserId(string userID, int projectId);
+
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace ACC.Migrations
+namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -181,12 +181,9 @@ namespace ACC.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-<<<<<<< HEAD:DataLayer/Migrations/AppDbContextModelSnapshot.cs
-=======
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
->>>>>>> ibrahim-isuue:ACC/Migrations/AppDbContextModelSnapshot.cs
                     b.HasKey("Id");
 
                     b.HasIndex("FolderId");
@@ -296,8 +293,6 @@ namespace ACC.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("IfcFiles");
-<<<<<<< HEAD:DataLayer/Migrations/AppDbContextModelSnapshot.cs
-=======
                 });
 
             modelBuilder.Entity("DataLayer.Models.Issue", b =>
@@ -320,6 +315,9 @@ namespace ACC.Migrations
 
                     b.Property<int?>("DocumentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("InitiatorID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
@@ -344,10 +342,29 @@ namespace ACC.Migrations
 
                     b.HasIndex("DocumentId");
 
+                    b.HasIndex("InitiatorID");
+
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Issues");
->>>>>>> ibrahim-isuue:ACC/Migrations/AppDbContextModelSnapshot.cs
+                });
+
+            modelBuilder.Entity("DataLayer.Models.IssueReviwers", b =>
+                {
+                    b.Property<string>("ReviewerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("IssueId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ReviewerId", "IssueId");
+
+                    b.HasIndex("IssueId");
+
+                    b.ToTable("IssueReviwers");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
@@ -507,6 +524,9 @@ namespace ACC.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("WorkflowTemplateId")
                         .HasColumnType("int");
 
@@ -640,6 +660,9 @@ namespace ACC.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.ToTable("Transmittals");
@@ -653,6 +676,9 @@ namespace ACC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("DocumentVersionId")
                         .HasColumnType("int");
 
@@ -662,6 +688,9 @@ namespace ACC.Migrations
 
                     b.Property<int>("TransmittalId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -683,6 +712,9 @@ namespace ACC.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("MinReviewers")
                         .HasColumnType("int");
 
@@ -697,6 +729,9 @@ namespace ACC.Migrations
 
                     b.Property<int>("TimeAllowed")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("WorkflowTemplateId")
                         .HasColumnType("int");
@@ -736,6 +771,9 @@ namespace ACC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -746,6 +784,9 @@ namespace ACC.Migrations
 
                     b.Property<int>("StepCount")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -934,6 +975,10 @@ namespace ACC.Migrations
                         .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("DataLayer.Models.ApplicationUser", "Initiator")
+                        .WithMany()
+                        .HasForeignKey("InitiatorID");
+
                     b.HasOne("DataLayer.Models.Project", "Project")
                         .WithMany("Issues")
                         .HasForeignKey("ProjectId")
@@ -942,7 +987,28 @@ namespace ACC.Migrations
 
                     b.Navigation("Document");
 
+                    b.Navigation("Initiator");
+
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.IssueReviwers", b =>
+                {
+                    b.HasOne("DataLayer.Models.Issue", "Issue")
+                        .WithMany("IssueReviwers")
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.ApplicationUser", "Reviewer")
+                        .WithMany("IssueReviwers")
+                        .HasForeignKey("ReviewerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Issue");
+
+                    b.Navigation("Reviewer");
                 });
 
             modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
@@ -1188,6 +1254,8 @@ namespace ACC.Migrations
 
             modelBuilder.Entity("DataLayer.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("IssueReviwers");
+
                     b.Navigation("Projects");
 
                     b.Navigation("ReviewStepUsers");
@@ -1216,6 +1284,11 @@ namespace ACC.Migrations
                     b.Navigation("ReviewFolders");
 
                     b.Navigation("SubFolders");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.Issue", b =>
+                {
+                    b.Navigation("IssueReviwers");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>

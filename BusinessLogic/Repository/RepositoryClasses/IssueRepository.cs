@@ -5,53 +5,22 @@ using BusinessLogic.Repository.RepositoryInterfaces;
 
 namespace BusinessLogic.Repository.RepositoryClasses
 {
-    public class IssueRepository : IIssueRepository
+    public class IssueRepository :GenericRepository<Issue> , IIssueRepository
     {
         private readonly AppDbContext _context;
 
-        public IssueRepository(AppDbContext context)
+        public IssueRepository(AppDbContext context) : base(context) 
         {
             _context = context;
         }
 
-        public void Add(Issue issue)
+
+
+        public List<Issue> GetIssuesByUserId(string userID , int projectId)
         {
-            issue.CreatedAt = DateTime.Now;
-            issue.UpdatedAt = DateTime.Now;
-            _context.Issues.Add(issue);
-            _context.SaveChanges();
+            return _context.Issues.Include(i=>i.IssueReviwers).Include(i => i.Document).Where(i => (i.InitiatorID== userID || i.IssueReviwers.Any(r=>r.ReviewerId == userID)) && i.ProjectId == projectId).ToList();
         }
 
-        public Issue GetById(int id)
-        {
-            return _context.Issues.Find(id);
-        }
-
-        public void Update(Issue issue)
-        {
-            issue.UpdatedAt = DateTime.Now;
-            _context.Issues.Update(issue);
-            _context.SaveChanges();
-        }
-
-        public void Delete(int id)
-        {
-            var issue = _context.Issues.Find(id);
-            if (issue != null)
-            {
-                _context.Issues.Remove(issue);
-                _context.SaveChanges();
-            }
-        }
-
-        public List<Issue> GetAll()
-        {
-            return _context.Issues.Include(i => i.Document).ToList();
-        }
-
-        public List<Issue> GetIssuesByProjectId(int projectId)
-        {
-            return _context.Issues.Include(i => i.Document).Where(i => i.ProjectId == projectId).ToList();
-        }
+      
     }
 }

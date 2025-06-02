@@ -3,14 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ACC.Migrations
+namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-    public partial class init444 : Migration
-========
-    public partial class start : Migration
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,12 +57,8 @@ namespace ACC.Migrations
                     ProjectId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-                    FolderId = table.Column<int>(type: "int", nullable: true)
-========
                     FolderId = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
                 },
                 constraints: table =>
                 {
@@ -144,7 +136,8 @@ namespace ACC.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Recipient = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Recipient = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -159,7 +152,9 @@ namespace ACC.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StepCount = table.Column<int>(type: "int", nullable: false)
+                    StepCount = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -198,12 +193,8 @@ namespace ACC.Migrations
                     FolderId = table.Column<int>(type: "int", nullable: false),
                     ProjectId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false)
-========
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
                 },
                 constraints: table =>
                 {
@@ -318,13 +309,9 @@ namespace ACC.Migrations
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-                    VersionNumber = table.Column<int>(type: "int", nullable: false)
-========
                     VersionNumber = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
                 },
                 constraints: table =>
                 {
@@ -338,43 +325,6 @@ namespace ACC.Migrations
                 });
 
             migrationBuilder.CreateTable(
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-========
-                name: "Issues",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    Priority = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    ProjectId = table.Column<int>(type: "int", nullable: false),
-                    DocumentId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Issues", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Issues_Documents_DocumentId",
-                        column: x => x.DocumentId,
-                        principalTable: "Documents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_Issues_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -460,6 +410,46 @@ namespace ACC.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Issues",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    DocumentId = table.Column<int>(type: "int", nullable: true),
+                    InitiatorID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Issues", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Issues_AspNetUsers_InitiatorID",
+                        column: x => x.InitiatorID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Issues_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Issues_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProjectMembers",
                 columns: table => new
                 {
@@ -498,7 +488,9 @@ namespace ACC.Migrations
                     ReviewersType = table.Column<int>(type: "int", nullable: true),
                     MinReviewers = table.Column<int>(type: "int", nullable: true),
                     MultiReviewerOptions = table.Column<int>(type: "int", nullable: true),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -524,7 +516,9 @@ namespace ACC.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TransmittalId = table.Column<int>(type: "int", nullable: false),
                     DocumentVersionId = table.Column<int>(type: "int", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -544,6 +538,31 @@ namespace ACC.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IssueReviwers",
+                columns: table => new
+                {
+                    IssueId = table.Column<int>(type: "int", nullable: false),
+                    ReviewerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IssueReviwers", x => new { x.ReviewerId, x.IssueId });
+                    table.ForeignKey(
+                        name: "FK_IssueReviwers_AspNetUsers_ReviewerId",
+                        column: x => x.ReviewerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_IssueReviwers_Issues_IssueId",
+                        column: x => x.IssueId,
+                        principalTable: "Issues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
@@ -554,7 +573,8 @@ namespace ACC.Migrations
                     InitiatorUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CurrentStepId = table.Column<int>(type: "int", nullable: true),
                     FinalReviewStatus = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -752,8 +772,11 @@ namespace ACC.Migrations
                 name: "IX_Folders_FolderId",
                 table: "Folders",
                 column: "FolderId");
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-========
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IssueReviwers_IssueId",
+                table: "IssueReviwers",
+                column: "IssueId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Issues_DocumentId",
@@ -761,10 +784,14 @@ namespace ACC.Migrations
                 column: "DocumentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Issues_InitiatorID",
+                table: "Issues",
+                column: "InitiatorID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Issues_ProjectId",
                 table: "Issues",
                 column: "ProjectId");
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectActivities_projectId",
@@ -861,17 +888,10 @@ namespace ACC.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-                name: "IfcFiles");
-========
-                name: "DocumentVersions");
-
-            migrationBuilder.DropTable(
                 name: "IfcFiles");
 
             migrationBuilder.DropTable(
-                name: "Issues");
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
+                name: "IssueReviwers");
 
             migrationBuilder.DropTable(
                 name: "ProjectActivities");
@@ -901,8 +921,7 @@ namespace ACC.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-<<<<<<<< HEAD:ACC/Migrations/20250601152536_init444.cs
-                name: "Projects");
+                name: "Issues");
 
             migrationBuilder.DropTable(
                 name: "Reviews");
@@ -914,11 +933,12 @@ namespace ACC.Migrations
                 name: "Transmittals");
 
             migrationBuilder.DropTable(
+                name: "Projects");
+
+            migrationBuilder.DropTable(
                 name: "WorkflowStepTemplates");
 
             migrationBuilder.DropTable(
-========
->>>>>>>> ibrahim-isuue:ACC/Migrations/20250601105750_start.cs
                 name: "Documents");
 
             migrationBuilder.DropTable(
@@ -926,9 +946,6 @@ namespace ACC.Migrations
 
             migrationBuilder.DropTable(
                 name: "WorkflowTemplates");
-
-            migrationBuilder.DropTable(
-                name: "Folders");
 
             migrationBuilder.DropTable(
                 name: "Folders");
