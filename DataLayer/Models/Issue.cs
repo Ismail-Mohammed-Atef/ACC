@@ -18,7 +18,6 @@ namespace DataLayer.Models
         public Document Document { get; set; } // Navigation Property
         public string? InitiatorID { get; set; } 
         public ApplicationUser Initiator { get; set; }
-
         public List<IssueReviwers>? IssueReviwers { get; set; }
 
     }
