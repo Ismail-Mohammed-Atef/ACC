@@ -44,7 +44,7 @@ namespace DataLayer
                 .HasForeignKey(pm => pm.MemberId);
 
 
-            ///////////////// ProjectCompany////////////////////////////////////////////
+           
 
             builder.Entity<ProjectCompany>()
         .HasKey(pc => new { pc.ProjectId, pc.CompanyId }); // Composite Key
@@ -58,6 +58,7 @@ namespace DataLayer
                 .HasOne(pc => pc.Company)
                 .WithMany(c => c.ProjectCompany)
                 .HasForeignKey(pc => pc.CompanyId);
+
 
             builder.Entity<Review>()
               .HasOne(wf => wf.WorkflowTemplate)
@@ -132,6 +133,36 @@ namespace DataLayer
 
 
 
+  /// issue
+            builder.Entity<Issue>()
+                .HasOne(i => i.Project)
+                .WithMany(p => p.Issues)
+                .HasForeignKey(i => i.ProjectId);
+
+            builder.Entity<Issue>()
+           .HasOne(i => i.Document)
+           .WithMany()
+           .HasForeignKey(i => i.DocumentId)
+           .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<IssueReviwers>()
+      .HasKey(w => new { w.ReviewerId, w.IssueId });
+
+            builder.Entity<IssueReviwers>()
+                .HasOne(rd => rd.Issue)
+                .WithMany(r => r.IssueReviwers)
+                .HasForeignKey(rd => rd.IssueId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<IssueReviwers>()
+                .HasOne(rd => rd.Reviewer)
+                .WithMany(d => d.IssueReviwers)
+                .HasForeignKey(rd => rd.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                 
+
         }
 
         public DbSet<Company> Companies { get; set; }
@@ -143,7 +174,9 @@ namespace DataLayer
         public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
+        public DbSet<Issue> Issues { get; set; }
         public DbSet<IfcFile> IfcFiles { get; set; }
+
         public DbSet<Transmittal> Transmittals { get; set; }
         public DbSet<TransmittalDocument> TransmittalDocuments { get; set; }
 
@@ -156,6 +189,9 @@ namespace DataLayer
         public DbSet<WorkflowStepUser> WorkflowStepUsers { get; set; }
 
 
+
+
+        public DbSet<IssueReviwers> IssueReviwers { get; set; }
 
 
 

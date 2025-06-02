@@ -3,6 +3,10 @@
     ViewBag.Title = "Project Folders";
     var projectId = ViewBag.ProjectId;
 }
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
 <style>
     .folder-tree {
         list-style: none;
@@ -11,7 +15,7 @@
 
         .folder-tree .list-group-item {
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.3rem 0.5rem;
             background-color: transparent;
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
@@ -50,12 +54,24 @@
         font-weight: 500;
         color: #333;
     }
+
+    .folder-clickable {
+        user-select: none;
+    }
+
+        .folder-clickable:hover {
+            text-decoration: underline;
+        }
+
+    .document-item {
+        user-select: none;
+    }
+
+        .document-item:hover {
+            background-color: #f0f0f0;
+        }
+
 </style>
-
-
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 <div class="container mt-4">
     <h2>Project Folders</h2>
@@ -77,32 +93,311 @@
 
     <div class="alert alert-info">
         Create New Folder.
-        <a asp-action="CreateRoot" asp-route-projectId="@projectId" class="btn btn-primary btn-sm ms-2">Create Folder</a>
+        <button class="btn btn-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#createRootFolderModal">Create Folder</button>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h5>Folders</h5>
+    <div class="row" style="min-height: 500px;">
+        <!-- Left Tree pane -->
+        <div class="col-md-4 border-end" style="overflow-y:auto; max-height: 600px;">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Folders</h5>
+                </div>
+                <div class="card-body p-2">
+                    <ul class="list-group folder-tree">
+                        @foreach (var folder in Model)
+                        {
+                            @await Html.PartialAsync("_FolderTree", folder)
+                        }
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <ul class="list-group folder-tree">
-                @foreach (var folder in Model)
-                {
-                    @await Html.PartialAsync("_FolderTree", folder)
-                }
-            </ul>
+
+        <!-- Right Content pane -->
+        <div class="col-md-8" id="folderContent" style="overflow-y:auto; max-height: 600px;">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Folder Details</h5>
+                </div>
+                <div class="card-body">
+                    <p>Select a folder or document to see details.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Add Subfolder Modal -->
+<div class="modal fade" id="addSubfolderModal" tabindex="-1" aria-labelledby="addSubfolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addSubfolderForm" method="post" asp-action="CreateFolder" asp-controller="ProjectDocument">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSubfolderModalLabel">Add Subfolder</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="parentFolderId" id="parentFolderId" />
+                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Folder Name</label>
+                        <input type="text" class="form-control" id="folderName" name="folderName" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Folder</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Root Folder Modal -->
+<div class="modal fade" id="createRootFolderModal" tabindex="-1" aria-labelledby="createRootFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="CreateRoot" asp-controller="ProjectDocument">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRootFolderModalLabel">Create Root Folder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="projectId" value="@projectId" />
+                    <div class="mb-3">
+                        <label for="rootFolderName" class="form-label">Folder Name</label>
+                        <input type="text" class="form-control" id="rootFolderName" name="folderName" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Folder</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Folder Modal -->
+<div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="DeleteFolder" asp-controller="ProjectDocument">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFolderModalLabel">Delete Folder</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="folderId" id="deleteFolderId" />
+                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
+                    <p>Are you sure you want to delete the folder: <strong id="deleteFolderName"></strong>?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="moveCopyModal" tabindex="-1" aria-labelledby="moveCopyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="moveCopyForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="moveCopyModalLabel">Select Folder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="actionType" name="actionType" />
+                    <input type="hidden" id="documentId" name="documentId" />
+                    <div class="mb-3">
+                        <label for="targetFolderId" class="form-label">Target Folder</label>
+                        <select class="form-select" id="targetFolderId" name="targetFolderId" required>
+                            <option disabled selected value="">-- Select Folder --</option>
+                            @* Render folders list *@
+                            @foreach (var folder in ViewBag.AllFolders as List<DataLayer.Models.Folder>)
+                            {
+                                <option value="@folder.Id">@folder.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(toggle => {
-            toggle.addEventListener('click', function () {
-                const icon = this.querySelector('[data-toggle-icon]');
-                icon?.classList.toggle('collapsed');
+        // Toggle arrow rotation for collapse
+        document.querySelectorAll('.toggle-arrow').forEach(arrow => {
+            arrow.addEventListener('click', function () {
+                this.classList.toggle('collapsed');
+            });
+        });
+
+        // Folder tree click handler for folder details, documents, add subfolder, and delete folder
+        document.querySelector('.folder-tree').addEventListener('click', function (e) {
+            // Handle folder click
+            const folderTarget = e.target.closest('.folder-clickable');
+            if (folderTarget) {
+                e.preventDefault();
+                e.stopPropagation();
+                const folderId = folderTarget.getAttribute('data-folder-id');
+                if (!folderId) return;
+
+                const contentDiv = document.getElementById('folderContent');
+                contentDiv.innerHTML = `<div class="card"><div class="card-body">Loading...</div></div>`;
+
+                fetch(`/ProjectDocument/GetFolderDetails/${folderId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network error');
+                        return response.text();
+                    })
+                    .then(html => {
+                        contentDiv.innerHTML = html;
+                    })
+                    .catch(err => {
+                        contentDiv.innerHTML = `<div class="alert alert-danger">Failed to load folder data: ${err.message}</div>`;
+                    });
+            }
+
+            // Handle document click
+            const documentItem = e.target.closest('.document-item');
+            if (documentItem) {
+                e.preventDefault();
+                e.stopPropagation();
+                const documentId = documentItem.getAttribute('data-document-id');
+                if (!documentId) return;
+
+                const contentDiv = document.getElementById('folderContent');
+                contentDiv.innerHTML = `<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>`;
+
+                fetch(`/ProjectDocument/GetDocumentDetails/${documentId}`)
+                    .then(res => res.ok ? res.text() : Promise.reject('Failed to load'))
+                    .then(html => contentDiv.innerHTML = html)
+                    .catch(err => contentDiv.innerHTML = `<div class="alert alert-danger">Error loading document details</div>`);
+            }
+
+            // Handle add subfolder button
+            const subfolderBtn = e.target.closest('.add-subfolder');
+            if (subfolderBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const folderId = subfolderBtn.getAttribute('data-folder-id');
+                document.getElementById('parentFolderId').value = folderId;
+                document.getElementById('folderName').value = '';
+                const addModal = new bootstrap.Modal(document.getElementById('addSubfolderModal'), {
+                    backdrop: true,
+                    keyboard: true
+                });
+                addModal.show();
+            }
+
+            // Handle delete folder button
+            const deleteBtn = e.target.closest('.delete-folder-btn');
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const folderId = deleteBtn.getAttribute('data-folder-id');
+                const folderName = deleteBtn.getAttribute('data-folder-name');
+                document.getElementById('deleteFolderId').value = folderId;
+                document.getElementById('deleteFolderName').textContent = folderName;
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteFolderModal'), {
+                    backdrop: true,
+                    keyboard: true
+                });
+                deleteModal.show();
+            }
+        });
+
+        // Fallback for all modal close/cancel buttons
+        document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const modalElement = this.closest('.modal');
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                }
             });
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let selectedDocumentId = null;
+        let selectedAction = null;
+
+        function openModal(docId, action) {
+            selectedDocumentId = docId;
+            selectedAction = action;
+            document.getElementById("documentId").value = docId;
+            document.getElementById("actionType").value = action;
+            document.getElementById("targetFolderId").value = ""; // reset
+
+            const modal = new bootstrap.Modal(document.getElementById('moveCopyModal'));
+            modal.show();
+        }
+
+        document.querySelectorAll('.move-document').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const docId = this.dataset.documentId;
+                openModal(docId, 'move');
+            });
+        });
+
+        document.querySelectorAll('.copy-document').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                const docId = this.dataset.documentId;
+                openModal(docId, 'copy');
+            });
+        });
+
+        // Handle form submit
+        document.getElementById('moveCopyForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const data = {
+                documentId: document.getElementById("documentId").value,
+                targetFolderId: document.getElementById("targetFolderId").value,
+                actionType: document.getElementById("actionType").value
+            };
+            console.log(data);
+            fetch('/ProjectDocument/MoveOrCopyDocument', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.ok ? res.json() : Promise.reject())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert("Failed to perform the operation.");
+                    }
+                })
+                .catch(() => alert("Error processing request."));
+        });
+    });
+
 </script>

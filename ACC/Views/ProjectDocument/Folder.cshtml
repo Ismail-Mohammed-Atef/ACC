@@ -50,62 +50,17 @@
         </div>
     </div>
 
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-header">
-            <h5>Subfolders</h5>
+            <h5>Contents</h5>
         </div>
         <div class="card-body">
-            @if (Model.SubFolders.Any())
-            {
-                <ul class="list-group">
-                    @foreach (var subfolder in Model.SubFolders)
-                    {
-                        <li class="list-group-item">
-                            <a asp-action="Folder" asp-route-id="@subfolder.Id" asp-route-projectId="@projectId">
-                                <i class="bi bi-folder-fill me-2"></i>@subfolder.Name
-                            </a>
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No subfolders.</p>
-            }
+            <ul class="list-group folder-tree">
+                @await Html.PartialAsync("_FolderTree", Model)
+            </ul>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h5>Documents</h5>
-        </div>
-        <div class="card-body">
-            @if (Model.Documents.Any())
-            {
-                <ul class="list-group">
-                    @foreach (var document in Model.Documents)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>
-                                <i class="bi bi-file-earmark-text me-2"></i>@document.Name@document.FileType
-                            </span>
-                            <span>
-                                <a asp-action="Versions" asp-route-documentId="@document.Id" asp-route-projectId="@projectId" class="btn btn-sm btn-info">View Versions (@document.Versions.Count)</a>
-                                @if (document.Versions.Any())
-                                {
-                                    <a asp-action="Download" asp-route-versionId="@document.Versions.OrderByDescending(v => v.VersionNumber).First().Id" asp-route-projectId="@projectId" class="btn btn-sm btn-primary">Download Latest</a>
-                                }
-                            </span>
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p>No documents.</p>
-            }
-        </div>
-    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
