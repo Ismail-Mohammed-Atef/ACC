@@ -22,7 +22,7 @@ namespace DataLayer.Models
         public ICollection<ProjectMembers>? Members { get; set; }
         public ICollection<ProjectActivities>? Activities { get; set; }
         public ICollection<ProjectCompany>? ProjectCompany { get; set; }
-
+        public List<Issue> Issues { get; set; }
 
     }
 }

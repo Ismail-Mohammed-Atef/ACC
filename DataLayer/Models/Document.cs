@@ -18,6 +18,6 @@ namespace DataLayer.Models
         public string CreatedBy { get; set; }
         public List<DocumentVersion> Versions { get; set; }
 
-        public List <ReviewDocument> ReviewDocuments { get; set; } = new List<ReviewDocument>();
+        public List<ReviewDocument> ReviewDocuments { get; set; } = new List<ReviewDocument>();
     }
 }

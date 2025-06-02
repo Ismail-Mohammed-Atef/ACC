@@ -424,7 +424,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             try
             {
-                if(projectId ==0)
+                if (projectId ==0)
                 {
                     projectId = id;
                 }
@@ -457,7 +457,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
             try
             {
-                if(projectId == 0)
+                if (projectId == 0)
                 {
                     projectId = id;
                 }
@@ -501,7 +501,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             var folder = await _documentRepository.GetAllQueryable()
                     .Include(d => d.Versions)
-                    .Include(d=>d.Folder)
+                    .Include(d => d.Folder)
                     .FirstOrDefaultAsync(f => f.Id == id && f.ProjectId == ProjectDocumentController.id);
 
             if (folder == null)
@@ -521,7 +521,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
             if (dto.ActionType == "copy")
             {
-                
+
                 var newDoc = new Document
                 {
                     Name = document.Name,
