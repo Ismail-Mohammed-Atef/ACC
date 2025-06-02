@@ -1,15 +1,20 @@
 ﻿using ACC.Services;
+using ACC.ViewModels.ProjectDocumentsVM;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
 using DataLayer.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using NuGet.Packaging.Signing;
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
+using static NuGet.Packaging.PackagingConstants;
 
 namespace ACC.Controllers.ProjectDetailsController
 {
@@ -64,6 +69,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
                 ViewBag.ProjectId = Id;
                 id = Id; // Ensure 'id' is defined; consider clarifying its purpose
+                ViewBag.AllFolders = _folderRepository.GetAll();
 
                 if (!folders.Any())
                 {
@@ -418,6 +424,10 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             try
             {
+                if(projectId ==0)
+                {
+                    projectId = id;
+                }
                 var version = await _documentVersionRepository.GetAllQueryable()
                     .Include(v => v.Document)
                     .FirstOrDefaultAsync(v => v.Id == versionId && v.Document.ProjectId == projectId);
@@ -427,7 +437,9 @@ namespace ACC.Controllers.ProjectDetailsController
                     return NotFound("File not found.");
                 }
 
-                var fileName = Path.GetFileName(version.FilePath);
+                var fullFileName = Path.GetFileName(version.FilePath);
+                var fileName = fullFileName.Substring(fullFileName.IndexOf('_') + 1);
+
                 var fileBytes = await System.IO.File.ReadAllBytesAsync(version.FilePath);
                 return File(fileBytes, "application/octet-stream", fileName);
             }
@@ -484,5 +496,54 @@ namespace ACC.Controllers.ProjectDetailsController
 
             return PartialView("_FolderDetails", folder);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetDocumentDetails(int id)
+        {
+            var folder = await _documentRepository.GetAllQueryable()
+                    .Include(d => d.Versions)
+                    .Include(d=>d.Folder)
+                    .FirstOrDefaultAsync(f => f.Id == id && f.ProjectId == ProjectDocumentController.id);
+
+            if (folder == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_DocumentDetails", folder);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> MoveOrCopyDocument([FromBody] MoveOrCopyVM dto)
+        {
+            var document = await _context.Documents.FindAsync(dto.DocumentId);
+            if (document == null) return NotFound();
+
+            if (dto.ActionType == "copy")
+            {
+                
+                var newDoc = new Document
+                {
+                    Name = document.Name,
+                    FileType = document.FileType,
+                    ProjectId = document.ProjectId,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = document.CreatedBy,
+                    Versions = new List<DocumentVersion>(),
+                    FolderId = dto.TargetFolderId
+
+                };
+                _context.Documents.Add(newDoc);
+            }
+            else if (dto.ActionType == "move")
+            {
+                document.FolderId = dto.TargetFolderId;
+                _context.Documents.Update(document);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+
     }
 }

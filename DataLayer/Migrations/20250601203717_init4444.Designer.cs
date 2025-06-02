@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:DataLayer/Migrations/20250601184536_Init.Designer.cs
-    [Migration("20250601184536_Init")]
-    partial class Init
-========
-    [Migration("20250601185938_initProjectModels")]
-    partial class initProjectModels
->>>>>>>> 3c6ae5c4ca34a04d6de58ed967135ebf2b1a538d:DataLayer/Migrations/20250601185938_initProjectModels.Designer.cs
+    [Migration("20250601203717_init4444")]
+    partial class init4444
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -137,9 +132,6 @@ namespace DataLayer.Migrations
                     b.Property<int?>("Country")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -148,9 +140,6 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Website")
                         .HasColumnType("nvarchar(max)");
@@ -189,9 +178,6 @@ namespace DataLayer.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.HasIndex("FolderId");
@@ -207,18 +193,12 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("DocumentId")
                         .HasColumnType("int");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("datetime2");
@@ -265,9 +245,6 @@ namespace DataLayer.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.HasIndex("FolderId");
@@ -303,78 +280,6 @@ namespace DataLayer.Migrations
                     b.ToTable("IfcFiles");
                 });
 
-            modelBuilder.Entity("DataLayer.Models.Issue", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("InitiatorID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocumentId");
-
-                    b.HasIndex("InitiatorID");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("Issues");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.IssueReviwers", b =>
-                {
-                    b.Property<string>("ReviewerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("IssueId")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.HasKey("ReviewerId", "IssueId");
-
-                    b.HasIndex("IssueId");
-
-                    b.ToTable("IssueReviwers");
-                });
-
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -385,9 +290,6 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("CreationDate")
                         .HasColumnType("datetime2");
@@ -416,9 +318,6 @@ namespace DataLayer.Migrations
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.ToTable("Projects");
@@ -440,13 +339,7 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("projectId")
@@ -467,14 +360,8 @@ namespace DataLayer.Migrations
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("Id")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("ProjectId", "CompanyId");
 
@@ -491,14 +378,8 @@ namespace DataLayer.Migrations
                     b.Property<string>("MemberId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("Id")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("ProjectId", "MemberId");
 
@@ -531,9 +412,6 @@ namespace DataLayer.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("WorkflowTemplateId")
                         .HasColumnType("int");
@@ -628,14 +506,8 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -668,9 +540,6 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.ToTable("Transmittals");
@@ -684,9 +553,6 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("DocumentVersionId")
                         .HasColumnType("int");
 
@@ -696,9 +562,6 @@ namespace DataLayer.Migrations
 
                     b.Property<int>("TransmittalId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -720,9 +583,6 @@ namespace DataLayer.Migrations
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("MinReviewers")
                         .HasColumnType("int");
 
@@ -737,9 +597,6 @@ namespace DataLayer.Migrations
 
                     b.Property<int>("TimeAllowed")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("WorkflowTemplateId")
                         .HasColumnType("int");
@@ -779,9 +636,6 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -792,9 +646,6 @@ namespace DataLayer.Migrations
 
                     b.Property<int>("StepCount")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -951,11 +802,13 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Document", b =>
                 {
-                    b.HasOne("DataLayer.Models.Folder", null)
+                    b.HasOne("DataLayer.Models.Folder", "Folder")
                         .WithMany("Documents")
                         .HasForeignKey("FolderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Folder");
                 });
 
             modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
@@ -974,49 +827,6 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Folder", null)
                         .WithMany("SubFolders")
                         .HasForeignKey("FolderId");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.Issue", b =>
-                {
-                    b.HasOne("DataLayer.Models.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("DataLayer.Models.ApplicationUser", "Initiator")
-                        .WithMany()
-                        .HasForeignKey("InitiatorID");
-
-                    b.HasOne("DataLayer.Models.Project", "Project")
-                        .WithMany("Issues")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Document");
-
-                    b.Navigation("Initiator");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("DataLayer.Models.IssueReviwers", b =>
-                {
-                    b.HasOne("DataLayer.Models.Issue", "Issue")
-                        .WithMany("IssueReviwers")
-                        .HasForeignKey("IssueId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DataLayer.Models.ApplicationUser", "Reviewer")
-                        .WithMany("IssueReviwers")
-                        .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Issue");
-
-                    b.Navigation("Reviewer");
                 });
 
             modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
@@ -1262,8 +1072,6 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("IssueReviwers");
-
                     b.Navigation("Projects");
 
                     b.Navigation("ReviewStepUsers");
@@ -1294,16 +1102,9 @@ namespace DataLayer.Migrations
                     b.Navigation("SubFolders");
                 });
 
-            modelBuilder.Entity("DataLayer.Models.Issue", b =>
-                {
-                    b.Navigation("IssueReviwers");
-                });
-
             modelBuilder.Entity("DataLayer.Models.Project", b =>
                 {
                     b.Navigation("Activities");
-
-                    b.Navigation("Issues");
 
                     b.Navigation("Members");
 
