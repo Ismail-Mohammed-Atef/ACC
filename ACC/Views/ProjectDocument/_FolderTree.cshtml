@@ -72,24 +72,10 @@
         {
             @foreach (var doc in Model.Documents)
             {
-                <li class="list-group-item d-flex justify-content-between align-items-center document-item" data-document-id="@doc.Id">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-file-earmark-text me-2"></i>
-                        <span>@doc.Name</span>
-                    </div>
-
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="documentDropdown-@doc.Id" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="documentDropdown-@doc.Id">
-                            <li><a class="dropdown-item copy-document" href="#" data-document-id="@doc.Id">Open File</a></li>
-                            <li><a class="dropdown-item copy-document" href="#" data-document-id="@doc.Id">Copy To...</a></li>
-                            <li><a class="dropdown-item move-document" href="#" data-document-id="@doc.Id">Move To...</a></li>
-                        </ul>
-                    </div>
+                <li class="list-group-item d-flex align-items-center document-item" data-document-id="@doc.Id">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    <span>@doc.Name</span>
                 </li>
-
             }
         }
         @* Render subfolders as list items (recursively) *@

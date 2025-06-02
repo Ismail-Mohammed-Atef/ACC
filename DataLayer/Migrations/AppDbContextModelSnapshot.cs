@@ -943,13 +943,11 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Document", b =>
                 {
-                    b.HasOne("DataLayer.Models.Folder", "Folder")
+                    b.HasOne("DataLayer.Models.Folder", null)
                         .WithMany("Documents")
                         .HasForeignKey("FolderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Folder");
                 });
 
             modelBuilder.Entity("DataLayer.Models.DocumentVersion", b =>
