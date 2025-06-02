@@ -1,0 +1,57 @@
+﻿@model ACC.ViewModels.ProjectIssueVM
+
+@{
+    ViewData["Title"] = "Create Project Issue";
+    Layout = "~/Views/Shared/_ProjectLayout.cshtml";
+}
+
+<h2>Create Project Issue</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Category"></label>
+        <select asp-for="Category" class="form-control" asp-items="Html.GetEnumSelectList<DataLayer.Models.Enums.IssueCategory>()"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Type"></label>
+        <select asp-for="Type" class="form-control" asp-items="Html.GetEnumSelectList<DataLayer.Models.Enums.IssueType>()"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Priority"></label>
+        <select asp-for="Priority" class="form-control" asp-items="Html.GetEnumSelectList<DataLayer.Models.Enums.IssuePriority>()"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Status"></label>
+        <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<DataLayer.Models.Enums.IssueStatus>()"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="ProjectId">Project</label>
+        <input asp-for="ProjectId" class="form-control" />
+        <span asp-validation-for="ProjectId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Attachment">Attachment</label>
+        <input asp-for="Attachment" type="file" class="form-control" />
+        <span asp-validation-for="Attachment" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+       <label class="form-label">Reviewers</label>
+        <select asp-for="SelectedReviewerIds" class="form-control" multiple>
+           @foreach (var user in Model.applicationUsers)
+           {
+               <option value="@user.Id">@user.UserName</option>
+           }
+       </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
