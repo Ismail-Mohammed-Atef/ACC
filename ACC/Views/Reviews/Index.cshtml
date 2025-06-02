@@ -1,5 +1,9 @@
 ﻿@using ACC.ViewModels.ReviewsVM
 @model List<ReviewVM>
+@{
+    Layout = "_ProjectLayout";
+}
+
 
 <!DOCTYPE html>
 <html>
@@ -57,30 +61,64 @@
             cursor: pointer;
         }
 
+.titleContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.TitleItem {
+    font-size: 16px;
+    color: black;
+    font-weight: 500;
+    text-decoration: none;
+}
+.TitleItem:hover {
+    text-decoration: underline;
+}
+
+      
+
+
     </style>
 
 </head>
 <body>
-    <div class="container-fluid p-4">
-        <h2>Create Review</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateReviewModal">+ Create Review</button>
-        <div class="d-flex justify-content-between my-3">
+   <div class="container-fluid p-4">
+        <h1 class="mb-0">Reviews</h1>
+        <br />
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Reviews</h4>
+        @if (ViewBag.id != null)
+        {
+            <a class="btn btn-outline-secondary" asp-controller="Workflow" asp-action="Index" asp-route-id="@ViewBag.id">
+                <i class="bi bi-gear"></i> Settings
+            </a>
+        }
+    </div>
 
-            <div class="d-flex">
-                <input type="text" id="searchInput" class="form-control me-2" placeholder="Search by name, email or trade">
+    <hr />
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateReviewModal">
+            <i class="bi bi-plus-lg"></i> Create Review
+        </button>
 
-            </div>
+        <div class="d-flex">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by name" />
         </div>
+    </div>
+</div>
 
         <!-- Companies Table -->
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Step</th>
                     <th>Workflow</th>
                     <th>Created At</th>
-                    <th>Status</th>
+                    <th>Final Status</th>
                     <th>Action</th>
 
                 </tr>
@@ -90,11 +128,12 @@
                 {
                     <tr class="company-row" data-id="@item.Id" data-url="@Url.Action("Details", "Reviews", new { id = item.Id })">
                         <td>@item.Name</td>
+                        <td>@item.CurrentStepView</td>
                         <td>@item.WorkflowName</td>
                         <td>@item.CreatedAt</td>
                         <td>@item.FinalReviewStatus</td>
                             <td>
-                        @if(item.CurrentUserId != item.Initiator)
+                        @if(ViewBag.CurrentUserId != item.Initiator)
                         {
                                 <form asp-action="Approve" method="post" asp-route-Id="@item.Id" style="display:inline">
                                     <button type="submit" class="btn btn-success btn-sm">Approve</button>
@@ -103,8 +142,18 @@
                                 <form asp-action="Reject" method="post" asp-route-Id="@item.Id" style="display:inline">
                                     <button type="submit" class="btn btn-danger btn-sm">Reject</button>
                                 </form>
+
                         }
-                            </td>
+                        else
+                        {
+                             <form asp-action="StartReview" method="post" asp-route-Id="@item.Id" style="display:inline">
+                                 <button type="submit" class="btn btn-success btn-sm" @(item.CurrentStepView != "Pending" || item.FinalReviewStatus == "Approved" ? "disabled" : "")>
+                                     Start Review
+                                 </button>
+                             </form>
+                            
+                        }
+                    </td>
                        
                        
                         <td>
@@ -128,17 +177,26 @@
         <div class="pagination">
             @for (int i = 1; i <= ViewBag.TotalPages; i++)
             {
-                <a href="/Reviews/Index?page=@i"
-                   class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
-                    @i
-                </a>
+                <a href="/Reviews/Index?id=@ViewBag.Id&page=@i"
+                class="btn @(ViewBag.CurrentPage == i ? "btn-primary" : "btn-outline-primary")">
+                 @i
+              </a>
+
             }
         </div>
+
+
+
     </div>
+
+
+
 
     <!-- Create Review Modal -->
     <partial name="PartialViews/_CreateReviewPartialView" model="(CreateReviewVM)ViewBag.CreateReviewVM" />
 
+
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
@@ -182,20 +240,39 @@
         });
 
 
-                $(document).ready(function () {
-            $(".company-row").click(function (e) {
-                if (!$(e.target).is("button") && !$(e.target).is("a") && !$(e.target).closest("form").length) {
-                    const url = $(this).data("url");
-                    if (url) {
-                        window.location.href = url;
-                    }
-                }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $("#searchInput").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+
+                $("#companyTableBody tr").filter(function () {
+                    var name = $(this).find("td:nth-child(1)").text().toLowerCase(); // Name Column
+                 
+
+                    $(this).toggle(name.indexOf(value) > -1 );
+                });
             });
         });
 
 
-
-
+        
+            
+   
+              $(document).ready(function () {
+          $(".company-row").click(function (e) {
+              if (!$(e.target).is("button") && !$(e.target).is("a") && !$(e.target).closest("form").length) {
+                  const url = $(this).data("url");
+                  if (url) {
+                      window.location.href = url;
+                  }
+              }
+          });
+      });
+   
+                               
+                         
     </script>
 
    

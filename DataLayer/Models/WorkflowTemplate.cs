@@ -11,6 +11,8 @@ namespace DataLayer.Models
     public class WorkflowTemplate : BaseEntity
     {
 
+        public int ProjectId { get; set; }
+        public Project Project { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
 
@@ -18,6 +20,10 @@ namespace DataLayer.Models
         public List<WorkflowStepTemplate> Steps { get; set; } = new List<WorkflowStepTemplate>();
 
         public List<Review> Reviews { get; set; } = new List<Review>();
+
+        public bool CopyApprovedFiles { get; set; }
+
+        public int? DestinationFolderId { get; set; }
 
         
 

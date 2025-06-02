@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class init444 : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -137,21 +137,6 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WorkflowTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StepCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WorkflowTemplates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -236,6 +221,30 @@ namespace DataLayer.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ProjectCompany_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkflowTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StepCount = table.Column<int>(type: "int", nullable: false),
+                    CopyApprovedFiles = table.Column<bool>(type: "bit", nullable: false),
+                    DestinationFolderId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkflowTemplates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WorkflowTemplates_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -480,6 +489,7 @@ namespace DataLayer.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WorkflowTemplateId = table.Column<int>(type: "int", nullable: false),
                     InitiatorUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -496,6 +506,11 @@ namespace DataLayer.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Reviews_WorkflowStepTemplates_CurrentStepId",
                         column: x => x.CurrentStepId,
@@ -715,6 +730,11 @@ namespace DataLayer.Migrations
                 column: "InitiatorUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reviews_ProjectId",
+                table: "Reviews",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reviews_WorkflowTemplateId",
                 table: "Reviews",
                 column: "WorkflowTemplateId");
@@ -758,6 +778,11 @@ namespace DataLayer.Migrations
                 name: "IX_WorkflowStepUsers_StepId",
                 table: "WorkflowStepUsers",
                 column: "StepId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkflowTemplates_ProjectId",
+                table: "WorkflowTemplates",
+                column: "ProjectId");
         }
 
         /// <inheritdoc />
@@ -809,9 +834,6 @@ namespace DataLayer.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Projects");
-
-            migrationBuilder.DropTable(
                 name: "Reviews");
 
             migrationBuilder.DropTable(
@@ -840,6 +862,9 @@ namespace DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "Projects");
         }
     }
 }

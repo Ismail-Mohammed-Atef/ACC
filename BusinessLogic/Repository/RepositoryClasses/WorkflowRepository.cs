@@ -20,9 +20,9 @@ namespace BusinessLogic.Repository.RepositoryClasses
             Context = context;
         }
 
-        public List<WorkflowTemplate> GetAllWithSteps()
+        public List<WorkflowTemplate> GetAllWithSteps(int proId)
         {
-            return Context.WorkflowTemplates.Include(w => w.Steps).ToList();
+            return Context.WorkflowTemplates.Include(w => w.Steps).Where(w => w.ProjectId==proId ).ToList();
         }
 
         public WorkflowTemplate GetById(int Id)

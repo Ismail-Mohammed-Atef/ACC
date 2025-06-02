@@ -17,22 +17,21 @@ namespace ACC.Controllers
         private readonly IWorkFlowStepRepository _workFlowStepRepository;
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly WorkflowStepsUsersService _workflowStepsUsersService;
+        private readonly FolderService _folderService;
 
-        public WorkflowController(IWorkflowRepository workflowRepository , IWorkFlowStepRepository workFlowStepRepository, UserManager<ApplicationUser> userManager , WorkflowStepsUsersService workflowStepsUsersService)
+        public WorkflowController(IWorkflowRepository workflowRepository , IWorkFlowStepRepository workFlowStepRepository, UserManager<ApplicationUser> userManager , WorkflowStepsUsersService workflowStepsUsersService , FolderService folderService)
         {
             _workflowRepository = workflowRepository;
-            this._workFlowStepRepository = workFlowStepRepository;
+            _workFlowStepRepository = workFlowStepRepository;
             UserManager = userManager;
-            this._workflowStepsUsersService = workflowStepsUsersService;
+            _workflowStepsUsersService = workflowStepsUsersService;
+            _folderService = folderService;
         }
 
-        public IActionResult Index(int page = 1, int pageSize = 4)
-
-
-
+        public IActionResult Index(int id , int page = 1, int pageSize = 4)
         {
 
-            var query = _workflowRepository.GetAllWithSteps();
+            var query = _workflowRepository.GetAllWithSteps(id);
 
             if (query == null)
             {
@@ -58,14 +57,16 @@ namespace ACC.Controllers
 
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             ViewBag.CurrentPage = page;
+            ViewBag.Id = id;
 
             return View("Index", WorkflowTemplates);
         }
 
-        public IActionResult NewWorkflow(int stepCount)
+        public IActionResult NewWorkflow(int stepCount , int proId)
         {
             var vm = new WorkflowTemplateViewModel();
             vm.ReviewersType = Enum.GetValues(typeof(ReviewersType)).Cast<ReviewersType>().ToList();
+            vm.AllFolders = _folderService.GetFolderTree();
            
 
             for (int i = 0; i < stepCount; i++)
@@ -75,6 +76,9 @@ namespace ACC.Controllers
             vm.applicationUsers = UserManager.Users.ToList();
 
             ViewBag.MultiReviwerOptions = Enum_Helper.GetEnumSelectListWithDisplayNames<MultiReviewerOptions>();
+            ViewBag.Id = proId;
+
+
 
             return View("NewWorkflow", vm);
         }
@@ -84,9 +88,13 @@ namespace ACC.Controllers
         {
             var template = new WorkflowTemplate
             {
+                ProjectId = vm.proId,
                 Name = vm.Name,
                 Description = vm.Description,
-                StepCount = vm.Steps.Count
+                StepCount = vm.Steps.Count,
+                CopyApprovedFiles = vm.CopyApprovedFiles,
+                DestinationFolderId = vm.SelectedDistFolderId
+                
             };
 
             foreach (var step in vm.Steps)
@@ -146,10 +154,18 @@ namespace ACC.Controllers
                     }
                 }
             }
+
+            
+
             _workflowStepsUsersService.Save();
 
-            return RedirectToAction("Index");
+
+            return RedirectToAction("Index", new { id = vm.proId });
         }
+
+
+
+    
 
 
 

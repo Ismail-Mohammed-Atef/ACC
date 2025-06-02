@@ -12,6 +12,8 @@
             </div>
             <div class="modal-body">
                 <form asp-controller="Reviews" asp-action="SaveReview" method="post">
+                    <input type="hidden" name="ProId" value="@ViewBag.Id" />
+
                     <div class="form-group">
                         <label asp-for="Name"></label>
                         <input asp-for="Name" class="form-control" />
@@ -27,16 +29,11 @@
                     <div class="form-group">
                         <label>Select Folders and Documents</label>
                         <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
-                            <partial name="_FolderTree" model="Model.AllFolders">
+                            <partial name="_FolderWithDocTree" model="Model.AllFolders">
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="SelectedFinalReviewStatus">Final Status</label>
-                        <select asp-for="SelectedFinalReviewStatus" asp-items="@(new SelectList(Model.FinalReviewStatuses))" class="form-control">
-                            <option value="">-- Select Final Status --</option>
-                        </select>
-                    </div>
+                
 
                     <button type="submit" class="btn btn-primary">Create Review</button>
                 </form>

@@ -1,11 +1,14 @@
 ﻿using DataLayer.Models.Enums;
 using DataLayer.Models;
 using System.Collections.Generic;
+using ACC.ViewModels.WorkflowVM;
 
 namespace ACC.ViewModels.ReviewsVM
 {
     public class CreateReviewVM
     {
+        
+        public int proId { get; set; }
         public int Id { get; set; }
         public string Name { get; set; }
 
