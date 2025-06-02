@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:DataLayer/Migrations/20250602132714_Init.cs
-    public partial class Init : Migration
-========
     public partial class init : Migration
->>>>>>>> 4ed4d95e580844e15f0789aa708f39557575e6a3:DataLayer/Migrations/20250602214333_init.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -926,12 +922,9 @@ namespace DataLayer.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-<<<<<<<< HEAD:DataLayer/Migrations/20250602132714_Init.cs
-========
                 name: "Issues");
 
             migrationBuilder.DropTable(
->>>>>>>> 4ed4d95e580844e15f0789aa708f39557575e6a3:DataLayer/Migrations/20250602214333_init.cs
                 name: "Reviews");
 
             migrationBuilder.DropTable(
@@ -939,9 +932,6 @@ namespace DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Transmittals");
-
-            migrationBuilder.DropTable(
-                name: "Projects");
 
             migrationBuilder.DropTable(
                 name: "WorkflowStepTemplates");
