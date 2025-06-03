@@ -45,7 +45,7 @@ namespace ACC.Controllers
                  Status = m.Status,
                  Company = (m.Company).Name ?? "No Company",
                  Role = (m.Role).Name ?? "No Role",
-                 AccessLevels = m.AccessLevel, // Adjust based on your model
+                 AccessLevels = m.AccessLevel ?? new List<AccessLevel>(), // Adjust based on your model
                  AddedOn = m.AddedOn
              })
              .ToList();

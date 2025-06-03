@@ -251,7 +251,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 _folderRepository.Save();
 
                 TempData["Success"] = "Root folder created successfully.";
-                return RedirectToAction("Folder", new { id = root.Id, projectId });
+                return RedirectToAction("Index", new { projectId });
             }
             catch (Exception ex)
             {
@@ -271,7 +271,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 if (string.IsNullOrWhiteSpace(folderName))
                 {
                     TempData["Error"] = "Folder name is required.";
-                    return RedirectToAction("Folder", new { id = parentFolderId, projectId });
+                    return RedirectToAction("Index", new {  projectId });
                 }
 
                 var parentFolder = await _folderRepository.GetAllQueryable()
@@ -307,13 +307,13 @@ namespace ACC.Controllers.ProjectDetailsController
                 _folderRepository.Save();
 
                 TempData["Success"] = "Folder created successfully.";
-                return RedirectToAction("Folder", new { id = parentFolderId, projectId });
+                return RedirectToAction("Index", new {  projectId });
             }
             catch (Exception ex)
             {
                 // Log the exception
                 TempData["Error"] = "An error occurred while creating the folder.";
-                return RedirectToAction("Folder", new { id = parentFolderId, projectId });
+                return RedirectToAction("Index", new { projectId });
             }
         }
 
@@ -407,7 +407,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 _documentRepository.Save();
 
                 TempData["Success"] = "File uploaded successfully.";
-                return RedirectToAction("Folder", new { id = folderId, projectId });
+                return RedirectToAction("Index", new { projectId });
             }
             catch (Exception ex)
             {
