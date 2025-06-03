@@ -1,4 +1,6 @@
-﻿namespace ACC.ViewModels.ReviewsVM
+﻿using ACC.ViewModels.ReviewsVM;
+
+namespace ACC.ViewModels.WorkflowVM
 {
     public class FolderWithDocumentsVM
     {

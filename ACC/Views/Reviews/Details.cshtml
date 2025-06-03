@@ -72,7 +72,11 @@
                         <th>Name</th>
                         <th>Comment</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        @if (ViewBag.CurrentUserId != ViewBag.Initiator)
+                        {
+                           <th>Action</th>
+                            
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -82,19 +86,24 @@
                             <td>@Model[i].Name</td>
                             <td>@Model[i].Comment</td>
                             <td>@Model[i].State</td>
-                            <td>
-                                <!-- Preserve other properties -->
-                                <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
-                                <input type="hidden" name="[@i].Name" value="@Model[i].Name" />
-                                <input type="hidden" name="[@i].Comment" value="@Model[i].Comment" />
-                                <input type="hidden" name="[@i].State" value="@Model[i].State" />
 
-                                <!-- Approval Checkbox -->
-                                <input type="checkbox" name="[@i].IsApproved" value="true" />
-                                <input type="hidden" name="[@i].IsApproved" value="false" />
-                            </td>
+                            @if (ViewBag.CurrentUserId != ViewBag.Initiator)
+                            {
+                                <td>
+                                    <!-- Preserve other properties -->
+                                    <input type="hidden" name="[@i].Id" value="@Model[i].Id" />
+                                    <input type="hidden" name="[@i].Name" value="@Model[i].Name" />
+                                    <input type="hidden" name="[@i].Comment" value="@Model[i].Comment" />
+                                    <input type="hidden" name="[@i].State" value="@Model[i].State" />
+
+                                    <!-- Approval Checkbox -->
+                                    <input type="checkbox" name="[@i].IsApproved" value="true" />
+                                    <input type="hidden" name="[@i].IsApproved" value="false" />
+                                </td>
+                            }
                         </tr>
-                    }
+                            
+                       }
                 </tbody>
             </table>
 

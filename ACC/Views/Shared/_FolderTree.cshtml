@@ -1,24 +1,12 @@
-﻿@model List<ACC.ViewModels.ReviewsVM.FolderWithDocumentsVM>
+﻿@using ACC.ViewModels.WorkflowVM
+@model List<FolderVM>
 
 <ul>
     @foreach (var folder in Model)
     {
         <li>
-            <input type="checkbox" name="SelectedFolderIds" value="@folder.Id" id="folder_@folder.Id" />
+            <input type="radio" name="SelectedDistFolderId" value="@folder.Id" id="folder_@folder.Id" />
             <label for="folder_@folder.Id"><strong>@folder.Name</strong></label>
-
-            @if (folder.Documents != null && folder.Documents.Any())
-            {
-                <ul>
-                    @foreach (var doc in folder.Documents)
-                    {
-                        <li>
-                            <input type="checkbox" name="SelectedDocumentIds" value="@doc.Id" id="doc_@doc.Id" />
-                            <label for="doc_@doc.Id">@doc.Name</label>
-                        </li>
-                    }
-                </ul>
-            }
 
             @if (folder.Children != null && folder.Children.Any())
             {
@@ -27,3 +15,4 @@
         </li>
     }
 </ul>
+

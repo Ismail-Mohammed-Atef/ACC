@@ -11,7 +11,7 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
     {
         WorkflowTemplate GetWorkflowTemp(int WorkflowId);
 
-        List<Review> GetCurrentStepUserReviews(string UserId);
+        List<Review> GetCurrentStepUserReviews(string UserId , int proId);
        
         Review GetReviewById(int Id);
 

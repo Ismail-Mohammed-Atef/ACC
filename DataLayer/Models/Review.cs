@@ -9,6 +9,8 @@ namespace DataLayer.Models
 {
     public class Review : BaseEntity
     {
+        public int? ProjectId { get; set; }
+        public Project? Project { get; set; }
         public string Name { get; set; }
         public int WorkflowTemplateId { get; set; }
         public WorkflowTemplate WorkflowTemplate { get; set; }

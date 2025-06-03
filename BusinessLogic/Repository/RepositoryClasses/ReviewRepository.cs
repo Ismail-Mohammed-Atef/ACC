@@ -25,13 +25,13 @@ namespace BusinessLogic.Repository.RepositoryClasses
         }
 
 
-        public List<Review> GetCurrentStepUserReviews(string userId)
+        public List<Review> GetCurrentStepUserReviews(string userId , int proId)
         {
             return Context.Reviews
                 .Include(r => r.CurrentStep)
                 .ThenInclude(s => s.workflowStepUsers)
                 .Where(r =>
-                    r.FinalReviewStatus == FinalReviewStatus.Pending &&
+                     r.ProjectId == proId &&
                     (r.InitiatorUserId == userId || r.CurrentStep.workflowStepUsers.Any(i=>i.UserId == userId)))
                 .ToList();
         }

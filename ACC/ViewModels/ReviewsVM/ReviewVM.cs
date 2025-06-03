@@ -16,7 +16,21 @@ namespace ACC.ViewModels.ReviewsVM
 
         public string Initiator { get; set; }
 
-        public string CurrentUserId { get; set; }
+
+        public int? CurrentStepController {  get; set; }
+
+         public string CurrentStepView
+         {
+             get
+             {
+                if (CurrentStepController != null)
+                    return $"{CurrentStepController}";
+        
+                 return "Pending";
+             }
+         }
+        
+
 
 
 

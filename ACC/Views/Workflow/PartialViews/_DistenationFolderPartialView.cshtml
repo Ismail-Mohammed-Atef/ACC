@@ -1,0 +1,33 @@
+﻿@model ACC.ViewModels.WorkflowVM.WorkflowTemplateViewModel
+
+
+
+
+<div class="modal fade" id="foldersTree" tabindex="-1" aria-labelledby="foldersTreeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="foldersTreeModalLabel">Select Distenation Folder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+ 
+                    
+
+                    <div class="form-group">
+                        <label>Select Folders</label>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                             <partial name="_FolderTree" model="Model.AllFolders">
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+

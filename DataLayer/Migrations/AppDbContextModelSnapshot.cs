@@ -482,6 +482,9 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
                     b.Property<int>("WorkflowTemplateId")
                         .HasColumnType("int");
 
@@ -490,6 +493,8 @@ namespace DataLayer.Migrations
                     b.HasIndex("CurrentStepId");
 
                     b.HasIndex("InitiatorUserId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("WorkflowTemplateId");
 
@@ -705,18 +710,29 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("CopyApprovedFiles")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("DestinationFolderId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
                     b.Property<int>("StepCount")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("WorkflowTemplates");
                 });
@@ -1000,6 +1016,10 @@ namespace DataLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataLayer.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId");
+
                     b.HasOne("DataLayer.Models.WorkflowTemplate", "WorkflowTemplate")
                         .WithMany("Reviews")
                         .HasForeignKey("WorkflowTemplateId")
@@ -1009,6 +1029,8 @@ namespace DataLayer.Migrations
                     b.Navigation("CurrentStep");
 
                     b.Navigation("InitiatorUser");
+
+                    b.Navigation("Project");
 
                     b.Navigation("WorkflowTemplate");
                 });
@@ -1129,6 +1151,17 @@ namespace DataLayer.Migrations
                     b.Navigation("Step");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.WorkflowTemplate", b =>
+                {
+                    b.HasOne("DataLayer.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

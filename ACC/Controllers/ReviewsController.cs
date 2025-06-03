@@ -17,6 +17,7 @@ namespace ACC.Controllers
 {
     public class ReviewsController : Controller
     {
+        private readonly IDocumentRepository _documentRepository;
         private readonly IReviewRepository _reviewRepository;
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IWorkFlowStepRepository _workFlowStepRepo;
@@ -27,8 +28,9 @@ namespace ACC.Controllers
         private readonly WorkflowStepsUsersService WorkflowStepUserService;
         private readonly ReviewStepUsersService ReviewStepUsersService;
 
-        public ReviewsController(IReviewRepository reviewRepo, IWorkflowRepository workflowRepo, IWorkFlowStepRepository workFlowStepRepo, FolderService folderService, ReviewDocumentService reviewDocumentService, ReviewFolderService reviewFolderService ,WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , UserManager<ApplicationUser> userManager)
+        public ReviewsController( IDocumentRepository documentRepository ,IReviewRepository reviewRepo, IWorkflowRepository workflowRepo, IWorkFlowStepRepository workFlowStepRepo, FolderService folderService, ReviewDocumentService reviewDocumentService, ReviewFolderService reviewFolderService ,WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , UserManager<ApplicationUser> userManager)
         {
+            _documentRepository = documentRepository;
             _reviewRepository = reviewRepo;
             _workflowRepository = workflowRepo;
             _workFlowStepRepo = workFlowStepRepo;
@@ -40,12 +42,11 @@ namespace ACC.Controllers
             UserManager = userManager;
         }
         [Authorize]
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 4)
-        
-        
+        public async Task<IActionResult> Index(int id ,int page = 1, int pageSize = 4)
+            
         {
             var CurrentUser = await UserManager.GetUserAsync(User);
-            var query = _reviewRepository.GetCurrentStepUserReviews(CurrentUser.Id);
+            var query = _reviewRepository.GetCurrentStepUserReviews(CurrentUser.Id , id);
 
             int totalRecords = query.Count();
 
@@ -61,7 +62,7 @@ namespace ACC.Controllers
                     FinalReviewStatus = c.FinalReviewStatus.ToString(),
                     CreatedAt = c.CreatedAt.ToString(),
                     Initiator = c.InitiatorUserId,
-                    CurrentUserId = CurrentUser.Id,
+                    CurrentStepController = c.CurrentStep?.StepOrder
                 })
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -70,13 +71,15 @@ namespace ACC.Controllers
             // Pass pagination data to the view
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             ViewBag.CurrentPage = page;
-
+            ViewBag.Id = id;    
             ViewBag.CreateReviewVM = new CreateReviewVM
             {
                 WorkflowTemplates = _workflowRepository.GetAll().ToList(),
                 FinalReviewStatuses = Enum.GetValues(typeof(FinalReviewStatus)).Cast<FinalReviewStatus>().ToList(),
-                AllFolders = FolderService.GetFolderTree(),
+                AllFolders = FolderService.GetFolderWithDocumentTree(),
             };
+            ViewBag.CurrentUserId = CurrentUser.Id;
+        
 
             return View("Index", ReviewListModel);
         }
@@ -100,11 +103,12 @@ namespace ACC.Controllers
 
                 var Review = new Review
                 {
+                    ProjectId = model.proId,
                     Name = model.Name,
                     FinalReviewStatus = model.SelectedFinalReviewStatus,
                     WorkflowTemplate = _workflowRepository.GetById(model.SelectedWorkflowId),
                     WorkflowTemplateId = model.SelectedWorkflowId,
-                    CurrentStepId = _workflowRepository.GetById(model.SelectedWorkflowId).Steps[0].Id,
+                    CurrentStepId = null,
                     CreatedAt = DateTime.Now,
                     InitiatorUserId = CurrentUser.Id,
 
@@ -180,7 +184,7 @@ namespace ACC.Controllers
                 }
 
 
-                return RedirectToAction("Index");
+                return RedirectToAction("Index" , new { id = model.proId });
             }
             catch (Exception ex)
             {
@@ -190,6 +194,17 @@ namespace ACC.Controllers
             return RedirectToAction("CreateReview", model);
         }
 
+
+        public async Task<IActionResult> StartReview(int Id)
+        {
+            Review ReviewFromDB = _reviewRepository.GetReviewById(Id);
+
+            ReviewFromDB.CurrentStepId = _workflowRepository.GetById(ReviewFromDB.WorkflowTemplateId).Steps[0].Id;
+
+            _reviewRepository.Save();
+
+            return RedirectToAction("Index", new { id = ReviewFromDB.ProjectId });
+        }
 
         public async Task<IActionResult> Approve(int Id)
         {
@@ -249,37 +264,134 @@ namespace ACC.Controllers
                     
                 }
 
-                if(Advance)
+
+
+
+                if(Advance == true)
                 {
                     ReviewFromDB.CurrentStepId = _workflowRepository.GetById(ReviewFromDB.WorkflowTemplateId).Steps.FirstOrDefault(r => r.StepOrder == NextReviewStep).Id;
+                    var FollowingStepUsers = ReviewStepUsersService.GetAll().Where(s => s.StepId == ReviewFromDB.CurrentStepId);
+
+                    foreach (var item in FollowingStepUsers)
+                    {
+                        item.IsApproved = null;
+                    }
+
                     _reviewRepository.Save();
                 }
                
 
             }
-            else
+
+
+            else if (Advance == true)
             {
-                //Apply action
+
+                var workflow = _workflowRepository.GetById(ReviewFromDB.WorkflowTemplateId);
+                bool copy = workflow.CopyApprovedFiles;
+
+
+
+                ReviewFromDB.CurrentStepId = null;
+                ReviewFromDB.FinalReviewStatus = FinalReviewStatus.Approved;
+
+
+                if (copy == true)
+                {
+
+                    List<ReviewDocument> DocumentList = ReviewFromDB.ReviewDocuments;
+
+                    var CurrentWorkflow = _workflowRepository.GetById(ReviewFromDB.WorkflowTemplateId);
+                    int DistId = (int)CurrentWorkflow.DestinationFolderId;
+
+                    foreach (var item in DocumentList)
+                    {
+                        Document doc = new Document();
+                        doc.FolderId = DistId;
+                        doc.Name = item.Document.Name;
+                        doc.ProjectId = item.Document.ProjectId;
+                        doc.CreatedAt = item.Document.CreatedAt;
+                        doc.CreatedBy = item.Document.CreatedBy;
+                        doc.Versions = new List<DocumentVersion>();
+                        doc.FileType = item.Document.FileType;
+
+                        _documentRepository.Insert(doc);
+
+
+
+
+
+                    }
+                }
+                _documentRepository.Save();
+
+
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index" , new {id = ReviewFromDB.ProjectId});
         }
 
-        public IActionResult Reject(int Id)
+        public async Task<IActionResult> Reject(int Id)
         {
             Review ReviewFromDB = _reviewRepository.GetById(Id);
 
             int CurrentReviewStep = (int)_workFlowStepRepo.GetById(ReviewFromDB.CurrentStepId.Value).StepOrder;
             int PreviousReviewStep = CurrentReviewStep - 1;
             int StepsCount = _workflowRepository.GetById(ReviewFromDB.WorkflowTemplateId).Steps.Count();
+            var StepMultiReviewerOption = ReviewFromDB.CurrentStep.MultiReviewerOptions;
+            var StepReviewerType = ReviewFromDB.CurrentStep.ReviewersType;
 
-            
-            if (PreviousReviewStep > 0)
+            var CurrentUser = await UserManager.GetUserAsync(User);
+            var CurrntStep = ReviewFromDB.CurrentStep;
+            ReviewStepUsersService.Get(CurrentUser.Id, CurrntStep.Id, ReviewFromDB.Id).IsApproved = false;
+            ReviewStepUsersService.Save();
+
+
+            bool Advance = true;
+
+            if(StepReviewerType == (ReviewersType)1 && StepMultiReviewerOption == (MultiReviewerOptions)2)
+            {
+                var StepUsers = ReviewStepUsersService.GetByStepId(CurrntStep.Id);
+                int counter = 0;
+
+                foreach (var item in StepUsers)
+                {
+                    if (item.IsApproved == false)
+                    { counter++; }
+                }
+
+                int ReviewersCount = ReviewStepUsersService.GetUsersCountById(CurrntStep.Id, ReviewFromDB.Id);
+
+                if (counter > ReviewersCount - CurrntStep.MinReviewers)
+                {
+                    Advance = true;
+                }
+                else
+                {
+                    Advance = false;
+                }
+            }
+
+            if (PreviousReviewStep > 0 && Advance == true)
             {
                 ReviewFromDB.CurrentStepId = _workflowRepository.GetById(ReviewFromDB.WorkflowTemplateId).Steps.FirstOrDefault(r => r.StepOrder == PreviousReviewStep).Id;
-                _reviewRepository.Save();
+                var FollowingStepUsers = ReviewStepUsersService.GetAll().Where(s => s.StepId == ReviewFromDB.CurrentStepId);
+
+                foreach(var item in FollowingStepUsers)
+                {
+                    item.IsApproved = null;
+                }
+
+
             }
-            return RedirectToAction("Index");
+            else if (Advance==true)
+            {
+                ReviewFromDB.CurrentStepId = null;
+                ReviewFromDB.FinalReviewStatus = FinalReviewStatus.Rejected;
+
+            }
+            _reviewRepository.Save();
+                return RedirectToAction("Index", new { id = ReviewFromDB.ProjectId });
         }
 
         public async Task<IActionResult> Details(int id)
@@ -300,7 +412,7 @@ namespace ACC.Controllers
             ViewBag.ReviewName = review.Name;
             ViewBag.ReviewId = review.Id;
             ViewBag.CurrentUserId = CurrentUser.Id;
-            ViewBag.Initiator = review.InitiatorUser;
+            ViewBag.Initiator = review.InitiatorUser.Id;
             return View("Details" , DocumentsListVM);
         }
 

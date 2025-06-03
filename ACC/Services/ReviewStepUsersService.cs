@@ -31,6 +31,16 @@ namespace ACC.Services
             return _context.Set<ReviewStepUser>().FirstOrDefault(w => w.StepId == StepId && w.UserId == UserId && w.ReviewId == ReviewId);
         }
 
+        public int GetUsersCountById(int StepId, int ReviewId)
+        {
+            var List = _context.Set<ReviewStepUser>().Where(s => s.StepId == StepId && s.ReviewId == ReviewId);
+            int counter = 0;
+            foreach(var item in List)
+            {
+                counter++;
+            }
+            return counter;
+        }
 
         public IList<ReviewStepUser> GetByStepId(int StepId)
         {
