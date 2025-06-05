@@ -143,7 +143,7 @@ namespace ACC.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png" };
+                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png",".ifc" ,".bcf"};
                 var extension = Path.GetExtension(model.Attachment.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
                 {
@@ -298,7 +298,7 @@ namespace ACC.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png" };
+                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".png", ".ifc", ".bcf" };
                 var extension = Path.GetExtension(model.Attachment.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
                 {

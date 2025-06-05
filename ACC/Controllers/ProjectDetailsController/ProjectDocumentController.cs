@@ -1,4 +1,5 @@
-﻿using ACC.Services;
+﻿using ACC.Controllers.Viewers;
+using ACC.Services;
 using ACC.ViewModels.ProjectDocumentsVM;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
@@ -271,7 +272,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 if (string.IsNullOrWhiteSpace(folderName))
                 {
                     TempData["Error"] = "Folder name is required.";
-                    return RedirectToAction("Index", new {  projectId });
+                    return RedirectToAction("Index", new { projectId });
                 }
 
                 var parentFolder = await _folderRepository.GetAllQueryable()
@@ -307,7 +308,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 _folderRepository.Save();
 
                 TempData["Success"] = "Folder created successfully.";
-                return RedirectToAction("Index", new {  projectId });
+                return RedirectToAction("Index", new { projectId });
             }
             catch (Exception ex)
             {
@@ -347,7 +348,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return View();
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg",".jepg", ".png", ".dwg", ".ifc", ".rvt" ,".pptx"};
+                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".jepg", ".png", ".dwg", ".ifc", ".rvt", ".pptx" };
                 var extension = Path.GetExtension(file.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
                 {
@@ -368,8 +369,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 var uploadFolder = Path.Combine(_env.WebRootPath, "uploads", projectId.ToString(), folderId.ToString());
                 Directory.CreateDirectory(uploadFolder);
 
-                var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-                var filePath = Path.Combine(uploadFolder, fileName);
+                var filePath = Path.Combine(uploadFolder, file.FileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
@@ -424,7 +424,7 @@ namespace ACC.Controllers.ProjectDetailsController
         {
             try
             {
-                if (projectId ==0)
+                if (projectId == 0)
                 {
                     projectId = id;
                 }
@@ -544,6 +544,55 @@ namespace ACC.Controllers.ProjectDetailsController
             await _context.SaveChangesAsync();
             return Ok(new { success = true });
         }
+        [HttpGet]
+        public async Task<IActionResult> OpenFile(int documentId)
+        {
+            // Get the document with its latest version
+            var document = await _documentRepository.GetAllQueryable()
+                .Include(d => d.Versions.OrderByDescending(v => v.VersionNumber))
+                .FirstOrDefaultAsync(d => d.Id == documentId);
 
+            if (document == null || document.Versions == null || !document.Versions.Any())
+            {
+                return NotFound("Document or version not found.");
+            }
+
+            var latestVersion = document.Versions.First();
+
+            // Reconstruct the file path
+            var filePath = Path.Combine(_env.WebRootPath, "uploads", document.ProjectId.ToString(), document.FolderId.ToString(), latestVersion.Document.Name+latestVersion.Document.FileType);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found on server.");
+            }
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+
+            if (document.FileType == ".pdf")
+            {
+                TempData["filePath"] = filePath;
+                return RedirectToAction("Upload", "Pdf");
+
+            }
+            if (document.FileType == ".png" || document.FileType == ".jpg")
+            {
+                TempData["filePath"] = filePath;
+                return RedirectToAction("Upload", "Image");
+
+            }
+            if (document.FileType == ".dwg")
+            {
+                TempData["filePath"] = filePath;
+                return RedirectToAction("Upload", "DWG");
+
+            }
+            return RedirectToAction("Index", "ProjectDocument", new { id = id });
+        }
     }
 }
