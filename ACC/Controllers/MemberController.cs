@@ -1,5 +1,6 @@
 ﻿using ACC.ViewModels.MemberVM;
 using ACC.ViewModels.MemberVM.MemberVM;
+using ACC.ViewModels.Security;
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
@@ -14,12 +15,14 @@ namespace ACC.Controllers
     public class MemberController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IRoleRepository _roleRepository;
         private readonly ICompanyRepository _companyRepository;
 
-        public MemberController(UserManager<ApplicationUser> userManager , IRoleRepository roleRepository , ICompanyRepository companyRepository)
+        public MemberController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager, IRoleRepository roleRepository , ICompanyRepository companyRepository)
         {
             _userManager = userManager;
+            this.signInManager = signInManager;
             _roleRepository = roleRepository;
             _companyRepository = companyRepository;
         }
@@ -77,15 +80,17 @@ namespace ACC.Controllers
                     RoleId = memberFromReq.RoleId,
                     CompanyId = memberFromReq.CompanyId,
                     Status = memberFromReq.Status,
+                    PasswordHash = memberFromReq.Password,
                     AccessLevel = new List<AccessLevel>()
                 };
                 if (memberFromReq.adminAccess) user.AccessLevel.Add(AccessLevel.AccountAdmin);
                 if (memberFromReq.excutive) user.AccessLevel.Add(AccessLevel.Excutive);
                 if (memberFromReq.standardAccess) user.AccessLevel.Add(AccessLevel.StandardAccess);
 
-                var result = await _userManager.CreateAsync(user, "123Aa_");
+                var result = await _userManager.CreateAsync(user, memberFromReq.Password);
                 if (result.Succeeded)
                 {
+                    await signInManager.SignInAsync(user, false);
                     TempData["SuccessMessage"] = "Member added successfully!";
                     return Json(new { success = true });
                 }

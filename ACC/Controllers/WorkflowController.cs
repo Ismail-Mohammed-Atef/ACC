@@ -17,14 +17,16 @@ namespace ACC.Controllers
         private readonly IWorkFlowStepRepository _workFlowStepRepository;
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly WorkflowStepsUsersService _workflowStepsUsersService;
+        private readonly ReviewStepUsersService _reviewStepUsersService;
         private readonly FolderService _folderService;
 
-        public WorkflowController(IWorkflowRepository workflowRepository , IWorkFlowStepRepository workFlowStepRepository, UserManager<ApplicationUser> userManager , WorkflowStepsUsersService workflowStepsUsersService , FolderService folderService)
+        public WorkflowController(IWorkflowRepository workflowRepository , IWorkFlowStepRepository workFlowStepRepository, UserManager<ApplicationUser> userManager , WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , FolderService folderService)
         {
             _workflowRepository = workflowRepository;
             _workFlowStepRepository = workFlowStepRepository;
             UserManager = userManager;
             _workflowStepsUsersService = workflowStepsUsersService;
+            _reviewStepUsersService = reviewStepUsersService;
             _folderService = folderService;
         }
 
@@ -43,6 +45,7 @@ namespace ACC.Controllers
             var WorkflowTemplates = query
                 .Select(c => new WorkflowTemplateViewModel
                 {
+                    Id = c.Id,
                     Name = c.Name,
                     Description = c.Description,
                     Steps = c.Steps.Select(s => new WorkflowStepInputViewModel
@@ -88,6 +91,7 @@ namespace ACC.Controllers
         {
             var template = new WorkflowTemplate
             {
+               
                 ProjectId = vm.proId,
                 Name = vm.Name,
                 Description = vm.Description,
@@ -163,12 +167,162 @@ namespace ACC.Controllers
             return RedirectToAction("Index", new { id = vm.proId });
         }
 
+       [HttpGet]
+       public async Task<IActionResult> EditWorkflow(int id)
+        {
+            var workflowFromDB = _workflowRepository.GetById(id);
+            if (workflowFromDB == null)
+            {
+                return NotFound();
+            }
+
+            var vm = new WorkflowTemplateViewModel
+            {
+                Id= workflowFromDB.Id,
+                proId = workflowFromDB.ProjectId,
+                Name = workflowFromDB.Name,
+                Description = workflowFromDB.Description,
+                CopyApprovedFiles = workflowFromDB.CopyApprovedFiles,
+                SelectedDistFolderId = workflowFromDB.DestinationFolderId,
+                ReviewersType = Enum.GetValues(typeof(ReviewersType)).Cast<ReviewersType>().ToList(),
+                AllFolders = _folderService.GetFolderTree(),
+                applicationUsers = UserManager.Users.ToList()
+            };
+
+            var stepTemplates = workflowFromDB.Steps.OrderBy(s => s.StepOrder).ToList();
+            foreach (var stepTemplate in stepTemplates)
+            {
+                var assignedUsers = _workflowStepsUsersService.GetByStepId(stepTemplate.Id);
+                var stepVM = new WorkflowStepInputViewModel
+                {
+                    StepOrder = stepTemplate.StepOrder,
+                    TimeAllowedInDays = stepTemplate.TimeAllowed,
+                    SelectedReviewersType = stepTemplate.ReviewersType,
+                    MinReviewers = stepTemplate.MinReviewers,
+                    SelectedOption = stepTemplate.MultiReviewerOptions == MultiReviewerOptions.EveryOne
+                                     ? "Every key reviewer must review this step"
+                                     : "Minimum number of reviewers",
+                    AssignedUsersIds = assignedUsers.Select(u => u.UserId).ToList()
+                };
+
+                vm.Steps.Add(stepVM);
+            }
+
+            ViewBag.MultiReviwerOptions = Enum_Helper.GetEnumSelectListWithDisplayNames<MultiReviewerOptions>();
+            ViewBag.Id = workflowFromDB.ProjectId;
+
+            return View("EditWorkflow", vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveWorkflow(WorkflowTemplateViewModel vm)
+        {
+            var template = _workflowRepository.GetById((int)vm.Id);
+
+            if (template == null)
+                return NotFound();
+
+            template.Name = vm.Name;
+            template.Description = vm.Description;
+            template.CopyApprovedFiles = vm.CopyApprovedFiles;
+            template.DestinationFolderId = vm.SelectedDistFolderId;
+
+            var StepsFromVM = vm.Steps.OrderBy(s => s.StepOrder).ToList(); 
+            var stepsFromDB = template.Steps.OrderBy(s => s.StepOrder).ToList();
+
+            for (int i=0; i< template.Steps.Count; i++)
+            {
+                var StepFromVM = StepsFromVM[i];
+                stepsFromDB[i].StepOrder = StepFromVM.StepOrder;
+                stepsFromDB[i].TimeAllowed = StepFromVM.TimeAllowedInDays;
+                stepsFromDB[i].ReviewersType = StepFromVM.SelectedReviewersType;
+                stepsFromDB[i].MinReviewers = StepFromVM.MinReviewers;
+                stepsFromDB[i].MultiReviewerOptions = StepFromVM.SelectedOption == "Every key reviewer must review this step"
+                                            ? MultiReviewerOptions.EveryOne
+                                            : MultiReviewerOptions.MinimumNumber;
+            }
+
+        
+
+            for (int i = 0; i < vm.Steps.Count; i++)
+            {
+                var step = StepsFromVM[i];
+                var savedStep = stepsFromDB[i];
 
 
-    
+                var OldStepUsers = _workflowStepsUsersService.GetByStepId(savedStep.Id);
+
+                foreach (var item in OldStepUsers)
+                {
+
+                    _workflowStepsUsersService.Delete(item);
+
+                }
+
+                _workflowStepsUsersService.Save();
+                savedStep.workflowStepUsers.Clear();
+                foreach (var userId in step.AssignedUsersIds)
+                {
+                    var user = await UserManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        WorkflowStepUser workflowStepUser = new WorkflowStepUser()
+                        {
+                            StepId = savedStep.Id,
+                            UserId = user.Id,
+                        };
+                        _workflowStepsUsersService.Insert(workflowStepUser);
+                        savedStep.workflowStepUsers.Add(workflowStepUser);
+                    }
+                }
+            }
+            _workflowStepsUsersService.Save();
+
+            var reviews = template.Reviews;
+            foreach (var review in reviews)
+            {
+
+
+                for (int i = 0; i < vm.Steps.Count; i++)
+                {
+                    var step = StepsFromVM[i];
+                    var savedStep = stepsFromDB[i];
+
+                    var OldStepUsers = _reviewStepUsersService.GetByStepId(savedStep.Id);
+
+                    foreach (var item in OldStepUsers)
+                    {
+
+                        _reviewStepUsersService.Delete(item);
+
+                    }
+                    _reviewStepUsersService.Save();
+                    foreach (var userId in step.AssignedUsersIds)
+                    {
+                        var user = await UserManager.FindByIdAsync(userId);
+                        if (user != null)
+                        {
+                            ReviewStepUser ReviewStepUser = new ReviewStepUser()
+                            {
+                                StepId = savedStep.Id,
+                                UserId = user.Id,
+                                ReviewId = review.Id
+                            };
+
+                            _reviewStepUsersService.Insert(ReviewStepUser);
+                        }
+                    }
+                }
+
+
+            }
+
+            _workflowRepository.Save();
+
+            return RedirectToAction("Index", new { id = vm.proId });
+        }
 
 
 
     }
 }
-

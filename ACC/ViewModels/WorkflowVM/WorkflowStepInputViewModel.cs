@@ -9,7 +9,7 @@ namespace ACC.ViewModels.WorkflowVM
 
         public int TimeAllowedInDays { get; set; }
 
-        public List<string> AssignedUsersIds { get; set; }
+        public List<string> AssignedUsersIds { get; set; } = new List<string>();
 
         public ReviewersType? SelectedReviewersType { get; set; }
         public string? SelectedOption { get; set; }

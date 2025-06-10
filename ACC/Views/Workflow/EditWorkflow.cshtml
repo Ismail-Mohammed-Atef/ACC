@@ -1,10 +1,12 @@
 ﻿@model ACC.ViewModels.WorkflowVM.WorkflowTemplateViewModel
 
 <div class="container mt-4">
-    <h2>Create New Workflow Template</h2>
+    <h2>Edit Workflow Template</h2>
 
-    <form asp-controller="Workflow" asp-action="EditTemplate" method="post">
-        <input hidden name="proId" value="@ViewBag.Id" />
+    <form asp-controller="Workflow" asp-action="SaveWorkflow" method="post">
+        <input type="hidden" name="proId" value="@ViewBag.Id" />
+        <input type="hidden" asp-for="Id" />
+
         <div class="mb-3">
             <label asp-for="Name" class="form-label">Workflow Name</label>
             <input asp-for="Name" class="form-control" required />
@@ -22,7 +24,6 @@
 
         @for (int i = 0; i < Model.Steps.Count; i++)
         {
-            var step = Model.Steps[i];
             <div class="card mb-3">
                 <div class="card-header bg-light">
                     <strong>Step @(i + 1): @(i == 0 ? "Initial Review" : "Final Approval")</strong>
@@ -32,7 +33,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Reviewer Type</label>
-                        <select name="Steps[@i].SelectedReviewersType"
+                        <select asp-for="Steps[@i].SelectedReviewersType"
                                 class="form-control reviewer-type-selector"
                                 data-step="@i"
                                 asp-items="@(new SelectList(Model.ReviewersType))">
@@ -42,50 +43,69 @@
 
                     <div class="form-group single-reviewers" data-step="@i" style="display:none;">
                         <label class="form-label">Reviewer (Single)</label>
-                        <select name="Steps[@i].AssignedUsersIds" class="form-control">
+                        <select asp-for="Steps[@i].AssignedUsersIds" class="form-control">
                             <option value="">-- Select Reviewer --</option>
                             @foreach (var user in Model.applicationUsers)
                             {
-                                <option value="@user.Id">@user.UserName</option>
+                                if (Model.Steps[i].AssignedUsersIds.Contains(user.Id))
+                                {
+                                    <option value="@user.Id" selected="selected">@user.UserName</option>
+                                }
+                                else
+                                {
+                                    <option value="@user.Id">@user.UserName</option>
+                                }
                             }
                         </select>
                     </div>
 
                     <div class="form-group multi-reviewers" data-step="@i" style="display:none;">
                         <label class="form-label">Reviewers (Multiple)</label>
-                        <select name="Steps[@i].AssignedUsersIds" class="form-control" multiple>
+                        <select asp-for="Steps[@i].AssignedUsersIds" class="form-control" multiple>
                             @foreach (var user in Model.applicationUsers)
                             {
-                                <option value="@user.Id">@user.UserName</option>
+                                if (Model.Steps[i].AssignedUsersIds.Contains(user.Id))
+                                {
+                                    <option value="@user.Id" selected="selected">@user.UserName</option>
+                                }
+                                else
+                                {
+                                    <option value="@user.Id">@user.UserName</option>
+                                }
                             }
                         </select>
+
 
                         <div>
                             <details>
                                 <summary>Advanced Options</summary>
-                                <select name="Steps[@i].SelectedOption" class="form-control">
+                                <select asp-for="Steps[@i].SelectedOption" class="form-control">
                                     <option value="">Select Option</option>
                                     @foreach (var item in ViewBag.MultiReviwerOptions)
                                     {
-                                        <option value="@item.Text">@item.Text</option>
+                                        if (Model.Steps[i].SelectedOption == item.Text)
+                                        {
+                                            <option value="@item.Text" selected="selected">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Text">@item.Text</option>
+                                        }
                                     }
                                 </select>
                             </details>
+
                             <div class="mb-3">
                                 <label asp-for="Steps[@i].MinReviewers" class="form-label">Min Number of Reviewers</label>
                                 <input asp-for="Steps[@i].MinReviewers" class="form-control" type="number" min="1" />
                             </div>
                         </div>
-
-
                     </div>
-
-
                 </div>
             </div>
         }
 
-        <button type="submit" class="btn btn-success">Create Workflow</button>
+        <button type="submit" class="btn btn-success">Update Workflow</button>
         <a asp-controller="Workflow" asp-action="Index" class="btn btn-secondary">Cancel</a>
     </form>
 
@@ -114,12 +134,8 @@
                 }
 
                 select.addEventListener("change", toggleReviewerFields);
-                toggleReviewerFields();
+                toggleReviewerFields(); // Initial load
             });
         });
     </script>
 </div>
-
-
-
-}
