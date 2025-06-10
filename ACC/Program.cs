@@ -1,9 +1,10 @@
-using ACC.Services;
+﻿using ACC.Services;
 using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using BusinessLogic.Services;
 using DataLayer;
 using DataLayer.Models;
+using Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
@@ -80,6 +81,16 @@ namespace ACC
 
 
             var app = builder.Build();
+
+            async Task SeedDataAsync()
+            {
+                using var scope = app.Services.CreateScope();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                await DBInitializer.SeedRolesAsync(roleManager);
+            }
+
+            // ❗ Await it before running the app
+             SeedDataAsync();
 
             if (!app.Environment.IsDevelopment())
             {

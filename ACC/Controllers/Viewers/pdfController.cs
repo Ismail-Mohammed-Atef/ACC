@@ -1,35 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ACC.Controllers.Viewers
 {
     public class PdfController : Controller
     {
         private readonly string _pdfFolder = Path.Combine("wwwroot", "pdfs");
+        private readonly IWebHostEnvironment _env;
 
-        [HttpGet]
-        public IActionResult Upload()
+        public PdfController(IWebHostEnvironment env)
         {
-            return View();
+            _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public IActionResult Upload(string filePath)
         {
-            if (file == null || Path.GetExtension(file.FileName).ToLower() != ".pdf")
-                return BadRequest("Only PDF files are allowed.");
-
-            Directory.CreateDirectory(_pdfFolder);
-
-            var uniqueFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid():N}.pdf";
-            var path = Path.Combine(_pdfFolder, uniqueFileName);
-
-            using (var stream = new FileStream(path, FileMode.Create))
+            if (string.IsNullOrEmpty(filePath) || Path.GetExtension(filePath).ToLower() != ".pdf")
             {
-                await file.CopyToAsync(stream);
+                return BadRequest(new { message = "Invalid or missing PDF file path." });
             }
 
-            return Json(new { filename = uniqueFileName });
-        }
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new { message = "File not found." });
+            }
 
+            // Convert filePath to a relative URL
+            var relativePath = filePath.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+            return Json(new { fileUrl = $"/{relativePath}" });
+        }
     }
 }

@@ -24,6 +24,7 @@
 
         @for (int i = 0; i < Model.Steps.Count; i++)
         {
+            var step = Model.Steps[i];
             <div class="card mb-3">
                 <div class="card-header bg-light">
                     <strong>Step @(i + 1): @(i == 0 ? "Initial Review" : "Final Approval")</strong>
@@ -53,8 +54,8 @@
                                 }
                                 else
                                 {
-                                    <option value="@user.Id">@user.UserName</option>
-                                }
+                                <option value="@user.Id">@user.UserName</option>
+                            }
                             }
                         </select>
                     </div>
@@ -70,8 +71,8 @@
                                 }
                                 else
                                 {
-                                    <option value="@user.Id">@user.UserName</option>
-                                }
+                                <option value="@user.Id">@user.UserName</option>
+                            }
                             }
                         </select>
 
@@ -89,8 +90,8 @@
                                         }
                                         else
                                         {
-                                            <option value="@item.Text">@item.Text</option>
-                                        }
+                                        <option value="@item.Text">@item.Text</option>
+                                    }
                                     }
                                 </select>
                             </details>
@@ -100,7 +101,11 @@
                                 <input asp-for="Steps[@i].MinReviewers" class="form-control" type="number" min="1" />
                             </div>
                         </div>
+
+
                     </div>
+
+
                 </div>
             </div>
         }
@@ -139,3 +144,7 @@
         });
     </script>
 </div>
+
+
+
+}

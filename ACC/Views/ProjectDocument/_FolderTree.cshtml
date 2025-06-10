@@ -89,7 +89,12 @@
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="documentDropdown-@doc.Id">
-                            <li><a class="dropdown-item copy-document" href="#" data-document-id="@doc.Id">Open File</a></li>
+                            <!-- In _DocumentDetails.cshtml or equivalent partial view -->
+                            <li>
+                                <button class="dropdown-item view-document" onclick="openFile(@doc.Id)">
+                                    View File
+                                </button>
+                            </li>
                             <li><a class="dropdown-item copy-document" href="#" data-document-id="@doc.Id">Copy To...</a></li>
                             <li><a class="dropdown-item move-document" href="#" data-document-id="@doc.Id">Move To...</a></li>
                         </ul>
@@ -113,24 +118,57 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Toggle arrow rotation on collapse show/hide
+      document.addEventListener('DOMContentLoaded', function () {
+        // Toggle arrow rotation
         document.querySelectorAll('.toggle-arrow').forEach(arrow => {
-            arrow.addEventListener('click', function () {
+            arrow.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
                 this.classList.toggle('collapsed');
             });
         });
-    });
-        document.addEventListener('DOMContentLoaded', function () {
-        // Existing toggle arrow handler here...
 
-        // Handle document click to load document details (customize URL and target div)
+        // Prevent dropdown-toggle button clicks from bubbling to document-item
+        document.querySelectorAll('.dropdown-toggle').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.stopPropagation(); // Stop click from reaching document-item
+            });
+        });
+
+        // Prevent dropdown menu item clicks from bubbling to document-item
+        document.querySelectorAll('.dropdown-menu .dropdown-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.stopPropagation(); // Stop click from reaching document-item
+
+                // Handle "View File" link specifically
+                if (this.classList.contains('view-file')) {
+                    e.preventDefault(); // Prevent default navigation
+                    const url = this.getAttribute('href');
+                    const contentDiv = document.getElementById('folderContent');
+                    contentDiv.innerHTML = `<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>`;
+
+                    // Fetch file content dynamically (assumes OpenFile returns HTML or JSON)
+                    fetch(url)
+                        .then(res => res.ok ? res.text() : Promise.reject('Failed to load'))
+                        .then(html => contentDiv.innerHTML = html)
+                        .catch(err => contentDiv.innerHTML = `<div class="text-danger">Error loading file content</div>`);
+                }
+            });
+        });
+
+        // Handle document item click
         document.querySelectorAll('.document-item').forEach(docItem => {
-            docItem.addEventListener('click', function () {
+            docItem.addEventListener('click', function (e) {
+                const target = e.target;
+                // Ignore clicks originating from dropdown menu, links, or buttons
+                if (target.closest('.dropdown-menu') || target.closest('a') || target.closest('button')) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
                 const documentId = this.getAttribute('data-document-id');
                 if (!documentId) return;
 
-                // For example, load document details into a right panel div with id="folderContent"
                 const contentDiv = document.getElementById('folderContent');
                 contentDiv.innerHTML = `<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>`;
 
@@ -140,6 +178,12 @@
                     .catch(err => contentDiv.innerHTML = `<div class="text-danger">Error loading document details</div>`);
             });
         });
-    });
 
+        // Prevent all dropdown-item href="#" from refreshing the page
+        document.querySelectorAll('a[href="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        });
+    });
 </script>
