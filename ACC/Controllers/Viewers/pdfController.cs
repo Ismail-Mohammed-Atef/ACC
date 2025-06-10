@@ -14,55 +14,22 @@ namespace ACC.Controllers.Viewers
             _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
-        [HttpGet]
-        public IActionResult Upload()
-        {
-            var filePath = TempData["filePath"] as string;
-
-            if (string.IsNullOrEmpty(filePath))
-            {
-                return BadRequest("No file path provided.");
-            }
-
-            // Ensure the file path is relative to wwwroot
-            if (!filePath.StartsWith(_env.WebRootPath, StringComparison.OrdinalIgnoreCase))
-            {
-                return BadRequest("Invalid file path.");
-            }
-
-            return View(model: filePath);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> Upload(string filePath)
+        public IActionResult Upload(string filePath)
         {
             if (string.IsNullOrEmpty(filePath) || Path.GetExtension(filePath).ToLower() != ".pdf")
             {
-                return BadRequest("Invalid or missing PDF file path.");
+                return BadRequest(new { message = "Invalid or missing PDF file path." });
             }
 
-            var fullSourcePath = filePath; // Already includes WebRootPath from TempData
-            if (!System.IO.File.Exists(fullSourcePath))
+            if (!System.IO.File.Exists(filePath))
             {
-                return NotFound("File not found.");
+                return NotFound(new { message = "File not found." });
             }
 
-            // Ensure the pdfs folder exists
-            Directory.CreateDirectory(_pdfFolder);
-
-            // Generate a unique filename
-            var uniqueFileName = $"{Path.GetFileNameWithoutExtension(filePath)}_{Guid.NewGuid():N}.pdf";
-            var destinationPath = Path.Combine(_pdfFolder, uniqueFileName);
-
-            // Copy the file
-            using (var sourceStream = new FileStream(fullSourcePath, FileMode.Open, FileAccess.Read))
-            using (var destinationStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write))
-            {
-                await sourceStream.CopyToAsync(destinationStream);
-            }
-
-            // Return the filename for the client to use in the PDF viewer
-            return Json(new { filename = uniqueFileName });
+            // Convert filePath to a relative URL
+            var relativePath = filePath.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+            return Json(new { fileUrl = $"/{relativePath}" });
         }
     }
 }

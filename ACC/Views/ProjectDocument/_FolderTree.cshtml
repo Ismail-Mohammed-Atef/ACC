@@ -89,10 +89,11 @@
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="documentDropdown-@doc.Id">
+                            <!-- In _DocumentDetails.cshtml or equivalent partial view -->
                             <li>
-                                <a class="dropdown-item" href="@Url.Action("OpenFile", "ProjectDocument", new { documentId = doc.Id})">
+                                <button class="dropdown-item view-document" onclick="openFile(@doc.Id)">
                                     View File
-                                </a>
+                                </button>
                             </li>
                             <li><a class="dropdown-item copy-document" href="#" data-document-id="@doc.Id">Copy To...</a></li>
                             <li><a class="dropdown-item move-document" href="#" data-document-id="@doc.Id">Move To...</a></li>
