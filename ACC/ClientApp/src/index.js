@@ -476,7 +476,7 @@ async function ifcloader(ifcloaderFragment, world) {
     panelSection.append(exitButton);
   };
   input.click();
-    }
+}
 
 
 

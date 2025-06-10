@@ -8,6 +8,7 @@ namespace DataLayer.Models.ClassHelper
 {
     public class Roles
     {
+
         public const string AccountAdmin = "Account Admin";
         public const string ProjectAdmin = "Project Admin";
         public const string BIMManager = "BIM Manager";
@@ -15,5 +16,6 @@ namespace DataLayer.Models.ClassHelper
         public const string DocumentController = "Document Controller";
         public const string QualityControl = "Quality Control";
         public const string GeneralMember = "General Member";
+
     }
 }

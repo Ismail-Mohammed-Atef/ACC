@@ -6,6 +6,7 @@ namespace ACC.ViewModels.IFCViewerVM
     {
         public int FileId { get; set; }
         public int ProjectId { get; set; }
+        public string? FilePath { get; set; }
         public List<IfcFile> AvailableFiles { get; set; } = new List<IfcFile>();
         public string ViewerJsFile { get; set; }
     }

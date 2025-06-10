@@ -82,6 +82,7 @@ namespace ACC
 
             var app = builder.Build();
 
+
             async Task SeedDataAsync()
             {
                 using var scope = app.Services.CreateScope();
@@ -90,7 +91,8 @@ namespace ACC
             }
 
             // ❗ Await it before running the app
-             SeedDataAsync();
+            SeedDataAsync();
+
 
             if (!app.Environment.IsDevelopment())
             {
