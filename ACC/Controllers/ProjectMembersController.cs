@@ -100,8 +100,12 @@ namespace ACC.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertMemberAsync(InsertMemberVM memberFromReq)
+        public async Task<IActionResult> InsertMemberAsync(InsertMemberVM memberFromReq , int? projId = null)
         {
+            if (projId == null)
+            {
+                projId = projectId;
+            }
             var memebr = _userManager.Users.Where(u=>u.UserName == memberFromReq.Name).FirstOrDefault();
             if (memebr != null)
             {
@@ -149,8 +153,12 @@ namespace ACC.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(string id)
+        public IActionResult Details(string id,int? projid =null)
         {
+            if (projid == null)
+            {
+                projid = projectId;
+            }
             var member = _userManager.Users.FirstOrDefault(u => u.Id == id);
             if (member != null)
             {
@@ -168,8 +176,14 @@ namespace ACC.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateMemberVM member)
+        public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateMemberVM member , int? projid =null)
         {
+
+            if (projid == null)
+            {
+                projid = projectId;
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -216,8 +230,13 @@ namespace ACC.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetUpdatePartial(string id)
+        public IActionResult GetUpdatePartial(string id,int? projId = null)
         {
+            if(projId == null)
+            {
+                projId = projectId;
+            }
+
             if (ModelState.IsValid)
             {
                 var member = _userManager.Users.FirstOrDefault(u => u.Id == id);

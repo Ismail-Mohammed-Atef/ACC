@@ -567,16 +567,18 @@ namespace ACC.Controllers.ProjectDetailsController
             {
                 return NotFound(new { message = "File not found on server." });
             }
-            if(document.FileType.ToLower() == ".ifc")
+            if (document.FileType.ToLower() == ".ifc")
             {
                 var relaPath = filePath.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+
+
                 return Ok(new
                 {
-                    fileUrl = $"/{relaPath}", // e.g., /uploads/1/2/document.pdf
+                    fileUrl = $"/{relaPath}", // e.g., /copied-ifc-files/filename.ifc
                     fileType = document.FileType.ToLower()
                 });
-
             }
+
             if (document.FileType.ToLower() == ".dwg")
             {
                 try
