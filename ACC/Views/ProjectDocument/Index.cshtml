@@ -14,6 +14,11 @@
         padding-left: 0;
     }
 
+    .modal-backdrop {
+        background-color: transparent !important;
+        backdrop-filter: none;
+        background-color: rgba(255, 255, 255, 0.2) !important;
+    }
         .folder-tree .list-group-item {
             border: none;
             padding: 0.3rem 0.5rem;
@@ -129,32 +134,6 @@
     </div>
 </div>
 
-<!-- Add Subfolder Modal -->
-<div class="modal fade" id="addSubfolderModal" tabindex="-1" aria-labelledby="addSubfolderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="addSubfolderForm" method="post" asp-action="CreateFolder" asp-controller="ProjectDocument">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addSubfolderModalLabel">Add Subfolder</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="parentFolderId" id="parentFolderId" />
-                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
-                    <div class="mb-3">
-                        <label for="folderName" class="form-label">Folder Name</label>
-                        <input type="text" class="form-control" id="folderName" name="folderName" required />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create Folder</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- Create Root Folder Modal -->
 <div class="modal fade" id="createRootFolderModal" tabindex="-1" aria-labelledby="createRootFolderModalLabel" aria-hidden="true">
@@ -176,31 +155,6 @@
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Create Folder</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Delete Folder Modal -->
-<div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="post" asp-action="DeleteFolder" asp-controller="ProjectDocument">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteFolderModalLabel">Delete Folder</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="folderId" id="deleteFolderId" />
-                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
-                    <p>Are you sure you want to delete the folder: <strong id="deleteFolderName"></strong>?</p>
-                    <p class="text-danger">This action cannot be undone.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -267,7 +221,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+     document.addEventListener('DOMContentLoaded', function () {
         // Toggle arrow rotation for collapse
         document.querySelectorAll('.toggle-arrow').forEach(arrow => {
             arrow.addEventListener('click', function () {
@@ -318,36 +272,40 @@
                     .catch(err => contentDiv.innerHTML = `<div class="alert alert-danger">Error loading document details</div>`);
             }
 
-            // Handle add subfolder button
-            const subfolderBtn = e.target.closest('.add-subfolder');
-            if (subfolderBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const folderId = subfolderBtn.getAttribute('data-folder-id');
-                document.getElementById('parentFolderId').value = folderId;
-                document.getElementById('folderName').value = '';
-                const addModal = new bootstrap.Modal(document.getElementById('addSubfolderModal'), {
-                    backdrop: true,
-                    keyboard: true
-                });
-                addModal.show();
-            }
+            // // Handle add subfolder button
+            // const subfolderBtn = e.target.closest('.add-subfolder');
+            // console.log(subfolderBtn);
+            // console.log("clicked");
 
-            // Handle delete folder button
-            const deleteBtn = e.target.closest('.delete-folder-btn');
-            if (deleteBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const folderId = deleteBtn.getAttribute('data-folder-id');
-                const folderName = deleteBtn.getAttribute('data-folder-name');
-                document.getElementById('deleteFolderId').value = folderId;
-                document.getElementById('deleteFolderName').textContent = folderName;
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteFolderModal'), {
-                    backdrop: true,
-                    keyboard: true
-                });
-                deleteModal.show();
-            }
+            // if (subfolderBtn) {
+            //     e.preventDefault();
+            //     e.stopPropagation();
+            //     const folderId = subfolderBtn.getAttribute('data-folder-id');
+            //     document.getElementById('parentFolderId').value = folderId;
+            //     document.getElementById('folderName').value = '';
+            //     const addModal = new bootstrap.Modal(document.getElementById('addSubfolderModal'), {
+            //         backdrop: true,
+            //         keyboard: true
+            //     });
+            //     addModal.show();
+            // }
+
+
+            // // Handle delete folder button
+            // const deleteBtn = e.target.closest('.delete-folder-btn');
+            // if (deleteBtn) {
+            //     e.preventDefault();
+            //     e.stopPropagation();
+            //     const folderId = deleteBtn.getAttribute('data-folder-id');
+            //     const folderName = deleteBtn.getAttribute('data-folder-name');
+            //     document.getElementById('deleteFolderId').value = folderId;
+            //     document.getElementById('deleteFolderName').textContent = folderName;
+            //     const deleteModal = new bootstrap.Modal(document.getElementById('deleteFolderModal'), {
+            //         backdrop: true,
+            //         keyboard: true
+            //     });
+            //     deleteModal.show();
+            // }
         });
 
         // Fallback for all modal close/cancel buttons
@@ -424,6 +382,7 @@
                 .catch(() => alert("Error processing request."));
         });
     });
+
        async function openFile(documentId) {
         const fileModal = new bootstrap.Modal(document.getElementById("fileModal"));
         const fileViewer = document.getElementById("fileViewer");
@@ -451,11 +410,15 @@
                 } else if (data.fileType === ".png" || data.fileType === ".jpg") {
                     fileViewer.innerHTML = `<img src="${data.fileUrl}" style="max-width: 100%; height: auto;" />`;
                     fileModal.show();
-                } else {
+                }else if (data.fileType === ".ifc"){
+                      const viewerUrl = `/IfcViewer?filePath=${encodeURIComponent(data.fileUrl)}`;
+                      window.location.href = viewerUrl;
+                }
+                else {
                     throw new Error("Unsupported file type: " + data.fileType);
                 }
             } else {
-               
+
 
                 throw new Error("Invalid response from server.");
             }

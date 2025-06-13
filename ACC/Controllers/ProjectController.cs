@@ -115,7 +115,6 @@ namespace ACC.Controllers
 
         #endregion
 
-
         [HttpPost]
         public IActionResult Delete(int id)
         {
