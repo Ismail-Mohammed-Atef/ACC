@@ -142,7 +142,11 @@
                         </div>
                         <div class="col-md-3">
                             <label asp-for="EndDate" class="form-label">End date <span class="required">*</span></label>
-                            <input type="date" class="form-control" asp-for="EndDate" />
+                            <input type="date" class="form-control"
+                                   asp-for="EndDate"
+                                   data-val="true"
+                                   data-val-greaterthanstart="End date must be greater than the start date."
+                                   data-val-greaterthanstart-other="StartDate" />
                             <span asp-validation-for="EndDate" class="text-danger"></span>
                         </div>
                     </div>

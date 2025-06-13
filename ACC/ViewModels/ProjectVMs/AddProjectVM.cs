@@ -21,14 +21,14 @@ namespace ACC.ViewModels.ProjectVMs
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string? Address { get; set; }
 
+
         [Required(ErrorMessage = "Start date is required.")]
-        [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
         public DateTime? StartDate { get; set; }
 
         [Required(ErrorMessage = "End date is required.")]
-        [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
-        [CustomValidation(typeof(AddProjectVM), "ValidateEndDate")]
+        [CustomValidation(typeof(AddProjectVM), nameof(ValidateEndDate))]
         public DateTime? EndDate { get; set; }
+
 
         public DateTime? CreationDate { get; set; }
 

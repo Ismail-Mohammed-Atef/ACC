@@ -366,6 +366,20 @@
         });
     </script>
 
+	<script>
+		$.validator.addMethod("greaterthanstart", function (value, element, param) {
+			var startDate = $(param).val();
+			if (!startDate || !value) return true; // let Required handle it
+			return new Date(value) > new Date(startDate);
+		}, "End date must be greater than the start date.");
+
+		$.validator.unobtrusive.adapters.add("greaterthanstart", ["other"], function (options) {
+			options.rules["greaterthanstart"] = "#" + options.params.other;
+			options.messages["greaterthanstart"] = options.message;
+		});
+	</script>
+
+
 	
 
 
