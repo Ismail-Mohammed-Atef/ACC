@@ -137,5 +137,16 @@ namespace ACC.Controllers.Viewers
                 return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
         }
+
+        //issue 
+        [HttpGet]
+        public IActionResult OpenDwg(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+                return NotFound("DWG file not found.");
+
+            return View("Upload", model: filePath);
+        }
+
     }
 }

@@ -16,11 +16,20 @@ namespace BusinessLogic.Repository.RepositoryClasses
 
 
 
-        public List<Issue> GetIssuesByUserId(string userID , int projectId)
+        public List<Issue> GetIssuesByUserId(string userID, int projectId)
         {
-            return _context.Issues.Include(i=>i.IssueReviwers).Include(i => i.Document).Where(i => (i.InitiatorID== userID || i.IssueReviwers.Any(r=>r.ReviewerId == userID)) && i.ProjectId == projectId).ToList();
+            return _context.Issues
+                .Include(i => i.IssueReviwers)
+                .Include(i => i.Document)
+                    .ThenInclude(d => d.Versions) // ✅ مهم جدًا
+                .Where(i =>
+                    (i.InitiatorID == userID ||
+                     i.IssueReviwers.Any(r => r.ReviewerId == userID))
+                     && i.ProjectId == projectId)
+                .ToList();
         }
 
-      
+
+
     }
 }

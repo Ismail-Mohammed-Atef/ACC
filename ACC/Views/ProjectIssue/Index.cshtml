@@ -5,9 +5,12 @@
     Layout = "_ProjectLayout";
 }
 
+
+
 <h2>Project Issues</h2>
 
-<a asp-action="Create" class="btn btn-primary">Create New Issue</a>
+@* <a asp-action="Create" class="btn btn-primary">Create New Issue</a> *@
+<a asp-action="Create" asp-route-id="@ViewBag.Id" class="btn btn-primary">Create New Issue</a>
 
 <table class="table">
     <thead>
@@ -37,18 +40,37 @@
                 <td>
                     @if (issue.DocumentId.HasValue)
                     {
-                        <a asp-controller="ProjectDocument" asp-action="Download" asp-route-versionId="@issue.DocumentId" asp-route-projectId="@issue.ProjectId">Download</a>
+                        <a asp-controller="ProjectDocument"
+                           asp-action="Download"
+                           asp-route-versionId="@issue.DocumentId"
+                           asp-route-projectId="@issue.ProjectId"
+                           class="btn btn-sm btn-outline-primary">
+                            Download
+                        </a>
+                        <a href="@Url.Action("OpenFromIssue", "ProjectDocument", new { versionId = issue.DocumentId, projectId = issue.ProjectId })"
+                           class="btn btn-primary btn-sm">
+                            Open
+                        </a>
+
+                        <span class="badge bg-info ms-2">
+                            @issue.Status.ToString()
+                        </span>
                     }
                     else
                     {
                         <span>No Attachment</span>
                     }
                 </td>
+
+
                 <td>
                     <a asp-action="Edit" asp-route-id="@issue.Id" class="btn btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@issue.Id" class="btn btn-danger">Delete</a>
+
+                    @* <a asp-action="Edit" asp-route-id="@issue.Id" class="btn btn-warning">Edit</a> *@
+                    @* <a asp-action="Delete" asp-route-id="@issue.Id" class="btn btn-danger">Delete</a> *@
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
