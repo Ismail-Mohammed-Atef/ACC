@@ -1,6 +1,7 @@
 ﻿using ACC.Controllers.Viewers;
 using ACC.Services;
 using ACC.ViewModels.ProjectDocumentsVM;
+using Aspose.CAD.FileFormats.Ifc.IFC4.Entities;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
 using DataLayer.Models;
@@ -199,21 +200,35 @@ namespace ACC.Controllers.ProjectDetailsController
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteFolderConfirmed(int folderId)
         {
-            var folder = _folderRepository.GetAllQueryable().Include(f => f.SubFolders).Include(f => f.Documents).Where(f => f.Id == folderId).FirstOrDefault();
+            var folder = _folderRepository.GetAllQueryable()
+                .Include(f => f.SubFolders)
+                .Include(f => f.Documents)
+                .FirstOrDefault(f => f.Id == folderId);
+
             if (folder == null)
                 return NotFound();
+
+            // 
+            var protectedFolders = new[] { "Work In Progress", "Shared", "Published", "Archive" };
+            if (protectedFolders.Contains(folder.Name, StringComparer.OrdinalIgnoreCase) && folder.ParentFolderId == null)
+            {
+                TempData["Error"] = $"Cannot delete protected folder: {folder.Name}.";
+                return RedirectToAction("Index", new { id = folder.ProjectId });
+            }
 
             if (folder.SubFolders.Any())
             {
                 TempData["Error"] = "Cannot delete a folder that has subfolders.";
-                return RedirectToAction(nameof(Index), id);
+                return RedirectToAction(nameof(Index), folder.ProjectId);
             }
 
             _folderRepository.Delete(folder);
             _folderRepository.Save();
 
-            return RedirectToAction(nameof(Index));
+            TempData["Success"] = "Folder deleted successfully.";
+            return RedirectToAction(nameof(Index), new { id = folder.ProjectId });
         }
+
 
         [HttpGet]
         public IActionResult CreateRoot(int projectId)
@@ -670,5 +685,70 @@ namespace ACC.Controllers.ProjectDetailsController
                 fileType = document.FileType.ToLower()
             });
         }
+        //ibrahim Issue important  to open files from issues
+        // ProjectDocumentController.cs
+        [HttpGet]
+        public async Task<IActionResult> OpenFromIssue(int versionId, int projectId)
+        {
+            var version = await _context.DocumentVersions
+                .Include(v => v.Document)
+                .FirstOrDefaultAsync(v => v.Id == versionId);
+
+            if (version == null || version.Document == null)
+                return NotFound("Document version not found.");
+
+            var extension = version.Document.FileType?.ToLower();
+
+            if (extension == ".ifc")
+            {
+                // ابحث عن ملف IFC في جدول IfcFiles
+                var ifcFile = await _context.IfcFiles
+                    .FirstOrDefaultAsync(f => f.FilePath == version.FilePath && f.ProjectId == projectId);
+
+                if (ifcFile == null)
+                {
+                    // تسجله تلقائياً لو مش موجود
+                    ifcFile = new IfcFile
+                    {
+                        FileName = version.Document.Name + ".ifc",
+                        FilePath = version.FilePath,
+                        ProjectId = projectId,
+                        UploadedBy = User.Identity.Name ?? "System",
+                        UploadDate = DateTime.UtcNow
+                    };
+                    _context.IfcFiles.Add(ifcFile);
+                    await _context.SaveChangesAsync();
+                }
+
+                // فتح الفيوير
+                return RedirectToAction("Index", "IfcViewer", new { fileId = ifcFile.Id, projectId });
+            }
+
+            // لو PDF
+            if (extension == ".pdf")
+            {
+                return RedirectToAction("ViewPdf", "Pdf", new { filePath = version.FilePath });
+            }
+
+            // لو صورة
+            if (extension == ".jpg" || extension == ".png" || extension == ".jpeg")
+            {
+                return RedirectToAction("OpenImage", "Image", new { filePath = version.FilePath });
+            }
+
+            // لو DWG (يتم تحويله إلى PDF أو عرضه حسب تنفيذك)
+            if (extension == ".dwg")
+            {
+                return RedirectToAction("OpenDwg", "Dwg", new { filePath = version.FilePath });
+            }
+
+            return BadRequest("Unsupported file type.");
+        }
+
+
+
+
     }
+
 }
+

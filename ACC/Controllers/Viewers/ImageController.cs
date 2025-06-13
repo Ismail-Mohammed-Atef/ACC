@@ -72,5 +72,15 @@ namespace ACC.Controllers.Viewers
             // Return the filename for the client to use in the image viewer
             return Json(new { filename = uniqueFileName });
         }
+        //issue 
+        [HttpGet]
+        public IActionResult OpenImage(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+                return NotFound("Image file not found.");
+
+            return View("Upload", model: filePath);
+        }
+
     }
 }

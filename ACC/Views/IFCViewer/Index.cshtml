@@ -144,12 +144,13 @@
         </div>
     </div>
 </div>
-    <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
+<script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
+<script>
+    const fileId = @Model.FileId;
+    if (fileId > 0) {
+        const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
+        window.loadIfcFile(url);
+    }
+</script>
 
-        const fileId = @Model.FileId;
-        if (fileId > 0) {
-            const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
-            window.loadIfcFile(url);
-        }
-    </script>
 }
