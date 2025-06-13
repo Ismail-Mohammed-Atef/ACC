@@ -29,7 +29,6 @@ namespace ACC.ViewModels.ProjectVMs
         [CustomValidation(typeof(AddProjectVM), nameof(ValidateEndDate))]
         public DateTime? EndDate { get; set; }
 
-
         public DateTime? CreationDate { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "Project value must be a positive number.")]
@@ -38,7 +37,13 @@ namespace ACC.ViewModels.ProjectVMs
         [Required(ErrorMessage = "Currency is required.")]
         public Currency? Currency { get; set; }
 
-   
+
+        [Display(Name = "Latitude")]
+        public double? Latitude { get; set; }
+
+        [Display(Name = "Longitude")]
+        public double? Longitude { get; set; }
+
 
         // Custom validation method for EndDate
         public static ValidationResult? ValidateEndDate(DateTime? endDate, ValidationContext context)

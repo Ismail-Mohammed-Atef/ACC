@@ -257,7 +257,7 @@
 
 			<partial name="PartialViews/_AddProjectPartialView" model="new AddProjectVM()" />
 		</div>
-	</div> 
+	</div>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -349,22 +349,22 @@
 				});
 			});
 
-            $(document).on("click", ".restore-project", function (e) {
-                e.preventDefault();
-                var projectId = $(this).data("id");
-                $.ajax({
-                    url: "/Project/Restore/" + projectId,
-                    type: "POST",
-                    success: function () {
-                        location.reload();
-                    },
-                    error: function () {
-                        alert("Error restoring project.");
-                    }
-                });
-            });
-        });
-    </script>
+			$(document).on("click", ".restore-project", function (e) {
+				e.preventDefault();
+				var projectId = $(this).data("id");
+				$.ajax({
+					url: "/Project/Restore/" + projectId,
+					type: "POST",
+					success: function () {
+						location.reload();
+					},
+					error: function () {
+						alert("Error restoring project.");
+					}
+				});
+			});
+		});
+	</script>
 
 	<script>
 		$.validator.addMethod("greaterthanstart", function (value, element, param) {
@@ -380,7 +380,113 @@
 	</script>
 
 
-	
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqbWUXIAolPajv3pLIleGfeg1RE0i6FjA"></script>
+
+	<script>
+		let map, marker;
+
+		console.log("✅ Script loaded. Checking Google Maps API...");
+		console.log("google:", typeof google !== "undefined" ? "✅ defined" : "❌ not defined");
+		console.log("google.maps:", typeof google !== "undefined" && typeof google.maps !== "undefined" ? "✅ defined" : "❌ not defined");
+
+		function updateLatLngDisplay(lat, lng) {
+			console.log("📌 Updating Lat/Lng to:", lat, lng);
+			$("#lat-display").text(lat.toFixed(6));
+			$("#lng-display").text(lng.toFixed(6));
+		}
+
+		function reverseGeocodeWithNominatim(lat, lng) {
+			const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+			console.log("🌍 Fetching address from Nominatim:", url);
+
+			fetch(url, {
+				headers: {
+					'User-Agent': 'YourAppName/1.0 (your@email.com)'
+				}
+			})
+			.then(res => res.json())
+			.then(data => {
+				if (data && data.display_name) {
+					const address = data.display_name;
+					console.log("📍 Address resolved:", address);
+					$("[name='Address']").val(address);
+				} else {
+					console.warn("⚠️ No address found in response.");
+				}
+			})
+			.catch(err => console.error("❌ Nominatim error:", err));
+		}
+
+		function initMap() {
+			console.log("📍 initMap called");
+			const mapEl = document.getElementById("map");
+
+			if (!mapEl) {
+				console.error("❌ Map container NOT found in DOM at initMap time.");
+				return;
+			}
+
+			const h = $(mapEl).height();
+			const w = $(mapEl).width();
+			console.log(`📐 Map container size: ${w}px × ${h}px`);
+
+			if (h === 0 || w === 0) {
+				console.warn("⚠️ Map container is not visible (zero size). Retrying...");
+				setTimeout(initMap, 300);
+				return;
+			}
+
+			const defaultLoc = { lat: 30.0444, lng: 31.2357 };
+
+			map = new google.maps.Map(mapEl, {
+				zoom: 6,
+				center: defaultLoc
+			});
+
+			marker = new google.maps.Marker({
+				position: defaultLoc,
+				map: map,
+				draggable: true
+			});
+
+			$("#Latitude").val(defaultLoc.lat);
+			$("#Longitude").val(defaultLoc.lng);
+			updateLatLngDisplay(defaultLoc.lat, defaultLoc.lng);
+			reverseGeocodeWithNominatim(defaultLoc.lat, defaultLoc.lng);
+
+			map.addListener("click", function (e) {
+				const lat = e.latLng.lat();
+				const lng = e.latLng.lng();
+				console.log("🖱️ Map clicked:", lat, lng);
+				marker.setPosition(e.latLng);
+				$("#Latitude").val(lat);
+				$("#Longitude").val(lng);
+				updateLatLngDisplay(lat, lng);
+				reverseGeocodeWithNominatim(lat, lng);
+			});
+
+			google.maps.event.trigger(map, 'resize');
+			map.setCenter(marker.getPosition());
+			console.log("✅ Map initialized successfully");
+		}
+
+		const modalEl = document.getElementById('addProjectModal');
+		if (modalEl) {
+			modalEl.addEventListener('shown.bs.modal', function () {
+				console.log("🟢 Modal shown – attempting to initialize map in 300ms...");
+				setTimeout(() => {
+					try {
+						initMap();
+					} catch (e) {
+						console.error("💥 Error inside initMap:", e);
+					}
+				}, 300);
+			});
+		} else {
+			console.warn("⚠️ Modal element #addProjectModal not found.");
+		}
+	</script>
+
 
 
 </body>
