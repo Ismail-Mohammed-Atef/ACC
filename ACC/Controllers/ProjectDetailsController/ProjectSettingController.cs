@@ -127,6 +127,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
                 projectRepo.Update(existing);
                 projectRepo.Save();
+                ViewBag.Id = existing.Id;
 
                 return Json(new { success = true, newAddress = project.Address });
             }

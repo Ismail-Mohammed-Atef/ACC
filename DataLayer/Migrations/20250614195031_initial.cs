@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -103,6 +103,8 @@ namespace DataLayer.Migrations
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ProjectValue = table.Column<double>(type: "float", nullable: true),
                     Currency = table.Column<int>(type: "int", nullable: true),
+                    Latitude = table.Column<double>(type: "float", nullable: true),
+                    Longitude = table.Column<double>(type: "float", nullable: true),
                     IsArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>

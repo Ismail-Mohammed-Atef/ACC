@@ -2,6 +2,9 @@
 @using Helpers;
 
 @model List<DisplayProjectsVM>
+@{
+    Layout = "_Layout";
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -268,7 +271,7 @@
 			$(document).on("click", ".project-row", function (e) {
 				if (!$(e.target).closest(".dropdown").length) {
 					var projectId = $(this).data("project-id");
-					window.location.href = "/ProjectSetting/Index?id=" + projectId;
+					window.location.href = "/ProjectMembers/Index?ProjectId=" + projectId;
 				}
 			});
 
