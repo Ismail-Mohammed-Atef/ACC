@@ -2,7 +2,6 @@
 @using ACC.ViewModels.MemberVM.MemberVM
 @{
     var companies = new SelectList(ViewBag.Companies, "Id", "Name");
-    var roles = new SelectList(ViewBag.Roles, "Id", "Name");
 }
 
 @model List<MemberVM>
@@ -34,7 +33,6 @@
                         <th>Name</th>
                         <th>Status</th>
                         <th>Company</th>
-                        <th>Default Role</th>
                         <th>Access Level</th>
                         <th>Added On</th>
                         <th><i class="fas fa-cog"></i></th>
@@ -47,13 +45,7 @@
                             <td>@member.Name</td>
                             <td>@member.Status</td>
                             <td>@member.Company</td>
-                            <td>@member.Role</td>
-                            <td>
-                                @foreach (var accessLevel in member.AccessLevels)
-                                {
-                                    <span>@accessLevel</span>
-                                }
-                            </td>
+                            <td>@member.GlobalAccessLevel</td>
                             <td>@member.AddedOn</td>
                             <td>
                                 <div class="action-btn">
@@ -121,7 +113,6 @@
                             <td>${member.name}</td>
                             <td>${member.status}</td>
                             <td>${member.company}</td>
-                            <td>${member.role}</td>
                             <td>${accessLevels}</td>
                             <td>${member.addedOn}</td>
                             <td>
@@ -239,6 +230,10 @@
                 $("#memberDetailsPanel").removeClass("show");
             });
 
+
+
+
+
             $(document).on("click", "#updateMemberBtn", function (e) {
                 e.preventDefault();
                 var memberId = $(".member-row.active").data("id");
@@ -248,15 +243,14 @@
                     return;
                 }
 
-                var member = {
-                    Email: $("#memberEmail").val(),
-                    RoleId: $("#memberRole").val() || null,
-                    CompanyId: $("#memberCompany").val() || null,
-                    Status: $("#memberStatus").val(),
-                    adminAccess: $("#adminAccess").is(":checked"),
-                    excutive: $("#excutive").is(":checked"),
-                    standardAccess: $("#standardAccess").is(":checked"),
+                       var member = {
+                    email: $("#memberEmail").val(),
+                    globalAccessLevelID: $("#memberRole").val() || null,
+                    companyId: $("#memberCompany").val() || null,
+                    status: $("#memberStatus").val(),
+               
                 };
+
                 console.log("Sending memberData:", JSON.stringify(member));
                 $.ajax({
                     url: "/Member/Update/" + memberId,

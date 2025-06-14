@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class @new : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,6 +16,10 @@ namespace DataLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    GloblaAccesLevel = table.Column<bool>(type: "bit", nullable: false),
+                    ProjectAccessLevel = table.Column<bool>(type: "bit", nullable: false),
+                    ProjectPosition = table.Column<bool>(type: "bit", nullable: false),
+                    Permission = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -107,19 +111,6 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Transmittals",
                 columns: table => new
                 {
@@ -155,6 +146,43 @@ namespace DataLayer.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: true),
+                    AddedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AccessLevelId = table.Column<int>(type: "int", nullable: false),
+                    AccessLevel = table.Column<int>(type: "int", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Companies_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Companies",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -252,71 +280,6 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: true),
-                    RoleId = table.Column<int>(type: "int", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: true),
-                    AccessLevel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AddedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_Companies_CompanyId",
-                        column: x => x.CompanyId,
-                        principalTable: "Companies",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DocumentVersions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DocumentId = table.Column<int>(type: "int", nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VersionNumber = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DocumentVersions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_DocumentVersions_Documents_DocumentId",
-                        column: x => x.DocumentId,
-                        principalTable: "Documents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -362,7 +325,8 @@ namespace DataLayer.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProjectId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -379,6 +343,11 @@ namespace DataLayer.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -397,6 +366,54 @@ namespace DataLayer.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectMembers",
+                columns: table => new
+                {
+                    MemberId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectMembers", x => new { x.ProjectId, x.MemberId });
+                    table.ForeignKey(
+                        name: "FK_ProjectMembers_AspNetUsers_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectMembers_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DocumentVersions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DocumentId = table.Column<int>(type: "int", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UploadedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VersionNumber = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DocumentVersions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DocumentVersions_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -435,31 +452,6 @@ namespace DataLayer.Migrations
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Issues_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProjectMembers",
-                columns: table => new
-                {
-                    MemberId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProjectId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProjectMembers", x => new { x.ProjectId, x.MemberId });
-                    table.ForeignKey(
-                        name: "FK_ProjectMembers_AspNetUsers_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProjectMembers_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -723,6 +715,11 @@ namespace DataLayer.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_ProjectId",
+                table: "AspNetUserRoles",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
                 table: "AspNetUserRoles",
                 column: "RoleId");
@@ -736,11 +733,6 @@ namespace DataLayer.Migrations
                 name: "IX_AspNetUsers_CompanyId",
                 table: "AspNetUsers",
                 column: "CompanyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_RoleId",
-                table: "AspNetUsers",
-                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -950,9 +942,6 @@ namespace DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Companies");
-
-            migrationBuilder.DropTable(
-                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Projects");

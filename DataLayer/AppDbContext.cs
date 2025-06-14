@@ -13,7 +13,15 @@ using System.Threading.Tasks;
 
 namespace DataLayer
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser>
+    public class AppDbContext : IdentityDbContext<
+    ApplicationUser,
+    ApplicationRole,
+    string,
+    IdentityUserClaim<string>,
+    ApplicationUserRole,
+    IdentityUserLogin<string>,
+    IdentityRoleClaim<string>,
+    IdentityUserToken<string>>
     {
         public AppDbContext(DbContextOptions options):base(options)
         {
@@ -33,18 +41,18 @@ namespace DataLayer
                 .WithMany(p => p.Members)
                 .HasForeignKey(pm => pm.ProjectId);
 
-            builder.Entity<ProjectActivities>()
-                .HasOne(pm => pm.project)
-                .WithMany(p => p.Activities)
-                .HasForeignKey(pm => pm.projectId);
-
             builder.Entity<ProjectMembers>()
                 .HasOne(pm => pm.Member)
                 .WithMany(u => u.Projects)
                 .HasForeignKey(pm => pm.MemberId);
 
+            builder.Entity<ProjectActivities>()
+               .HasOne(pm => pm.project)
+               .WithMany(p => p.Activities)
+               .HasForeignKey(pm => pm.projectId);
 
-           
+
+
 
             builder.Entity<ProjectCompany>()
         .HasKey(pc => new { pc.ProjectId, pc.CompanyId }); // Composite Key
@@ -161,7 +169,25 @@ namespace DataLayer
                 .HasForeignKey(rd => rd.ReviewerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-                 
+            //Roles and permissions ------------------------------------
+
+            builder.Ignore<IdentityUserRole<string>>();
+            // Composite Key: ApplicationUserRole
+            builder.Entity<ApplicationUserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            builder.Entity<ApplicationUserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
+
+            builder.Entity<ApplicationUserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId);
+
+
+
 
         }
 
@@ -171,7 +197,6 @@ namespace DataLayer
         public DbSet<DocumentVersion> DocumentVersions { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectMembers> ProjectMembers { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
         public DbSet<Issue> Issues { get; set; }
@@ -187,13 +212,12 @@ namespace DataLayer
         public DbSet<ReviewDocument> ReviewDocuments { get; set; }
         public DbSet<ReviewStepUser> ReviewStepUsers { get; set; }
         public DbSet<WorkflowStepUser> WorkflowStepUsers { get; set; }
-
-
-
-
         public DbSet<IssueReviwers> IssueReviwers { get; set; }
 
+        public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
 
+
+        //------------------------------------------------------------------------------
 
     }
 }

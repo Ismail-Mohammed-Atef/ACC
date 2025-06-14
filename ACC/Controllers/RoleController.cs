@@ -1,6 +1,7 @@
 ﻿using ACC.ViewModels.RoleVM;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -8,20 +9,19 @@ namespace ACC.Controllers
 {
     public class RoleController : Controller
     {
-        private readonly IRoleRepository _roleRepository;
+        private readonly RoleManager<ApplicationRole> _roleManamger;
 
-        public RoleController(IRoleRepository roleRepository)
+        public RoleController(RoleManager<ApplicationRole> roleManamger)
         {
-            this._roleRepository = roleRepository;
+            _roleManamger = roleManamger;
         }
         public IActionResult Index()
         {
-            var Roles = _roleRepository.GetAll();
+            var Roles = _roleManamger.Roles.Where(r=>r.ProjectPosition == true);
 
 
             var roleViewModel = Roles.Select(x => new RoleViewModel
             {
-
                 RoleName = x.Name
             }).ToList();
             return View(roleViewModel);
@@ -32,18 +32,22 @@ namespace ACC.Controllers
 
 
         [HttpPost]
-        public IActionResult AddRole(string roleName)
+        public async Task<IActionResult> AddRole(string roleName)
         {
             if (!string.IsNullOrWhiteSpace(roleName))
             {
-                var existingRole = _roleRepository.GetAll().FirstOrDefault(r => r.Name == roleName);
+                var existingRole = await _roleManamger.FindByNameAsync(roleName);
                 if (existingRole == null)
                 {
-                    var newRole = new Role { Name = roleName };
-                    _roleRepository.Insert(newRole);
-                    _roleRepository.Save();
+                    var newRole = new ApplicationRole { Name = roleName , ProjectPosition = true };
+                    var result = await _roleManamger.CreateAsync(newRole);
 
-                    return Json(new { success = true, message = "Role added successfully", role = newRole.Name });
+                    if (result.Succeeded)
+                    {
+                        return Json(new { success = true, message = "Role added successfully", role = newRole.Name });
+                    }
+
+                    return Json(new { success = false, message = "Failed to add role", errors = result.Errors });
                 }
                 return Json(new { success = false, message = "Role already exists" });
             }
@@ -52,22 +56,24 @@ namespace ACC.Controllers
 
 
         [HttpPost]
-        public IActionResult DeleteRole(string roleName)
+        public async Task<IActionResult> DeleteRole(string roleName)
         {
             if (!string.IsNullOrWhiteSpace(roleName))
             {
-                var roleToDelete = _roleRepository.GetAll().FirstOrDefault(r => r.Name == roleName);
+                var roleToDelete = await _roleManamger.FindByNameAsync(roleName);
                 if (roleToDelete != null)
                 {
-                    _roleRepository.Delete(roleToDelete);
-                    _roleRepository.Save();
+                    var result = await _roleManamger.DeleteAsync(roleToDelete);
+                    if (result.Succeeded)
+                        return Json(new { success = true, message = "Role deleted successfully" });
 
-                    return Json(new { success = true, message = "Role deleted successfully" });
+                    return Json(new { success = false, message = "Failed to delete role", errors = result.Errors });
                 }
                 return Json(new { success = false, message = "Role not found" });
             }
             return Json(new { success = false, message = "Invalid role name" });
         }
+
 
 
     }

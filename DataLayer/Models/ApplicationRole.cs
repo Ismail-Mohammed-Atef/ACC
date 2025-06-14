@@ -9,6 +9,13 @@ namespace DataLayer.Models
 {
     public class ApplicationRole : IdentityRole
     {
+        public ICollection<ApplicationUserRole> UserRoles { get; set; }
+
+        public bool GloblaAccesLevel { get; set; } = false;
+        public bool ProjectAccessLevel { get; set; } = false;
+        public bool ProjectPosition {  get; set; } = false;
+
+        public bool Permission {  get; set; } = false;
 
     }
 }
