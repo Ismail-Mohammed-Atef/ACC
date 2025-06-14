@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ACC.ViewModels;
 using BusinessLogic.Repository.RepositoryInterfaces;
-using DataLayer.Models.Enums;
-using ACC.ViewModels;
 using DataLayer.Models;
-using System.Linq;
-using System;
-using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using BusinessLogic.Repository.RepositoryClasses;
-using Microsoft.CodeAnalysis;
+using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 
 
 namespace ACC.Controllers
@@ -55,12 +50,12 @@ namespace ACC.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
             ViewBag.CurrentPage = page;
 
-         
+
             return View("Index", companiesListModel);
         }
 
 
-     
+
 
 
      
@@ -102,7 +97,7 @@ namespace ACC.Controllers
 
                 _companyRepository.Insert(company);
                 _companyRepository.Save();
-                _projectActivityRepository.AddNewActivity(company,null);
+                _projectActivityRepository.AddNewActivity(company, null);
 
                 return RedirectToAction("Index");
             }
@@ -137,8 +132,8 @@ namespace ACC.Controllers
             return RedirectToAction("Index");
         }
 
-       
-       
+
+
 
 
         public IActionResult Details(int id)
@@ -165,8 +160,8 @@ namespace ACC.Controllers
                             .Cast<CompanyType>()
                             .Select(c => new
                             {
-                                Value = (int)c,     
-                                Text = c.ToString() 
+                                Value = (int)c,
+                                Text = c.ToString()
                             }).ToList(),
 
 
@@ -175,8 +170,8 @@ namespace ACC.Controllers
                             .Cast<Country>()
                             .Select(c => new
                             {
-                                Value = (int)c, 
-                                Text = c.ToString() 
+                                Value = (int)c,
+                                Text = c.ToString()
                             }).ToList()
 
 
@@ -187,7 +182,7 @@ namespace ACC.Controllers
 
 
         [HttpPost]
-        public IActionResult UpdateCompany( int id ,[FromBody] UpdatedCompanyVM model)
+        public IActionResult UpdateCompany(int id, [FromBody] UpdatedCompanyVM model)
         {
             if (!ModelState.IsValid)
             {
@@ -207,9 +202,9 @@ namespace ACC.Controllers
                 company.Description = model.Description;
                 company.Website = model.Website;
                 company.PhoneNumber = model.PhoneNumber;
-                company.CompanyType = (CompanyType)Enum.Parse(typeof(CompanyType), model.SelectedCompanyType); 
+                company.CompanyType = (CompanyType)Enum.Parse(typeof(CompanyType), model.SelectedCompanyType);
                 company.Country = (Country)Enum.Parse(typeof(Country), model.SelectedCountry);
-                
+
                 _companyRepository.Update(company);
                 _companyRepository.Save();
 
@@ -224,7 +219,7 @@ namespace ACC.Controllers
 
         public IActionResult CheckName(string name)
         {
-            Company company = _companyRepository.GetCompanyByName(name);    
+            Company company = _companyRepository.GetCompanyByName(name);
 
             if (company == null)
             {

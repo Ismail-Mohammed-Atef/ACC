@@ -178,6 +178,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 return RedirectToAction("Index", new { projectId });
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> DeleteFolder(int? folderId)
         {
@@ -565,6 +566,17 @@ namespace ACC.Controllers.ProjectDetailsController
             if (!System.IO.File.Exists(filePath))
             {
                 return NotFound(new { message = "File not found on server." });
+            }
+            if (document.FileType.ToLower() == ".ifc")
+            {
+                var relaPath = filePath.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+
+
+                return Ok(new
+                {
+                    fileUrl = $"/{relaPath}", // e.g., /copied-ifc-files/filename.ifc
+                    fileType = document.FileType.ToLower()
+                });
             }
 
             if (document.FileType.ToLower() == ".dwg")

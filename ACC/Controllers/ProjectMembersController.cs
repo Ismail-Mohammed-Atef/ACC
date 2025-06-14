@@ -93,6 +93,10 @@ namespace ACC.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertMember(InsertMemberVM memberFromReq , int ProjectId)
         {
+            if (projId == null)
+            {
+                projId = projectId;
+            }
             var memebr = _userManager.Users.Where(u=>u.UserName == memberFromReq.Name).FirstOrDefault();
 
             if (memebr != null)

@@ -4,6 +4,7 @@ import * as THREE from "three";
 import * as OBCF from "@thatopen/components-front";
 
 BUI.Manager.init();
+console.log("BUI Manager initialized.");
 
 const container = document.getElementById("container");
 const loaderBtn = document.getElementById("loadBtn");
@@ -13,8 +14,7 @@ const AreaBtn = document.getElementById("AreaBtn");
 const FaceBtn = document.getElementById("FaceBtn");
 const EdgeBtn = document.getElementById("EdgeBtn");
 const VolumeBtn = document.getElementById("VolumeBtn");
-
-
+ 
 const components = new OBC.Components();
 const fragments = new OBC.FragmentsManager(components);
 const worlds = components.get(OBC.Worlds);
@@ -60,6 +60,14 @@ clipper.visible = true;
 clipper.enabled = true;
 clipper.Type = OBCF.EdgesPlane;
 
+window.addEventListener("DOMContentLoaded", async () => {
+    try {
+        await ifcloader(IfcLoader, world);
+        console.log("IFC loaded successfully on page load.");
+    } catch (err) {
+        console.error("Failed to load IFC on page load:", err);
+    }
+});
 loaderBtn?.addEventListener("click", async () => {
   await ifcloader(IfcLoader, world);
 });
@@ -285,17 +293,20 @@ async function ifcloader(ifcloaderFragment, world) {
   ifcloaderFragment.settings.webIfc.COORDINATE_TO_ORIGIN = false;
   ifcloaderFragment.settings.webIfc.USE_BVH = true;
 
-
   await ifcloaderFragment.setup();
-  const input = document.createElement("input");
 
-  input.type = "file";
-  input.accept = ".ifc";
-  input.onchange = async () => {
-    const file = input.files?.[0];
-    if (!file) return;
+    // Specify the IFC file path (adjust this to your file location)
+    const urlParams = new URLSearchParams(window.location.search);
+    const ifcFileUrl = urlParams.get('filePath');
 
-    const buffer = await file.arrayBuffer();
+    console.log("Loading IFC file from:", ifcFileUrl);
+  try {
+    // Fetch the IFC file
+    const response = await fetch(ifcFileUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch IFC file: ${response.statusText}`);
+    }
+    const buffer = await response.arrayBuffer();
     const data = new Uint8Array(buffer);
     const model = await ifcloaderFragment.load(data);
 
@@ -317,7 +328,7 @@ async function ifcloader(ifcloaderFragment, world) {
 
     world.camera.controls.fitToSphere(finalModel);
 
-    // post processing
+    // Post-processing and other logic remains the same
     const { postproduction } = world.renderer;
     postproduction.enabled = true;
     if (viewerGrids.groups) {
@@ -328,34 +339,32 @@ async function ifcloader(ifcloaderFragment, world) {
 
     const postPanel = BUI.Component.create(() => {
       return BUI.html`
-    <bim-panel active label="Postprocessing" class="options-menu">
-      <bim-panel-section collapsed label="Gamma">
-        <bim-checkbox checked label="Gamma Correction" @change="${({ target }) => postproduction.setPasses({ gamma: target.value })}"></bim-checkbox>
-      </bim-panel-section>
-
-      <bim-panel-section collapsed label="Custom Effects">
-        <bim-checkbox checked label="Custom Effects" @change="${({ target }) => postproduction.setPasses({ custom: target.value })}"></bim-checkbox>
-        <bim-checkbox checked label="Gloss Enabled" @change="${({ target }) => postproduction.customEffects.glossEnabled = target.value}"></bim-checkbox>
-        <bim-number-input slider step="0.01" label="Opacity" value="${postproduction.customEffects.opacity}" min="0" max="1" @change="${({ target }) => postproduction.customEffects.opacity = target.value}"></bim-number-input>
-        <bim-number-input slider step="0.1" label="Tolerance" value="${postproduction.customEffects.tolerance}" min="0" max="6" @change="${({ target }) => postproduction.customEffects.tolerance = target.value}"></bim-number-input>
-        <bim-color-input label="Line color" @input="${({ target }) => postproduction.customEffects.lineColor = new THREE.Color(target.value.color).getHex()}"></bim-color-input>
-        <bim-number-input slider step="0.1" label="Gloss Exponent" value="${postproduction.customEffects.glossExponent}" min="0" max="5" @change="${({ target }) => postproduction.customEffects.glossExponent = target.value}"></bim-number-input>
-        <bim-number-input slider step="0.05" label="Max Gloss" value="${postproduction.customEffects.maxGloss}" min="-2" max="2" @change="${({ target }) => postproduction.customEffects.maxGloss = target.value}"></bim-number-input>
-        <bim-number-input slider step="0.05" label="Min Gloss" value="${postproduction.customEffects.minGloss}" min="-2" max="2" @change="${({ target }) => postproduction.customEffects.minGloss = target.value}"></bim-number-input>
-      </bim-panel-section>
-
-      <bim-panel-section collapsed label="Ambient Occlusion">
-        <bim-checkbox label="AO Enabled" @change="${({ target }) => postproduction.setPasses({ ao: target.value })}"></bim-checkbox>
-        <bim-checkbox checked label="Half Resolution" @change="${({ target }) => ao.halfRes = target.value}"></bim-checkbox>
-        <bim-color-input label="AO Color" @input="${({ target }) => {
-          const color = new THREE.Color(target.value.color);
-          ao.color.set(color);
-        }}"></bim-color-input>
-        <bim-number-input slider label="AO Samples" step="1" value="${ao.aoSamples}" min="1" max="16" @change="${({ target }) => ao.aoSamples = target.value}"></bim-number-input>
-        <bim-number-input slider label="Intensity" step="1" value="${ao.intensity}" min="0" max="16" @change="${({ target }) => ao.intensity = target.value}"></bim-number-input>
-      </bim-panel-section>
-    </bim-panel>
-  `;
+        <bim-panel active label="Postprocessing" class="options-menu">
+          <bim-panel-section collapsed label="Gamma">
+            <bim-checkbox checked label="Gamma Correction" @change="${({ target }) => postproduction.setPasses({ gamma: target.value })}"></bim-checkbox>
+          </bim-panel-section>
+          <bim-panel-section collapsed label="Custom Effects">
+            <bim-checkbox checked label="Custom Effects" @change="${({ target }) => postproduction.setPasses({ custom: target.value })}"></bim-checkbox>
+            <bim-checkbox checked label="Gloss Enabled" @change="${({ target }) => postproduction.customEffects.glossEnabled = target.value}"></bim-checkbox>
+            <bim-number-input slider step="0.01" label="Opacity" value="${postproduction.customEffects.opacity}" min="0" max="1" @change="${({ target }) => postproduction.customEffects.opacity = target.value}"></bim-number-input>
+            <bim-number-input slider step="0.1" label="Tolerance" value="${postproduction.customEffects.tolerance}" min="0" max="6" @change="${({ target }) => postproduction.customEffects.tolerance = target.value}"></bim-number-input>
+            <bim-color-input label="Line color" @input="${({ target }) => postproduction.customEffects.lineColor = new THREE.Color(target.value.color).getHex()}"></bim-color-input>
+            <bim-number-input slider step="0.1" label="Gloss Exponent" value="${postproduction.customEffects.glossExponent}" min="0" max="5" @change="${({ target }) => postproduction.customEffects.glossExponent = target.value}"></bim-number-input>
+            <bim-number-input slider step="0.05" label="Max Gloss" value="${postproduction.customEffects.maxGloss}" min="-2" max="2" @change="${({ target }) => postproduction.customEffects.maxGloss = target.value}"></bim-number-input>
+            <bim-number-input slider step="0.05" label="Min Gloss" value="${postproduction.customEffects.minGloss}" min="-2" max="2" @change="${({ target }) => postproduction.customEffects.minGloss = target.value}"></bim-number-input>
+          </bim-panel-section>
+          <bim-panel-section collapsed label="Ambient Occlusion">
+            <bim-checkbox label="AO Enabled" @change="${({ target }) => postproduction.setPasses({ ao: target.value })}"></bim-checkbox>
+            <bim-checkbox checked label="Half Resolution" @change="${({ target }) => ao.halfRes = target.value}"></bim-checkbox>
+            <bim-color-input label="AO Color" @input="${({ target }) => {
+              const color = new THREE.Color(target.value.color);
+              ao.color.set(color);
+            }}"></bim-color-input>
+            <bim-number-input slider label="AO Samples" step="1" value="${ao.aoSamples}" min="1" max="16" @change="${({ target }) => ao.aoSamples = target.value}"></bim-number-input>
+            <bim-number-input slider label="Intensity" step="1" value="${ao.intensity}" min="0" max="16" @change="${({ target }) => ao.intensity = target.value}"></bim-number-input>
+          </bim-panel-section>
+        </bim-panel>
+      `;
     });
     document.body.append(postPanel);
     postPanel.style.position = "absolute";
@@ -419,7 +428,6 @@ async function ifcloader(ifcloaderFragment, world) {
     });
     document.body.append(panel);
 
-    // Move and resize the floor plan panel
     panel.style.position = "absolute";
     panel.style.bottom = "1rem";
     panel.style.right = "1rem";
@@ -444,13 +452,13 @@ async function ifcloader(ifcloaderFragment, world) {
         return BUI.html`
           <bim-button checked label="${plan.name}"
             @click="${() => {
-            world.renderer.postproduction.customEffects.minGloss = 0.1;
-            highLighter.backupColor = whiteColor;
-            classifier.setColor(modelItems, whiteColor);
-            world.scene.three.background = whiteColor;
-            plans.goTo(plan.id);
-            culler.needsUpdate = true;
-          }}">
+              world.renderer.postproduction.customEffects.minGloss = 0.1;
+              highLighter.backupColor = whiteColor;
+              classifier.setColor(modelItems, whiteColor);
+              world.scene.three.background = whiteColor;
+              plans.goTo(plan.id);
+              culler.needsUpdate = true;
+            }}">
           </bim-button>
         `;
       });
@@ -461,22 +469,25 @@ async function ifcloader(ifcloaderFragment, world) {
       return BUI.html`
         <bim-button checked label="Exit"
           @click="${() => {
-          highLighter.backupColor = null;
-          highLighter.clear();
-          world.renderer.postproduction.customEffects.minGloss = minGloss;
-          classifier.resetColor(modelItems);
-          world.scene.three.background = defaultBackground;
-          plans.exitPlanView();
-          culler.needsUpdate = true;
-        }}">
+            highLighter.backupColor = null;
+            highLighter.clear();
+            world.renderer.postproduction.customEffects.minGloss = minGloss;
+            classifier.resetColor(modelItems);
+            world.scene.three.background = defaultBackground;
+            plans.exitPlanView();
+            culler.needsUpdate = true;
+          }}">
         </bim-button>
       `;
     });
 
     panelSection.append(exitButton);
-  };
-  input.click();
-    }
+  } catch (error) {
+    console.error("Error loading IFC file:", error);
+    alert("Failed to load IFC file. Check console for details.");
+  }
+}
+
 
 
 

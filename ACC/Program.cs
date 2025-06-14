@@ -102,6 +102,7 @@ namespace ACC
 
             var app = builder.Build();
 
+
             async Task SeedDataAsync()
             {
                 using var scope = app.Services.CreateScope();
@@ -113,6 +114,7 @@ namespace ACC
             // ❗ Await it before running the app
             SeedDataAsync();
 
+
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -120,7 +122,12 @@ namespace ACC
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true,
+                DefaultContentType = "application/octet-stream" // or a more specific type if known
+            });
+
 
             app.UseRouting();
 
