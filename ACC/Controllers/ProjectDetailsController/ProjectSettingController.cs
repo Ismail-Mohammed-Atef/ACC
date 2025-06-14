@@ -49,7 +49,10 @@ namespace ACC.Controllers.ProjectDetailsController
                 StartDate = ProjectSelected.StartDate,
                 EndDate = ProjectSelected.EndDate,
                 Address = ProjectSelected.Address,
-                Currency = ProjectSelected.Currency
+                Currency = ProjectSelected.Currency,
+                Latitude = ProjectSelected.Latitude,
+                Longitude = ProjectSelected.Longitude,
+                
             };
 
             return View("Index", ProjectSelectedvm);
@@ -102,5 +105,36 @@ namespace ACC.Controllers.ProjectDetailsController
                 return Json(new { success = false, error = "An error occurred while updating the project" });
             }
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateProjectLocation(DisplayProjectsVM project)
+        {
+            if (!ModelState.IsValid)
+                return Json(new { success = false, error = "Invalid input." });
+
+            try
+            {
+                var existing = projectRepo.GetById(project.id);
+                if (existing == null)
+                    return NotFound();
+
+                // Only update location-related fields
+                existing.Address = project.Address;
+                existing.Latitude = project.Latitude;
+                existing.Longitude = project.Longitude;
+
+                projectRepo.Update(existing);
+                projectRepo.Save();
+
+                return Json(new { success = true, newAddress = project.Address });
+            }
+            catch
+            {
+                return Json(new { success = false, error = "Failed to update location." });
+            }
+        }
+
     }
 }

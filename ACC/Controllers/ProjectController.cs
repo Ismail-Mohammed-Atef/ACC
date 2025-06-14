@@ -96,6 +96,8 @@ namespace ACC.Controllers
                     CreationDate = DateTime.Now,
                     Currency = projectFromRequest.Currency,
                     Address = projectFromRequest.Address,
+                    Latitude = projectFromRequest.Latitude,
+                    Longitude = projectFromRequest.Longitude
                 };
 
                 projectRepo.Insert(newProject);
