@@ -2,6 +2,7 @@
 using ACC.ViewModels.ProjectVMs;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
+using DataLayer.Models.ClassHelper;
 using DataLayer.Models.Enums;
 using Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ namespace ACC.Controllers.ProjectDetailsController
             this.projectRepo = projectRepo;
         }
 
+        [HasProjectRole(ProjectAccessLevels.ProjectAdmin,"id")]
 
         public IActionResult Index(int id)
         {
