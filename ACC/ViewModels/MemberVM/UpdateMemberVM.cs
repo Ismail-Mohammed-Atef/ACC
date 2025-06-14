@@ -11,9 +11,10 @@ namespace ACC.ViewModels.MemberVM
         public string email { get; set; }
         public string? status { get; set; }
         public int? companyId { get; set; }
-        public int? roleId { get; set; }
-        public bool adminAccess { get; set; }
-        public bool standardAccess { get; set; }
-        public bool excutive { get; set; }
+        public string? globalAccessLevelID { get; set; }
+        public string? positionID { get; set; }
+        public string? projectAccessLevelID { get; set; }
+     
+
     }
 }

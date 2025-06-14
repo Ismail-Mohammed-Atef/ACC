@@ -2,9 +2,11 @@
 @using ACC.ViewModels.ProjectMembersVM
 
 @{
-    Layout = "_ProjectLayout";
-   
+    Layout = "_ProjectLayout"; 
+    int ProjId = ViewBag.ProjId;
 }
+
+
 @model List<ProjectMembersVM>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,7 +36,7 @@
                         <th>Name</th>
                         <th>Status</th>
                         <th>Company</th>
-                        <th>Default Role</th>
+                        <th>Role</th>
                         <th>Access Level</th>
                         <th>Added On</th>
                         <th><i class="fas fa-cog"></i></th>
@@ -47,19 +49,8 @@
                             <td>@member.Name</td>
                             <td>@member.Status</td>
                             <td>@member.Company</td>
-                            <td>@member.Role</td>
-                            <td>@member.Email</td>
-                            <td>
-                                @if (member.AccessLevels != null)
-                                {
-                                    foreach (var accessLevel in member.AccessLevels)
-                                    {
-                                        <span>@accessLevel</span>
-                                    }
-                                }
-
-
-                            </td>
+                            <td>@member.Position</td>
+                            <td>@member.ProjectAccessLevel</td>
                             <td>@member.AddedOn</td>
                             <td>
                                 <div class="action-btn">
@@ -67,7 +58,8 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-menu">
-                                        <button class="delete-btn" data-id="@member.Id">Delete</button>
+                                        <button class="delete-btn" data-id="@member.Id" data-projectid="@ProjId">Delete</button>
+
                                     </div>
                                 </div>
                             </td>
@@ -94,6 +86,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        const ProjId = @ProjId;
+    </script>
 
     <script>
         $(document).ready(function () {
@@ -115,6 +110,7 @@
                     }
                 });
             }
+
 
             // Update table content
             function updateTable(members) {
@@ -220,52 +216,55 @@
                 }
             });
 
-            $(document).on("click", ".member-row", function (e) {
-                if (!$(e.target).closest(".toggle-menu, .delete-btn").length) {
-                    $(".member-row").removeClass("active");
-                    $(this).addClass("active");
-                    var memberId = $(this).data("id");
+                   $(document).on("click", ".member-row", function (e) {
+            if (!$(e.target).closest(".toggle-menu, .delete-btn").length) {
+                $(".member-row").removeClass("active");
+                $(this).addClass("active");
+                var memberId = $(this).data("id");
 
-                    $.ajax({
-                        url: "/Member/GetUpdatePartial/" + memberId,
-                        type: "GET",
-                        success: function (partialViewHtml) {
-                            $("#updatePanelContainer").html(partialViewHtml);
-                            $("#memberDetailsPanel").addClass("show");
-                        },
-                        error: function (xhr, status, error) {
-                            console.log("Error:", xhr, status, error);
-                            toastr.error("Failed to load member update view.");
-                        }
-                    });
-                }
-            });
+                $.ajax({
+                    url: "/ProjectMembers/GetUpdatePartial/" + memberId + "?projectId=" + ProjId,
+                    type: "GET",
+                    success: function (partialViewHtml) {
+                        $("#updatePanelContainer").html(partialViewHtml);
+                        $("#memberDetailsPanel").addClass("show");
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error:", xhr, status, error);
+                        toastr.error("Failed to load member update view.");
+                    }
+                });
+            }
+        });
+
 
             $(document).on("click", "#closePanel", function () {
                 $("#memberDetailsPanel").removeClass("show");
             });
 
-            $(document).on("click", "#updateMemberBtn", function (e) {
-                e.preventDefault();
-                var memberId = $(".member-row.active").data("id");
+                   $(document).on("click", "#updateMemberBtn", function (e) {
+            e.preventDefault();
 
-                if (!memberId) {
-                    toastr.error("Please select a member to update");
-                    return;
-                }
+            var memberId = $(".member-row.active").data("id");
 
-                var member = {
-                    Email: $("#memberEmail").val(),
-                    RoleId: $("#memberRole").val() || null,
-                    CompanyId: $("#memberCompany").val() || null,
-                    Status: $("#memberStatus").val(),
-                    adminAccess: $("#adminAccess").is(":checked"),
-                    excutive: $("#excutive").is(":checked"),
-                    standardAccess: $("#standardAccess").is(":checked"),
-                };
-                console.log("Sending memberData:", JSON.stringify(member));
-                $.ajax({
-                    url: "/Member/Update/" + memberId,
+            if (!memberId) {
+                toastr.error("Please select a member to update");
+                return;
+            }
+
+            var member = {
+                email: $("#memberEmail").val(),
+                roleId: $("#memberRole").val() || null,
+                companyId: $("#memberCompany").val() || null,
+                positionID: $("#memberRole").val() || null,
+                projectAccessLevelID: $("#memberAccessLevel").val() || null,
+               
+            };
+
+            console.log("Sending memberData:", JSON.stringify(member));
+
+             $.ajax({
+                    url: "/ProjectMembers/Update/" + memberId + "?ProjectId=" + ProjId,
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify(member),
@@ -290,28 +289,38 @@
                         }
                     }
                 });
-            });
+        });
 
-            $(document).on("click", ".delete-btn", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var memberId = $(this).data("id");
-                $(this).closest(".action-menu").hide();
-                
-                    $.ajax({
-                        url: "/Member/Delete/" + memberId,
-                        type: "POST",
-                        success: function () {
-                            $("#row-" + memberId).remove();
-                            toastr.success("Member deleted successfully!");
-                            $("#memberDetailsPanel").removeClass("show");
-                        },
-                        error: function () {
-                            toastr.error("Failed to delete member.");
-                        }
-                    });
-                
+
+                    $(document).on("click", ".delete-btn", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var memberId = $(this).data("id");
+            var projectId = $(this).data("projectid");
+
+            // Optional: تأكيد الحذف باستخدام confirm
+            if (!confirm("Are you sure you want to delete this member?")) {
+                return;
+            }
+
+            $(this).closest(".action-menu").hide();
+
+            $.ajax({
+                url: "/ProjectMembers/Delete/" + memberId,
+                type: "POST",
+                data: { ProjectId: projectId },
+                success: function () {
+                    $("#row-" + memberId).remove();
+                    toastr.success("Member deleted successfully!");
+                    $("#memberDetailsPanel").removeClass("show");
+                },
+                error: function () {
+                    toastr.error("Failed to delete member.");
+                }
             });
+        });
+
         });
     </script>
 </body>
