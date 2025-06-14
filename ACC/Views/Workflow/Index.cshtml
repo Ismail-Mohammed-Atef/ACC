@@ -123,9 +123,8 @@
                                     <i class="fas fa-ellipsis-v"></i> <!-- Three-dot icon -->
                                 </button>
                                 <div class="action-menu position-absolute bg-white border shadow-sm rounded p-2" style="display: none;">
-                                    <form asp-action="Edit" method="post" style="display:inline;">
-                                        <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" asp-action="EditWorkflow" asp-controller="Workflow" asp-route-Id="@item.Id" class="btn btn-danger">Edit</button>
+                                    <form asp-action="Edit" method="get" style="display:inline;">
+                                    <button type="submit" asp-action="EditWorkflow" asp-controller="Workflow" asp-route-Id="@item.Id" class="btn btn-danger">Edit</button>
                                     </form>
                                 </div>
                              

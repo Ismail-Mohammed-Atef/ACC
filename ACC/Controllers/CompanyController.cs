@@ -29,7 +29,6 @@ namespace ACC.Controllers
 
 
 
-        [Authorize]
         public IActionResult Index(int page = 1, int pageSize = 4)
         {
             var query = _companyRepository.GetAll();
@@ -64,7 +63,7 @@ namespace ACC.Controllers
      
 
 
-        // GET: Company/InsertCompany
+     
         public IActionResult InsertCompany()
         {
             var model = new CompanyVM
