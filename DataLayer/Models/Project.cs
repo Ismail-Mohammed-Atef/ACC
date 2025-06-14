@@ -26,6 +26,8 @@ namespace DataLayer.Models
         public ICollection<ProjectActivities>? Activities { get; set; }
         public ICollection<ProjectCompany>? ProjectCompany { get; set; }
         public List<Issue> Issues { get; set; }
+        public ICollection<ApplicationUserRole> UserRoles { get; set; }
+
 
     }
 }
