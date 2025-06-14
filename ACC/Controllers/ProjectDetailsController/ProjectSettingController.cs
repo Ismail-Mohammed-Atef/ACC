@@ -49,7 +49,10 @@ namespace ACC.Controllers.ProjectDetailsController
                 StartDate = ProjectSelected.StartDate,
                 EndDate = ProjectSelected.EndDate,
                 Address = ProjectSelected.Address,
-                Currency = ProjectSelected.Currency
+                Currency = ProjectSelected.Currency,
+                Latitude = ProjectSelected.Latitude,
+                Longitude = ProjectSelected.Longitude,
+                
             };
 
             return View("Index", ProjectSelectedvm);
