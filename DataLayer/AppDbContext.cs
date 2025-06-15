@@ -231,7 +231,7 @@ namespace DataLayer
         public DbSet<ReviewStepUser> ReviewStepUsers { get; set; }
         public DbSet<WorkflowStepUser> WorkflowStepUsers { get; set; }
 
-        public DbSet<IssueReviwers> IssueReviwers { get; set; }
+       
 
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
 
