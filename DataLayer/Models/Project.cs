@@ -18,11 +18,16 @@ namespace DataLayer.Models
         public DateTime? CreationDate { get; set; }
         public double? ProjectValue { get; set; }
         public Currency? Currency { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+
         public bool IsArchived { get; set; } = false;
         public ICollection<ProjectMembers>? Members { get; set; }
         public ICollection<ProjectActivities>? Activities { get; set; }
         public ICollection<ProjectCompany>? ProjectCompany { get; set; }
         public List<Issue> Issues { get; set; }
+        public ICollection<ApplicationUserRole> UserRoles { get; set; }
+
 
     }
 }

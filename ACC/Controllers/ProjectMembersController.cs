@@ -1,9 +1,11 @@
-﻿using ACC.ViewModels.MemberVM;
+﻿using ACC.Services;
+using ACC.ViewModels.MemberVM;
 using ACC.ViewModels.MemberVM.MemberVM;
 using ACC.ViewModels.ProjectMembersVM;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
 using DataLayer.Models;
+using DataLayer.Models.ClassHelper;
 using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,44 +19,38 @@ namespace ACC.Controllers
     {
         private readonly IProjetcRepository _projectRepository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserRoleService _userRoleService;
         private readonly ICompanyRepository _companyRepository;
-        private readonly IRoleRepository _roleRepository;
-        private readonly AppDbContext _context;
-        private static int projectId;
 
         public ProjectMembersController(
             UserManager<ApplicationUser> userManager,
-            IRoleRepository roleRepository,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<ApplicationRole> roleManager,
+            UserRoleService userRoleService,
             ICompanyRepository companyRepository,
-            AppDbContext context,
-            IProjetcRepository projectRepository)
+            IProjetcRepository projectRepository,
+            AppDbContext context)
         {
             _userManager = userManager;
-            _roleRepository = roleRepository;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
+            _userRoleService = userRoleService;
             _companyRepository = companyRepository;
-            _context = context;
             _projectRepository = projectRepository;
         }
 
-        public IActionResult Index(int id, int page = 1, string search = "", int pageSize = 5)
-        {
-            if(id == 0)
-            {
-                id = projectId;
-            }
-            var projectExists = _context.Projects.Any(p => p.Id == id);
-            if (!projectExists)
-            {
-                TempData["ErrorMessage"] = "Project not found!";
-                return RedirectToAction("Index", "Projects");
-            }
 
-            var userIdsInProject = _context.ProjectMembers
-                .Where(pm => pm.ProjectId == id)
-                .Select(pm => pm.MemberId)
-                .ToList();
+        [HasProjectRole(ProjectAccessLevels.ProjectAdmin)]
+        public IActionResult Index(int ProjectId, int page = 1, string search = "", int pageSize = 5)
+        {
+
+            var userIdsInProject = _userRoleService.GetMembers(ProjectId);
 
             var query = _userManager.Users
+                .Include(u=>u.Company)
+                .Include(u => u.UserRoles)
                 .Where(u => userIdsInProject.Contains(u.Id))
                 .AsQueryable();
 
@@ -65,100 +61,89 @@ namespace ACC.Controllers
 
             var totalItems = query.Count();
 
-            var projectMembers = query
+            var pagedUsers = query
                 .OrderBy(m => m.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(m => new ProjectMembersVM
-                {
-                    Id = m.Id,
-                    Name = m.UserName,
-                    Email = m.Email,
-                    Status = m.Status,
-                    Company = m.Company != null ? m.Company.Name : "No Company",
-                    Role = m.Role != null ? m.Role.Name : "No Role",
-                    AddedOn = m.AddedOn
-                })
-                .ToList();
+                .ToList(); 
 
-            //if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            //{
-            //    return Json(new
-            //    {
-            //        data = projectMembers,
-            //        totalItems,
-            //        currentPage = page,
-            //        pageSize
-            //    });
-            //}
+            var projectMembers = pagedUsers.Select(m => new ProjectMembersVM
+            {
+                Id = m.Id,
+                Name = m.UserName,
+                Email = m.Email,
+                Status = m.Status,
+                Company = m.Company?.Name ?? "No Company",
+                AddedOn = m.AddedOn,
+                Position = _userRoleService.GetPosition(m.Id , ProjectId).Name,
+                ProjectAccessLevel = _userRoleService.GetProjectAccessLevel(m.Id , ProjectId).Name,
+
+            }).ToList();
 
             ViewBag.Members = _userManager.Users.ToList();
-            ViewBag.Id = id;
-            projectId = id;
+            ViewBag.ProAccessLevelsList = _userRoleService.AllProjectAccessLevels();
+            ViewBag.PositionsList = _userRoleService.AllProjectPositions();
+            ViewBag.ProjId = ProjectId;
+            ViewBag.Id = ProjectId;
 
             return View(projectMembers);
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> InsertMemberAsync(InsertMemberVM memberFromReq , int? projId = null)
+        public async Task<IActionResult> InsertMember(InsertMemberVM memberFromReq , int ProjectId)
         {
-            if (projId == null)
-            {
-                projId = projectId;
-            }
+           
             var memebr = _userManager.Users.Where(u=>u.UserName == memberFromReq.Name).FirstOrDefault();
+
             if (memebr != null)
             {
-                var projectMember = new ProjectMembers()
+
+                var ProjAccessLevel = new ApplicationUserRole()
                 {
-                    ProjectId = projectId,
-                    MemberId = memebr.Id
+                    ProjectId = ProjectId,
+                    UserId = memebr.Id,
+                    RoleId = memberFromReq.ProjectAccessLevelId,
+
                 };
-                if(memebr.Projects is null)
+                _userRoleService.Insert(ProjAccessLevel);
+                _userRoleService.Save();
+
+
+                var position = new ApplicationUserRole()
                 {
-                    memebr.Projects = new List<ProjectMembers>();
-                }
-                memebr.Projects.Add(projectMember);
-                await _userManager.UpdateAsync(memebr);
+                    ProjectId = ProjectId,
+                    UserId = memebr.Id,
+                    RoleId = memberFromReq.PositionId,
+
+                };
+                _userRoleService.Insert(position);
+
+                _userRoleService.Save();
                 
             }
-            return Json(new { success = true });
+            return RedirectToAction("Index", new { ProjectId = ProjectId });
+
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteAsync(string id, int projectId)
+        public async Task<IActionResult> Delete(string id, int ProjectId)
         {
-            var projectMember = _context.ProjectMembers
-                .FirstOrDefault(pm => pm.MemberId == id && pm.ProjectId == projectId);
-
-            if (projectMember != null)
+            
+            var projectMemberRelations = _userRoleService.GetAll().Where(i=>i.ProjectId == ProjectId && i.UserId==id).ToList();
+            foreach(var relation in projectMemberRelations)
             {
-                var member = await _userManager.FindByIdAsync(id);
-                if (member != null)
-                {
-                    var result = await _userManager.DeleteAsync(member);
-                    if (result.Succeeded)
-                    {
-                        _context.ProjectMembers.Remove(projectMember);
-                        await _context.SaveChangesAsync();
-
-                        TempData["SuccessMessage"] = "Member deleted successfully!";
-                        return Ok();
-                    }
-                }
+                _userRoleService.Delete(relation);
             }
-
-            TempData["ErrorMessage"] = "Failed to delete member!";
-            return NotFound();
+            _userRoleService.Save();
+            
+            return RedirectToAction("Index", new { ProjectId = ProjectId });
         }
 
         [HttpGet]
-        public IActionResult Details(string id,int? projid =null)
+        public IActionResult Details(string id , int ? ProjectId = null)
         {
-            if (projid == null)
-            {
-                projid = projectId;
-            }
+         
             var member = _userManager.Users.FirstOrDefault(u => u.Id == id);
             if (member != null)
             {
@@ -168,7 +153,7 @@ namespace ACC.Controllers
                     email = member.Email,
                     status = member.Status,
                     company = member.Company?.Name,
-                    role = member.Role?.Name,
+                    role = _userRoleService.GetByUserId(id , ProjectId).Role.Name,
                     accessLevels = member.AccessLevel
                 });
             }
@@ -176,66 +161,80 @@ namespace ACC.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateMemberVM member , int? projid =null)
+        public async Task<IActionResult> Update(string id, int ProjectId , [FromBody] UpdateMemberVM member)
         {
-
-            if (projid == null)
-            {
-                projid = projectId;
-            }
+            
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
             try
             {
-                var mmbr = await _userManager.FindByIdAsync(id);
-                if (mmbr != null)
+
+                var user = await _userManager.FindByIdAsync(id);
+                user.CompanyId = member.companyId;
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
                 {
-                    mmbr.UserName = member.email.Split("@")[0];
-                    mmbr.Email = member.email;
-                    mmbr.RoleId = member.roleId;
-                    mmbr.CompanyId = member.companyId;
-                    mmbr.AccessLevel = new List<AccessLevel>();
-
-                    if (member.adminAccess) mmbr.AccessLevel.Add(AccessLevel.AccountAdmin);
-                    if (member.excutive) mmbr.AccessLevel.Add(AccessLevel.Excutive);
-                    if (member.standardAccess) mmbr.AccessLevel.Add(AccessLevel.StandardAccess);
-
-                    var result = await _userManager.UpdateAsync(mmbr);
-                    if (result.Succeeded)
-                    {
-                        TempData["SuccessMessage"] = "Member updated successfully!";
-                        return Json(new { success = true });
-                    }
-
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError("", error.Description);
-                    }
-
-                    TempData["ErrorMessage"] = "Failed to update member!";
-                    return BadRequest(ModelState);
+                    var errors = result.Errors.Select(e => e.Description);
+                    return BadRequest(new { success = false, errors });
                 }
 
-                return NotFound();
+
+
+                var ProjectAccessLevel = _userRoleService.GetAll().FirstOrDefault(i => i.UserId == id && i.ProjectId== ProjectId && i.Role.ProjectAccessLevel == true);
+                if (ProjectAccessLevel != null)
+                {
+                    _userRoleService.Delete(ProjectAccessLevel);
+                    _userRoleService.Save();
+                }
+
+                var UpdatedProjectAccessLevel = new ApplicationUserRole
+                {
+                    ProjectId = ProjectAccessLevel.ProjectId,
+                    RoleId = member.projectAccessLevelID,
+                    UserId = id
+                };
+
+                _userRoleService.Insert(UpdatedProjectAccessLevel);
+                _userRoleService.Save();
+
+
+
+                var Postion = _userRoleService.GetAll().FirstOrDefault(i => i.UserId == id && i.ProjectId == ProjectId && i.Role.ProjectPosition == true);
+                if (Postion != null)
+                {
+                    _userRoleService.Delete(Postion);
+                    _userRoleService.Save();
+                }
+
+                var UpdatedPosition = new ApplicationUserRole
+                {
+                    ProjectId = Postion.ProjectId,
+                    RoleId = member.positionID,
+                    UserId = id
+                };
+
+                _userRoleService.Insert(UpdatedPosition);
+                _userRoleService.Save();
+
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Failed to update member!";
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
+
         }
 
+
         [HttpGet]
-        public IActionResult GetUpdatePartial(string id,int? projId = null)
+        public IActionResult GetUpdatePartial(string id, int ProjectId)
+
         {
-            if(projId == null)
-            {
-                projId = projectId;
-            }
 
             if (ModelState.IsValid)
             {
@@ -245,22 +244,28 @@ namespace ACC.Controllers
                     return NotFound();
                 }
 
+
                 var insertMemberVM = new InsertMemberVM
                 {
                     Email = member.Email,
-                    RoleId = member.RoleId,
                     CompanyId = member.CompanyId,
-                    Status = member.Status,
-                    adminAccess = member.AccessLevel?.Contains(AccessLevel.AccountAdmin) ?? false,
-                    excutive = member.AccessLevel?.Contains(AccessLevel.Excutive) ?? false,
-                    standardAccess = member.AccessLevel?.Contains(AccessLevel.StandardAccess) ?? false
+                    currentCompany = _companyRepository.GetById(member.CompanyId ?? 0)?.Name,
+                    PositionId = _userRoleService.GetPosition(id , ProjectId).Id,
+                    ProjectAccessLevelId = _userRoleService.GetProjectAccessLevel(id , ProjectId).Id,
+
                 };
 
+
+
                 ViewBag.Companies = new SelectList(_companyRepository.GetAll(), "Id", "Name");
-                ViewBag.Roles = new SelectList(_roleRepository.GetAll(), "Id", "Name");
+                ViewBag.PositionsList = new SelectList(_userRoleService.AllProjectPositions(), "Id", "Name");
+                ViewBag.ProjectAccessLevelsList = new SelectList(_userRoleService.AllProjectAccessLevels(), "Id", "Name");
+                ViewBag.ProjId = ProjectId;
 
                 return PartialView("PartialViews/_UpdateProjectMembersPartialView", insertMemberVM);
             }
+
+          
 
             return PartialView("PartialViews/_UpdateProjectMembersPartialView", ModelState);
         }

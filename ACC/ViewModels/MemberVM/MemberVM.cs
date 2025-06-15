@@ -9,8 +9,7 @@ namespace ACC.ViewModels.MemberVM.MemberVM
         public string Email { get; set; }
         public Status? Status { get; set; }
         public string? Company { get; set; }
-        public string? Role { get; set; }
-        public ICollection<AccessLevel>? AccessLevels { get; set; }
+        public string GlobalAccessLevel { get; set; }
         public DateTime? AddedOn { get; set; }
     }
 }

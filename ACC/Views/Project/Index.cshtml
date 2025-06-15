@@ -2,6 +2,9 @@
 @using Helpers;
 
 @model List<DisplayProjectsVM>
+@{
+    Layout = "_Layout";
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -257,7 +260,7 @@
 
 			<partial name="PartialViews/_AddProjectPartialView" model="new AddProjectVM()" />
 		</div>
-	</div> 
+	</div>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -268,7 +271,7 @@
 			$(document).on("click", ".project-row", function (e) {
 				if (!$(e.target).closest(".dropdown").length) {
 					var projectId = $(this).data("project-id");
-					window.location.href = "/ProjectSetting/Index?id=" + projectId;
+					window.location.href = "/ProjectMembers/Index?ProjectId=" + projectId;
 				}
 			});
 
@@ -349,24 +352,129 @@
 				});
 			});
 
-            $(document).on("click", ".restore-project", function (e) {
-                e.preventDefault();
-                var projectId = $(this).data("id");
-                $.ajax({
-                    url: "/Project/Restore/" + projectId,
-                    type: "POST",
-                    success: function () {
-                        location.reload();
-                    },
-                    error: function () {
-                        alert("Error restoring project.");
-                    }
-                });
-            });
-        });
-    </script>
+			$(document).on("click", ".restore-project", function (e) {
+				e.preventDefault();
+				var projectId = $(this).data("id");
+				$.ajax({
+					url: "/Project/Restore/" + projectId,
+					type: "POST",
+					success: function () {
+						location.reload();
+					},
+					error: function () {
+						alert("Error restoring project.");
+					}
+				});
+			});
+		});
+	</script>
 
-	
+	<script>
+		$.validator.addMethod("greaterthanstart", function (value, element, param) {
+			var startDate = $(param).val();
+			if (!startDate || !value) return true; // let Required handle it
+			return new Date(value) > new Date(startDate);
+		}, "End date must be greater than the start date.");
+
+		$.validator.unobtrusive.adapters.add("greaterthanstart", ["other"], function (options) {
+			options.rules["greaterthanstart"] = "#" + options.params.other;
+			options.messages["greaterthanstart"] = options.message;
+		});
+	</script>
+
+
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqbWUXIAolPajv3pLIleGfeg1RE0i6FjA"></script>
+
+	<script>
+		let map, marker;
+		function updateLatLngDisplay(lat, lng) {
+			$("#lat-display").text(lat.toFixed(6));
+			$("#lng-display").text(lng.toFixed(6));
+		}
+
+		function reverseGeocodeWithNominatim(lat, lng) {
+			const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+			fetch(url, {
+				headers: {
+					'User-Agent': 'YourAppName/1.0 (your@email.com)'
+				}
+			})
+			.then(res => res.json())
+			.then(data => {
+				if (data && data.display_name) {
+					const address = data.display_name;
+					$("[name='Address']").val(address);
+				} else {
+					console.warn("⚠️ No address found in response.");
+				}
+			})
+			.catch(err => console.error("❌ Nominatim error:", err));
+		}
+
+		function initMap() {
+			const mapEl = document.getElementById("map");
+
+			if (!mapEl) {
+				console.error("❌ Map container NOT found in DOM at initMap time.");
+				return;
+			}
+
+			const h = $(mapEl).height();
+			const w = $(mapEl).width();
+			if (h === 0 || w === 0) {
+				setTimeout(initMap, 300);
+				return;
+			}
+
+			const defaultLoc = { lat: 30.0444, lng: 31.2357 };
+
+			map = new google.maps.Map(mapEl, {
+				zoom: 6,
+				center: defaultLoc
+			});
+
+			marker = new google.maps.Marker({
+				position: defaultLoc,
+				map: map,
+				draggable: true
+			});
+
+			$("#Latitude").val(defaultLoc.lat);
+			$("#Longitude").val(defaultLoc.lng);
+			updateLatLngDisplay(defaultLoc.lat, defaultLoc.lng);
+			reverseGeocodeWithNominatim(defaultLoc.lat, defaultLoc.lng);
+
+			map.addListener("click", function (e) {
+				const lat = e.latLng.lat();
+				const lng = e.latLng.lng();
+				console.log("🖱️ Map clicked:", lat, lng);
+				marker.setPosition(e.latLng);
+				$("#Latitude").val(lat);
+				$("#Longitude").val(lng);
+				updateLatLngDisplay(lat, lng);
+				reverseGeocodeWithNominatim(lat, lng);
+			});
+
+			google.maps.event.trigger(map, 'resize');
+			map.setCenter(marker.getPosition());
+		}
+
+		const modalEl = document.getElementById('addProjectModal');
+		if (modalEl) {
+			modalEl.addEventListener('shown.bs.modal', function () {
+				setTimeout(() => {
+					try {
+						initMap();
+					} catch (e) {
+						console.error("💥 Error inside initMap:", e);
+					}
+				}, 300);
+			});
+		} else {
+			console.warn("⚠️ Modal element #addProjectModal not found.");
+		}
+	</script>
+
 
 
 </body>

@@ -24,6 +24,7 @@ namespace ACC.Controllers.ProjectDetailsController
         // GET: /ProjectCompany/Index/{id}
         public IActionResult Index(int id, int page = 1, int pageSize = 4, string searchTerm = null)
         {
+
             var companies = _companyRepository.GetCompaniesInEacProjectWithPrpjectId(id);
 
             // Apply search filter if searchTerm is provided
