@@ -440,9 +440,7 @@
 	<script>
 		$(document).ready(function () {
 
-			// Tabs navigation logic
-			$(".nav-link").click(function (e) {
-				e.preventDefault();
+			
 
 				// Remove 'active' from all nav links, then add it to the clicked one
 				$(".nav-link").removeClass("active");
@@ -484,9 +482,11 @@
 					.addClass(isError ? "bg-danger" : "bg-success")
 					.fadeIn(400)
 					.delay(5000)
-					.fadeOut(2000);
+					.fadeOut(2000, function() {
+			$(this).css("display", "none"); // Ensure it's hidden
+		});
 			}
-
+		
 			$("#editProjectForm").submit(function (event) {
 				event.preventDefault();
 				$.ajax({
@@ -519,10 +519,7 @@
 				});
 			});
 		});
-	</script>
 
-
-	<script>
 		function reverseGeocode(lat, lng) {
 			fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
 				.then(res => res.json())

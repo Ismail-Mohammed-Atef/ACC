@@ -21,7 +21,6 @@ namespace ACC.Controllers.ProjectDetailsController
             this.projectRepo = projectRepo;
         }
 
-        //[HasProjectRole(ProjectAccessLevels.ProjectAdmin,"id")]
 
         public IActionResult Index(int id)
         {
