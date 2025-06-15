@@ -24,7 +24,63 @@
             background-color: #f0f0f0;
         }
 
+    
+
+      
+
+
 </style>
+<!-- Add Subfolder Modal -->
+<div class="modal fade" id="addSubfolderModal" tabindex="-1" aria-labelledby="addSubfolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addSubfolderForm" method="post" asp-action="CreateFolder" asp-controller="ProjectDocument">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSubfolderModalLabel">Add Subfolder</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="parentFolderId" id="parentFolderId" />
+                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Folder Name</label>
+                        <input type="text" class="form-control" id="folderName" name="folderName" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Folder</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Folder Modal -->
+<div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="DeleteFolder" asp-controller="ProjectDocument">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFolderModalLabel">Delete Folder</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="folderId" id="deleteFolderId" />
+                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
+                    <p>Are you sure you want to delete the folder: <strong id="deleteFolderName"></strong>?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <li class="list-group-item d-flex justify-content-between align-items-center folder-item" data-folder-id="@Model.Id">
     <div class="folder-label d-flex align-items-center gap-2">
@@ -35,7 +91,6 @@
            aria-expanded="false"
            aria-controls="folder-@Model.Id"></i>
         <div class="folder-name folder-clickable" data-folder-id="@Model.Id">@Model.Name</div>
-
     </div>
 
     <div class="dropdown">
@@ -60,13 +115,12 @@
                 <button type="button"
                         class="dropdown-item delete-folder-btn"
                         data-folder-id="@Model.Id"
-                        data-folder-name="@Model.Name">
+                        data-folder-name="@Model.Name"
+                        data-action="delete-folder">
                     Delete Folder
                 </button>
             </li>
-
         </ul>
-
     </div>
 </li>
 
@@ -89,7 +143,6 @@
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="documentDropdown-@doc.Id">
-                            <!-- In _DocumentDetails.cshtml or equivalent partial view -->
                             <li>
                                 <button class="dropdown-item view-document" onclick="openFile(@doc.Id)">
                                     View File
@@ -100,7 +153,6 @@
                         </ul>
                     </div>
                 </li>
-
             }
         }
         @* Render subfolders as list items (recursively) *@
@@ -111,14 +163,11 @@
                 @await Html.PartialAsync("_FolderTree", subfolder)
             }
         }
-
     </ul>
 }
 
-
-
 <script>
-      document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
         // Toggle arrow rotation
         document.querySelectorAll('.toggle-arrow').forEach(arrow => {
             arrow.addEventListener('click', function (e) {
@@ -131,23 +180,42 @@
         // Prevent dropdown-toggle button clicks from bubbling to document-item
         document.querySelectorAll('.dropdown-toggle').forEach(button => {
             button.addEventListener('click', function (e) {
-                e.stopPropagation(); // Stop click from reaching document-item
+                e.stopPropagation();
             });
         });
-
+            // Handle "Add Subfolder" click
+    document.querySelectorAll('.add-subfolder').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            const folderId = this.getAttribute('data-folder-id');
+            document.getElementById('parentFolderId').value = folderId;
+            const modal = new bootstrap.Modal(document.getElementById('addSubfolderModal'));
+            modal.show();
+        });
+    });
+             // Handle "Delete" click
+    document.querySelectorAll('.delete-folder-btn').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            const folderId = this.getAttribute('data-folder-id');
+            document.getElementById('deleteFolderId').value = folderId;
+            const modal = new bootstrap.Modal(document.getElementById('deleteFolderModal'));
+            modal.show();
+        });
+    });
+     
         // Prevent dropdown menu item clicks from bubbling to document-item
         document.querySelectorAll('.dropdown-menu .dropdown-item').forEach(item => {
             item.addEventListener('click', function (e) {
-                e.stopPropagation(); // Stop click from reaching document-item
+                e.stopPropagation();
 
                 // Handle "View File" link specifically
                 if (this.classList.contains('view-file')) {
-                    e.preventDefault(); // Prevent default navigation
+                    e.preventDefault();
                     const url = this.getAttribute('href');
                     const contentDiv = document.getElementById('folderContent');
                     contentDiv.innerHTML = `<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>`;
 
-                    // Fetch file content dynamically (assumes OpenFile returns HTML or JSON)
                     fetch(url)
                         .then(res => res.ok ? res.text() : Promise.reject('Failed to load'))
                         .then(html => contentDiv.innerHTML = html)
@@ -160,7 +228,6 @@
         document.querySelectorAll('.document-item').forEach(docItem => {
             docItem.addEventListener('click', function (e) {
                 const target = e.target;
-                // Ignore clicks originating from dropdown menu, links, or buttons
                 if (target.closest('.dropdown-menu') || target.closest('a') || target.closest('button')) return;
 
                 e.preventDefault();

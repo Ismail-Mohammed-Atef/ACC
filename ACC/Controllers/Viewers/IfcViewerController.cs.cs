@@ -16,12 +16,13 @@ namespace ACC.Controllers.Viewer
             _ifcFileService = ifcFileService;
         }
 
-        public async Task<IActionResult> Index(int? fileId, int projectId = 1)
+        public async Task<IActionResult> Index(int? fileId, int projectId , string? filePath)
         {
             var model = new IfcViewerModel
             {
                 FileId = fileId ?? 0,
                 ProjectId = projectId,
+                FilePath = filePath,
                 AvailableFiles = await _ifcFileService.GetIfcFilesByProjectIdAsync(projectId),
                 ViewerJsFile = GetBuiltViewerJsFileName()
             };

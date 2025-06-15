@@ -144,6 +144,7 @@
         </div>
     </div>
 </div>
+
 <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
 <script>
     const fileId = @Model.FileId;
@@ -152,5 +153,16 @@
         window.loadIfcFile(url);
     }
 </script>
+
+
+    <script type="module" src="/dist/assets/viewer.js?v=@DateTime.Now.Ticks"></script>
+        console.log("hello");
+        const fileId = @Model.FileId;
+        if (fileId > 0) {
+            console.log(fileId);
+            const url = `/IfcViewer/GetIfcFile?id=${fileId}`;
+            window.loadIfcFile(url);
+        }
+    </script>
 
 }
