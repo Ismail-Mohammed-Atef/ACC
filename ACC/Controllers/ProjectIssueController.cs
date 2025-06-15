@@ -32,10 +32,25 @@ namespace ACC.Controllers
             this.userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int id)
+        public async Task<IActionResult> Index(int id, string searchTerm, string status)
         {
             var CurrentUser = await userManager.GetUserAsync(User);
             List<Issue> issues = issueRepository.GetIssuesByUserId(CurrentUser.Id, id);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                issues = issues
+                    .Where(i => i.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                             || i.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && status != "All")
+            {
+                issues = issues
+                    .Where(i => string.Equals(i.Status.ToString(), status, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
 
             var issueViewModels = issues.Select(i => new ProjectIssueVM
             {
@@ -47,22 +62,37 @@ namespace ACC.Controllers
                 Priority = i.Priority,
                 Status = i.Status,
                 ProjectId = i.ProjectId,
-                //DocumentId = i.DocumentId
-                DocumentId = i.Document?.Versions.FirstOrDefault()?.Id
-
+                CreatedAt = i.CreatedAt,
+                DocumentId = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.Id, // ✅ الآمن
+                InitiatorId = i.InitiatorID // ✅ لو محتاج في الواجهة
             }).ToList();
 
             ViewBag.Id = id;
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.SelectedStatus = status;
+
+            var currentUserId = userManager.GetUserId(User);
+
+            var unread = await _context.IssueNotifications
+                .Where(n => n.ReceiverId == currentUserId && !n.IsRead)
+                .GroupBy(n => n.IssueId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+
+            ViewBag.UnreadCommentsCount = unread;
+
             return View(issueViewModels);
         }
 
-        public async Task<IActionResult> Create(int id) // ← id = ProjectId من URL
+
+
+
+        public async Task<IActionResult> Create(int id) 
         {
             var currentUser = await userManager.GetUserAsync(User);
 
             var vm = new ProjectIssueVM
             {
-                ProjectId = id, // ← نسجله تلقائيًا
+                ProjectId = id, 
                 applicationUsers = userManager.Users
                     .Where(u => u.Id != currentUser.Id)
                     .ToList()

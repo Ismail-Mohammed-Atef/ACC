@@ -11,6 +11,8 @@ namespace BusinessLogic.Repository.RepositoryInterfaces
     {
 
         List<Issue> GetIssuesByUserId(string userID, int projectId);
+        Task<Issue?> GetByIdAsync(int id);
+
 
     }
 }
