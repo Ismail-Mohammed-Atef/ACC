@@ -42,7 +42,6 @@ namespace ACC.Controllers
         }
 
 
-        [HasProjectRole(ProjectAccessLevels.ProjectAdmin)]
         public IActionResult Index(int ProjectId, int page = 1, string search = "", int pageSize = 5)
         {
 
