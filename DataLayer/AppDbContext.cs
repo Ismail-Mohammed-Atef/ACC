@@ -154,7 +154,7 @@ namespace DataLayer
            .OnDelete(DeleteBehavior.SetNull);
 
             builder.Entity<IssueReviwers>()
-      .HasKey(w => new { w.ReviewerId, w.IssueId });
+           .HasKey(w => new { w.ReviewerId, w.IssueId });
 
             builder.Entity<IssueReviwers>()
                 .HasOne(rd => rd.Issue)
@@ -167,6 +167,18 @@ namespace DataLayer
                 .HasOne(rd => rd.Reviewer)
                 .WithMany(d => d.IssueReviwers)
                 .HasForeignKey(rd => rd.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<IssueComment>()
+               .HasOne(c => c.Issue)
+               .WithMany(i => i.Comments)
+               .HasForeignKey(c => c.IssueId);
+
+            builder.Entity<IssueComment>()
+                .HasOne(c => c.Author)
+                .WithMany()
+                .HasForeignKey(c => c.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             //Roles and permissions ------------------------------------
@@ -189,6 +201,7 @@ namespace DataLayer
 
 
 
+
         }
 
         public DbSet<Company> Companies { get; set; }
@@ -199,7 +212,12 @@ namespace DataLayer
         public DbSet<ProjectMembers> ProjectMembers { get; set; }
         public DbSet<ProjectActivities> ProjectActivities { get; set; }
         public DbSet<ProjectCompany> ProjectCompany { get; set; }
+        //issue DBSet
         public DbSet<Issue> Issues { get; set; }
+        public DbSet<IssueReviwers> IssueReviwers { get; set; }
+        public DbSet<IssueComment> IssueComments { get; set; }
+        public DbSet<IssueNotification> IssueNotifications { get; set; }
+
         public DbSet<IfcFile> IfcFiles { get; set; }
 
         public DbSet<Transmittal> Transmittals { get; set; }
@@ -212,12 +230,13 @@ namespace DataLayer
         public DbSet<ReviewDocument> ReviewDocuments { get; set; }
         public DbSet<ReviewStepUser> ReviewStepUsers { get; set; }
         public DbSet<WorkflowStepUser> WorkflowStepUsers { get; set; }
-        public DbSet<IssueReviwers> IssueReviwers { get; set; }
+
+       
 
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
 
 
-        //------------------------------------------------------------------------------
+  
 
     }
 }
