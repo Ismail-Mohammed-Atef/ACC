@@ -14,6 +14,9 @@ namespace ACC.ViewModels
         public IssueStatus Status { get; set; }
         public int ProjectId { get; set; }
         public IFormFile Attachment { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+
         public int? DocumentId { get; set; }
 
         public string InitiatorId { get; set; }
