@@ -14,6 +14,8 @@ namespace DataLayer.Models
         public string AuthorId { get; set; }
         [Column(TypeName = "nvarchar(max)")]
         public string Content { get; set; }
+        public string? ImagePath { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public Issue Issue { get; set; }

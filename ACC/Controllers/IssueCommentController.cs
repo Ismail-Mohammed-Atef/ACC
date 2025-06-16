@@ -15,17 +15,20 @@ namespace ACC.Controllers
         private readonly IIssueNotificationRepository _notificationRepo;
         private readonly IIssueRepository _issueRepo;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWebHostEnvironment _env;
 
         public IssueCommentController(
             IIssueCommentRepository commentRepo,
             IIssueNotificationRepository notificationRepo,
             IIssueRepository issueRepo,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IWebHostEnvironment env)
         {
             _commentRepo = commentRepo;
             _notificationRepo = notificationRepo;
             _issueRepo = issueRepo;
             _userManager = userManager;
+            _env = env;
         }
 
         public async Task<IActionResult> Index(int issueId)
@@ -61,71 +64,44 @@ namespace ACC.Controllers
 
             return View(viewModel);
         }
-
-
         [HttpPost]
-        public async Task<IActionResult> AddComment(int issueId, string content)
+        public async Task<IActionResult> AddComment(int issueId, string content, IFormFile? image)
         {
-            try
+            var user = await _userManager.GetUserAsync(User);
+            string? imagePath = null;
+
+            if (image != null && image.Length > 0)
             {
-                var user = await _userManager.GetUserAsync(User);
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "comments", issueId.ToString());
+                Directory.CreateDirectory(uploadsFolder);
 
-                if (string.IsNullOrWhiteSpace(content))
-                    return RedirectToAction("Index", new { issueId });
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
 
-                var comment = new IssueComment
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    IssueId = issueId,
-                    AuthorId = user.Id,
-                    Content = content,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _commentRepo.Insert(comment);
-                _commentRepo.Save();
-
-                // ✅ 1. Get full issue with reviewers and initiator
-                var issue = await _issueRepo.GetByIdAsync(issueId); // already includes reviewers
-
-                var recipients = new List<string>();
-
-                // ✅ 2. Add initiator if not the sender
-                if (issue.InitiatorID != user.Id)
-                    recipients.Add(issue.InitiatorID);
-
-                // ✅ 3. Add all reviewers except the sender
-                var reviewerIds = issue.IssueReviwers?
-                    .Where(r => r.ReviewerId != user.Id)
-                    .Select(r => r.ReviewerId)
-                    .Distinct()
-                    .ToList();
-
-                if (reviewerIds != null)
-                    recipients.AddRange(reviewerIds);
-
-                // ✅ 4. Add notifications
-                foreach (var receiverId in recipients.Distinct())
-                {
-                    var notification = new IssueNotification
-                    {
-                        ReceiverId = receiverId,
-                        IssueId = issueId,
-                        Message = $"{user.UserName} added a comment on Issue #{issueId}",
-                        IsRead = false
-                    };
-                    _notificationRepo.Insert(notification);
+                    await image.CopyToAsync(stream);
                 }
 
-                _notificationRepo.Save();
-
-                return RedirectToAction("Index", new { issueId });
+                imagePath = $"/uploads/comments/{issueId}/{fileName}";
             }
-            catch (Exception)
+
+            if (string.IsNullOrWhiteSpace(content) && imagePath == null)
+                return RedirectToAction("Index", new { issueId });
+
+            var comment = new IssueComment
             {
-                TempData["Error"] = "An error occurred while saving the comment.";
-                return RedirectToAction("Index", new { issueId });
-            }
-        }
+                IssueId = issueId,
+                AuthorId = user.Id,
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                ImagePath = imagePath
+            };
 
+            _commentRepo.Insert(comment);
+            _commentRepo.Save();
+
+            return RedirectToAction("Index", new { issueId });
+        }
     }
 }

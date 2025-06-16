@@ -11,19 +11,39 @@
     ← Back to Issues
 </a>
 
-<form asp-action="AddComment" method="post">
+<form asp-action="AddComment" method="post" enctype="multipart/form-data">
     <input type="hidden" name="issueId" value="@ViewBag.IssueId" />
+
     <div class="mb-2">
         <textarea name="content" class="form-control" placeholder="Write your comment..."></textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Post</button>
+
+    <div class="mb-2">
+        <label for="image">Attach Image (optional)</label>
+        <input type="file" name="image" accept="image/*" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Send</button>
 </form>
+
+
+
 
 <hr />
 @foreach (var comment in Model)
 {
     <div class="mb-3">
-        <strong>@comment.AuthorName</strong> <small class="text-muted">@comment.CreatedAt.ToString("g")</small>
+        <strong>@comment.AuthorName</strong>
+        <small class="text-muted">@comment.CreatedAt.ToString("g")</small>
         <p>@comment.Content</p>
+
+        @if (!string.IsNullOrEmpty(comment.ImagePath))
+        {
+            <div class="mt-2">
+                <img src="@comment.ImagePath" alt="attachment" style="max-width: 300px;" class="img-thumbnail" />
+            </div>
+        }
+
     </div>
 }
+
