@@ -258,7 +258,6 @@ namespace DataLayer
 
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
 
-        public DbSet<IssueReviwers> IssueReviwers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
   

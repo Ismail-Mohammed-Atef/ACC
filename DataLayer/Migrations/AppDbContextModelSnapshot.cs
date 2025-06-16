@@ -1419,9 +1419,9 @@ namespace DataLayer.Migrations
 
                     b.Navigation("ReviewStepUsers");
 
-                    b.Navigation("UserRoles");
-
                     b.Navigation("SentNotifications");
+
+                    b.Navigation("UserRoles");
 
                     b.Navigation("WorkflowSteps");
 
