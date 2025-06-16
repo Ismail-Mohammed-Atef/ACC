@@ -114,7 +114,7 @@ namespace ACC
             }
 
             // ❗ Await it before running the app
-            SeedDataAsync()
+            SeedDataAsync();
 
 
             if (!app.Environment.IsDevelopment())
