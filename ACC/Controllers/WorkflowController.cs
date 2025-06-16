@@ -7,6 +7,7 @@ using DataLayer.Models.Enums;
 using Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace ACC.Controllers
@@ -19,8 +20,9 @@ namespace ACC.Controllers
         private readonly WorkflowStepsUsersService _workflowStepsUsersService;
         private readonly ReviewStepUsersService _reviewStepUsersService;
         private readonly FolderService _folderService;
+        private readonly UserRoleService _userRoleService;
 
-        public WorkflowController(IWorkflowRepository workflowRepository , IWorkFlowStepRepository workFlowStepRepository, UserManager<ApplicationUser> userManager , WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , FolderService folderService)
+        public WorkflowController(IWorkflowRepository workflowRepository , IWorkFlowStepRepository workFlowStepRepository, UserManager<ApplicationUser> userManager , WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , FolderService folderService , UserRoleService userRoleService)
         {
             _workflowRepository = workflowRepository;
             _workFlowStepRepository = workFlowStepRepository;
@@ -28,6 +30,7 @@ namespace ACC.Controllers
             _workflowStepsUsersService = workflowStepsUsersService;
             _reviewStepUsersService = reviewStepUsersService;
             _folderService = folderService;
+            _userRoleService = userRoleService;
         }
 
         public IActionResult Index(int id , int page = 1, int pageSize = 4)
@@ -70,18 +73,32 @@ namespace ACC.Controllers
             var vm = new WorkflowTemplateViewModel();
             vm.ReviewersType = Enum.GetValues(typeof(ReviewersType)).Cast<ReviewersType>().ToList();
             vm.AllFolders = _folderService.GetFolderTree();
+            vm.ProjectPositions = _userRoleService.AllProjectPositions();
+            var ReviewersList = _userRoleService.GetAll().Where(i => i.ProjectId == proId && i.Role.ProjectPosition == true).ToList();
+            
+            foreach(var item in ReviewersList)
+            {
+                ProjectReviewersVM projectReviewersVM = new ProjectReviewersVM()
+                {
+                    UserId = item.UserId,
+                    RoleId = item.RoleId,
+                    UserName = item.User.UserName,
+                    RoleName = item.Role.Name
+                };
+                vm.Reviewers.Add(projectReviewersVM);
+            }
+            
+            
            
+
 
             for (int i = 0; i < stepCount; i++)
             {
                 vm.Steps.Add(new WorkflowStepInputViewModel());
             }
-            vm.applicationUsers = UserManager.Users.ToList();
 
             ViewBag.MultiReviwerOptions = Enum_Helper.GetEnumSelectListWithDisplayNames<MultiReviewerOptions>();
             ViewBag.Id = proId;
-
-
 
             return View("NewWorkflow", vm);
         }
@@ -114,11 +131,6 @@ namespace ACC.Controllers
                     MinReviewers = step.MinReviewers,
 
                 };
-
-
-
-
-
 
 
                 if (step.SelectedOption == "Every key reviewer must review this step")
@@ -186,7 +198,15 @@ namespace ACC.Controllers
                 SelectedDistFolderId = workflowFromDB.DestinationFolderId,
                 ReviewersType = Enum.GetValues(typeof(ReviewersType)).Cast<ReviewersType>().ToList(),
                 AllFolders = _folderService.GetFolderTree(),
-                applicationUsers = UserManager.Users.ToList()
+                Reviewers = _userRoleService.GetAll().Where(i => i.ProjectId == workflowFromDB.ProjectId).Select(i => new ProjectReviewersVM
+                {
+                    UserId = i.UserId,
+                    RoleId = i.RoleId,
+                    UserName = i.User.UserName,
+                    RoleName = i.Role.Name
+                }).ToList()
+
+
             };
 
             var stepTemplates = workflowFromDB.Steps.OrderBy(s => s.StepOrder).ToList();
