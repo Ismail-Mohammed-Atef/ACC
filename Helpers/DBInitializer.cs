@@ -12,7 +12,7 @@ namespace Helpers
 {
     public static class DBInitializer
     {
-        public static async Task SeedAsync(RoleManager<ApplicationRole> roleManager, AppDbContext context)
+        public static async Task SeedAsync(RoleManager<ApplicationRole> roleManager, AppDbContext context , UserManager<ApplicationUser> userManager )
         {
             var projectPositionsList = new List<string>
             {
@@ -119,6 +119,29 @@ namespace Helpers
                 {
                     await roleManager.CreateAsync(new ApplicationRole { Name = roleName, ProjectAccessLevel = true });
                 }
+            }
+
+            var Admin = new ApplicationUser
+            {
+                UserName = "admin",
+                Email = "admin@cde.com",
+            };
+
+            var result = await userManager.CreateAsync(Admin, "123");
+            if (result.Succeeded)
+            {
+
+
+                var userRole = new ApplicationUserRole
+                {
+                    ProjectId = null,
+                    RoleId = (await roleManager.FindByNameAsync(GlobalAccessLevels.AccountAdmin))?.Id,
+                    UserId = Admin.Id
+                };
+
+                context.Set<ApplicationUserRole>().Add(userRole);
+
+    
             }
 
             await context.SaveChangesAsync();

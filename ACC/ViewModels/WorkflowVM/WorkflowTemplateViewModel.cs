@@ -13,7 +13,7 @@ namespace ACC.ViewModels.WorkflowVM
 
         public string Description { get; set; }
 
-        public List<ApplicationUser> applicationUsers { get; set; }
+        public List<ProjectReviewersVM> Reviewers { get; set; } = new List<ProjectReviewersVM>();
 
         public string SelectedAppUserId { get; set; }
 
@@ -28,6 +28,11 @@ namespace ACC.ViewModels.WorkflowVM
 
 
         public List<ReviewersType>? ReviewersType { get; set; } = Enum.GetValues(typeof(ReviewersType)).Cast<ReviewersType>().ToList();
+
+        public List<ApplicationRole> ProjectPositions { get; set; } = new List<ApplicationRole>();
+
+
+
 
         public int? SelectedDistFolderId { get; set; }
 

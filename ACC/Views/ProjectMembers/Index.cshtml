@@ -4,7 +4,16 @@
 @{
     Layout = "_ProjectLayout"; 
     int ProjId = ViewBag.ProjId;
+    var CurrentUserId = UserManager.GetUserId(User);
+    bool hasAdminAccess = UserRoleService.HasGlobalAccess(CurrentUserId, GlobalAccessLevels.AccountAdmin) ||
+                          UserRoleService.HasProjectAccess(CurrentUserId, ProjId, ProjectAccessLevels.ProjectAdmin);
+
+
 }
+<script>
+    const hasAdminAccess = @hasAdminAccess.ToString().ToLower(); 
+</script>
+
 
 
 @model List<ProjectMembersVM>
@@ -23,12 +32,15 @@
     <div class="d-flex">
         <div class="container-fluid p-4">
             <h2>Account Members</h2>
+            @if (hasAdminAccess)
+                        {
             <div class="d-flex justify-content-between my-3">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">+ Add members</button>
                 <div class="d-flex">
                     <input type="text" class="form-control me-2" id="searchInput" placeholder="Search by name or email">
                 </div>
             </div>
+                        }
 
             <table class="table table-bordered" id="membersTable">
                 <thead>
@@ -39,7 +51,11 @@
                         <th>Role</th>
                         <th>Access Level</th>
                         <th>Added On</th>
+                        @if (hasAdminAccess)
+                        {
                         <th><i class="fas fa-cog"></i></th>
+                            
+                        }
                     </tr>
                 </thead>
                 <tbody id="membersTableBody">
@@ -52,6 +68,8 @@
                             <td>@member.Position</td>
                             <td>@member.ProjectAccessLevel</td>
                             <td>@member.AddedOn</td>
+                            @if (hasAdminAccess)
+                        {
                             <td>
                                 <div class="action-btn">
                                     <button class="btn btn-light btn-sm toggle-menu">
@@ -63,6 +81,7 @@
                                     </div>
                                 </div>
                             </td>
+                            }
                         </tr>
                     }
                 </tbody>
@@ -79,6 +98,10 @@
 
         <!-- Placeholder for partial view -->
         <div id="updatePanelContainer"></div>
+
+
+
+
     </div>
 
     <partial name="PartialViews/_AddProjectMembersPartialView" model="new InsertMemberVM()" />
@@ -216,26 +239,28 @@
                 }
             });
 
-                   $(document).on("click", ".member-row", function (e) {
-            if (!$(e.target).closest(".toggle-menu, .delete-btn").length) {
-                $(".member-row").removeClass("active");
-                $(this).addClass("active");
-                var memberId = $(this).data("id");
+             $(document).on("click", ".member-row", function (e) {
+        if (!hasAdminAccess) return;
 
-                $.ajax({
-                    url: "/ProjectMembers/GetUpdatePartial/" + memberId + "?projectId=" + ProjId,
-                    type: "GET",
-                    success: function (partialViewHtml) {
-                        $("#updatePanelContainer").html(partialViewHtml);
-                        $("#memberDetailsPanel").addClass("show");
-                    },
-                    error: function (xhr, status, error) {
-                        console.log("Error:", xhr, status, error);
-                        toastr.error("Failed to load member update view.");
-                    }
-                });
-            }
-        });
+        if (!$(e.target).closest(".toggle-menu, .delete-btn").length) {
+            $(".member-row").removeClass("active");
+            $(this).addClass("active");
+            var memberId = $(this).data("id");
+
+            $.ajax({
+                url: "/ProjectMembers/GetUpdatePartial/" + memberId + "?projectId=" + ProjId,
+                type: "GET",
+                success: function (partialViewHtml) {
+                    $("#updatePanelContainer").html(partialViewHtml);
+                    $("#memberDetailsPanel").addClass("show");
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error:", xhr, status, error);
+                    toastr.error("Failed to load member update view.");
+                }
+            });
+        }
+    });
 
 
             $(document).on("click", "#closePanel", function () {
