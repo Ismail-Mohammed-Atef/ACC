@@ -53,6 +53,7 @@ namespace ACC
                    .AddDefaultTokenProviders();
 
 
+           
 
 
             #region Dependency injection
@@ -95,6 +96,8 @@ namespace ACC
             builder.Services.AddScoped<ReviewStepUsersService>();
             builder.Services.AddScoped<IssueReviewersService>();
             builder.Services.AddScoped<UserRoleService>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
             #endregion

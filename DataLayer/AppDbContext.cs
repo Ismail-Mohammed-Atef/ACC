@@ -180,6 +180,15 @@ namespace DataLayer
                 .WithMany()
                 .HasForeignKey(c => c.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
+            //Notification
+            builder.Entity<Notification>(entity =>
+            {
+                entity.HasOne(n => n.Recipient)
+                    .WithMany(u => u.ReceivedNotifications)
+                    .HasForeignKey(n => n.RecipientId)
+                    .OnDelete(DeleteBehavior.NoAction)
+
+                    ;
 
             //Roles and permissions ------------------------------------
 
@@ -198,6 +207,20 @@ namespace DataLayer
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleId);
 
+
+
+
+
+                entity.HasOne(n => n.Sender)
+                    .WithMany(u => u.SentNotifications)
+                    .HasForeignKey(n => n.SenderId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(n => n.Review)
+                    .WithMany()
+                    .HasForeignKey(n => n.ReviewId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
 
 
 
@@ -235,6 +258,8 @@ namespace DataLayer
 
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
 
+        public DbSet<IssueReviwers> IssueReviwers { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
   
 
