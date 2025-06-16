@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataLayer.Migrations
 {
     /// <inheritdoc />
+<<<<<<<< HEAD:DataLayer/Migrations/20250615144246_Init0.cs
     public partial class Init0 : Migration
+========
+    public partial class init : Migration
+>>>>>>>> b5837cd372cb8fae2272cb41a65d55ae0affc831:DataLayer/Migrations/20250615214143_init.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -518,6 +522,63 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IssueComments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IssueId = table.Column<int>(type: "int", nullable: false),
+                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IssueComments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_IssueComments_AspNetUsers_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_IssueComments_Issues_IssueId",
+                        column: x => x.IssueId,
+                        principalTable: "Issues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "IssueNotifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReceiverId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IssueId = table.Column<int>(type: "int", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IssueNotifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_IssueNotifications_AspNetUsers_ReceiverId",
+                        column: x => x.ReceiverId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_IssueNotifications_Issues_IssueId",
+                        column: x => x.IssueId,
+                        principalTable: "Issues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "IssueReviwers",
                 columns: table => new
                 {
@@ -759,6 +820,26 @@ namespace DataLayer.Migrations
                 column: "FolderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_IssueComments_AuthorId",
+                table: "IssueComments",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IssueComments_IssueId",
+                table: "IssueComments",
+                column: "IssueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IssueNotifications_IssueId",
+                table: "IssueNotifications",
+                column: "IssueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IssueNotifications_ReceiverId",
+                table: "IssueNotifications",
+                column: "ReceiverId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_IssueReviwers_IssueId",
                 table: "IssueReviwers",
                 column: "IssueId");
@@ -884,6 +965,12 @@ namespace DataLayer.Migrations
 
             migrationBuilder.DropTable(
                 name: "IfcFiles");
+
+            migrationBuilder.DropTable(
+                name: "IssueComments");
+
+            migrationBuilder.DropTable(
+                name: "IssueNotifications");
 
             migrationBuilder.DropTable(
                 name: "IssueReviwers");

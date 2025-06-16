@@ -58,6 +58,7 @@ namespace Helpers
 
             var permissionsList = new List<string>
             {
+
                 Permissions.ViewFiles,
                 Permissions.UploadFiles,
                 Permissions.EditFiles,

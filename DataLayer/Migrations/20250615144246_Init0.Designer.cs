@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
+<<<<<<<< HEAD:DataLayer/Migrations/20250615144246_Init0.Designer.cs
     [Migration("20250615144246_Init0")]
     partial class Init0
+========
+    [Migration("20250615214143_init")]
+    partial class init
+>>>>>>>> b5837cd372cb8fae2272cb41a65d55ae0affc831:DataLayer/Migrations/20250615214143_init.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -389,6 +394,71 @@ namespace DataLayer.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Issues");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.IssueComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IssueId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("IssueId");
+
+                    b.ToTable("IssueComments");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.IssueNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssueId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssueId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.ToTable("IssueNotifications");
                 });
 
             modelBuilder.Entity("DataLayer.Models.IssueReviwers", b =>
@@ -965,6 +1035,44 @@ namespace DataLayer.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.IssueComment", b =>
+                {
+                    b.HasOne("DataLayer.Models.ApplicationUser", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.Issue", "Issue")
+                        .WithMany("Comments")
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Issue");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.IssueNotification", b =>
+                {
+                    b.HasOne("DataLayer.Models.Issue", "Issue")
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.ApplicationUser", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Issue");
+
+                    b.Navigation("Receiver");
+                });
+
             modelBuilder.Entity("DataLayer.Models.IssueReviwers", b =>
                 {
                     b.HasOne("DataLayer.Models.Issue", "Issue")
@@ -1270,6 +1378,8 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Models.Issue", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("IssueReviwers");
                 });
 
