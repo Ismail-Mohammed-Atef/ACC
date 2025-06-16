@@ -42,7 +42,6 @@ namespace ACC.Controllers
         }
 
 
-        [HasGlobalRole(GlobalAccessLevels.AccountAdmin)]
         public IActionResult Index(int ProjectId, int page = 1, string search = "", int pageSize = 5)
         {
 
@@ -91,6 +90,8 @@ namespace ACC.Controllers
 
 
         [HttpPost]
+        [HasRoles(GlobalAccessLevels.AccountAdmin, ProjectAccessLevels.ProjectAdmin)]
+
         public async Task<IActionResult> InsertMember(InsertMemberVM memberFromReq , int ProjectId)
         {
            
@@ -127,6 +128,8 @@ namespace ACC.Controllers
         }
 
         [HttpPost]
+        [HasRoles(GlobalAccessLevels.AccountAdmin, ProjectAccessLevels.ProjectAdmin)]
+
         public async Task<IActionResult> Delete(string id, int ProjectId)
         {
             
@@ -141,6 +144,8 @@ namespace ACC.Controllers
         }
 
         [HttpGet]
+        [HasRoles(GlobalAccessLevels.AccountAdmin, ProjectAccessLevels.ProjectAdmin)]
+
         public IActionResult Details(string id , int ? ProjectId = null)
         {
          
@@ -161,6 +166,8 @@ namespace ACC.Controllers
         }
 
         [HttpPost]
+        [HasRoles(GlobalAccessLevels.AccountAdmin, ProjectAccessLevels.ProjectAdmin)]
+
         public async Task<IActionResult> Update(string id, int ProjectId , [FromBody] UpdateMemberVM member)
         {
             
@@ -232,6 +239,8 @@ namespace ACC.Controllers
 
 
         [HttpGet]
+        [HasRoles(GlobalAccessLevels.AccountAdmin, ProjectAccessLevels.ProjectAdmin)]
+
         public IActionResult GetUpdatePartial(string id, int ProjectId)
 
         {

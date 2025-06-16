@@ -107,8 +107,10 @@ namespace ACC
             {
                 using var scope = app.Services.CreateScope();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>(); 
-                await DBInitializer.SeedAsync(roleManager, context); 
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                await DBInitializer.SeedAsync(roleManager, context, userManager);
             }
 
             // ❗ Await it before running the app
@@ -135,7 +137,7 @@ namespace ACC
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Account}/{action=LogIn}/{id?}");
 
             app.Run();
         }
