@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250615214143_init")]
-    partial class init
+    [Migration("20250616195248_re-initTheProjectForSecondTime")]
+    partial class reinitTheProjectForSecondTime
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

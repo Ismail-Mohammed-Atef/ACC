@@ -7,7 +7,8 @@ import * as BUIC from "@thatopen/ui-obc";
 
 BUI.Manager.init();
 console.log("BUI Manager initialized.");
-console.log("test 2.");
+console.log("test 3.");
+console.log("Script loaded!")
 
 
 const container = document.getElementById("container");
@@ -111,6 +112,32 @@ world.camera.projection.onChanged.add(() => {
     const projection = world.camera.projection.current;
     grid.fade = projection === "Perspective";
 });
+
+
+
+////// Toggle the theme of the viewer
+
+const themeToggleBtn = document.getElementById("ThemeToggleBtn");
+let isDarkTheme = true;
+
+themeToggleBtn?.addEventListener("click", () => {
+    isDarkTheme = !isDarkTheme;
+
+    if (isDarkTheme) {
+        world.scene.three.background = new THREE.Color(0x000000);
+        world.renderer.postproduction.customEffects.lineColor = 0xffffff;
+        document.body.style.backgroundColor = "#000";
+        themeToggleBtn.innerHTML = `<iconify-icon icon="solar:moon-bold" width="24" height="24"></iconify-icon>`;
+    } else {
+        world.scene.three.background = new THREE.Color(0xffffff);
+        world.renderer.postproduction.customEffects.lineColor = 0x000000;
+        document.body.style.backgroundColor = "#fff";
+        themeToggleBtn.innerHTML = `<iconify-icon icon="solar:sun-bold" width="24" height="24"></iconify-icon>`;
+    }
+
+    world.renderer.postproduction.enabled = true;
+});
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
