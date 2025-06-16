@@ -19,10 +19,8 @@ namespace DataLayer.Models
         public Company? Company { get; set; }
 
         [ForeignKey(nameof(Role))]
-        public int? RoleId { get; set; }
-        public Role? Role { get; set; }
+        
         public Status? Status { get; set; }
-        public IList<AccessLevel>? AccessLevel { get; set; }
         public IList<ProjectMembers>? Projects { get; set; }
         public DateTime? AddedOn { get; set; } = DateTime.Now;
         public string? FirstName { get; set; }
@@ -36,6 +34,10 @@ namespace DataLayer.Models
         public List<ReviewStepUser> ReviewStepUsers { get; set; } = new List<ReviewStepUser> { };
 
         public List<IssueReviwers>? IssueReviwers { get; set; }
+
+        public ICollection<ApplicationUserRole> UserRoles { get; set; }
+        public int AccessLevelId { get; set; }
+        public AccessLevel AccessLevel { get; set; }
 
 
 

@@ -1,4 +1,5 @@
 ﻿using ACC.ViewModels.ProjectVMs;
+using BusinessLogic.Repository.RepositoryClasses;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer;
 using DataLayer.Models;
@@ -13,13 +14,15 @@ namespace ACC.Controllers
     {
         private readonly IProjetcRepository projectRepo;
         private readonly IProjectActivityRepository projectActivityRepo;
+        private readonly IFolderRepository _folderRepository;
         private readonly AppDbContext _context;
-        public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo ,IProjectActivityRepository projectActivityRepo)
+        public ProjectController(AppDbContext context, IProjetcRepository ProjectRepo ,IProjectActivityRepository projectActivityRepo , IFolderRepository folderRepository)
 
         {
             _context = context;
             projectRepo = ProjectRepo;
             this.projectActivityRepo = projectActivityRepo;
+            _folderRepository = folderRepository;
         }
      
 
@@ -96,11 +99,56 @@ namespace ACC.Controllers
                     CreationDate = DateTime.Now,
                     Currency = projectFromRequest.Currency,
                     Address = projectFromRequest.Address,
+                    Latitude = projectFromRequest.Latitude,
+                    Longitude = projectFromRequest.Longitude
                 };
 
                 projectRepo.Insert(newProject);
                 projectRepo.Save();
                 projectActivityRepo.AddNewActivity(newProject , newProject.Id);
+
+
+                // Create default folders if none exist
+                var workInProgress = new Folder
+                {
+                    Name = "Work In Progress",
+                    ProjectId = newProject.Id,
+                    SubFolders = new List<Folder>(),
+                    Documents = new List<Document>(),
+                    CreatedBy = "System"
+                };
+                var shared = new Folder
+                {
+                    Name = "Shared",
+                    ProjectId = newProject.Id,
+                    SubFolders = new List<Folder>(),
+                    Documents = new List<Document>(),
+                    CreatedBy = "System"
+                };
+                var published = new Folder
+                {
+                    Name = "Published",
+                    ProjectId = newProject.Id,
+                    SubFolders = new List<Folder>(),
+                    Documents = new List<Document>(),
+                    CreatedBy = "System"
+                };
+                var archive = new Folder
+                {
+                    Name = "Archive",
+                    ProjectId = newProject.Id,
+                    SubFolders = new List<Folder>(),
+                    Documents = new List<Document>(),
+                    CreatedBy = "System"
+                };
+                var initialFolders = new List<Folder> { workInProgress, shared, published, archive };
+
+                // Insert default folders
+                foreach (var folder in initialFolders)
+                {
+                    _folderRepository.Insert(folder);
+                }
+                _folderRepository.Save(); // Use async SaveAsync for consistency
 
                 return Json(new { success = true });
             }

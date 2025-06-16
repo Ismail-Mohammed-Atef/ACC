@@ -1,54 +1,126 @@
 ﻿@model List<ACC.ViewModels.ProjectIssueVM>
 
+
 @{
     ViewData["Title"] = "Project Issues";
     Layout = "_ProjectLayout";
 }
 
-<h2>Project Issues</h2>
+<h2 class="mb-4">Project Issues</h2>
 
-<a asp-action="Create" class="btn btn-primary">Create New Issue</a>
+<a asp-action="Create" asp-route-id="@ViewBag.Id" class="btn btn-primary mb-3">Create New Issue</a>
 
-<table class="table">
-    <thead>
+<form asp-action="Index" method="get" class="mb-3">
+    <input type="hidden" name="id" value="@ViewBag.Id" />
+    <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input type="text" name="searchTerm" class="form-control" placeholder="Search issues..." value="@ViewBag.SearchTerm" />
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-select">
+                <option value="All" selected="@((ViewBag.SelectedStatus as string) == "All")">All Statuses</option>
+                <option value="Open" selected="@((ViewBag.SelectedStatus as string) == "Open")">Open</option>
+                <option value="InProgress" selected="@((ViewBag.SelectedStatus as string) == "InProgress")">In Progress</option>
+                <option value="Closed" selected="@((ViewBag.SelectedStatus as string) == "Closed")">Closed</option>
+                <option value="Resolved" selected="@((ViewBag.SelectedStatus as string) == "Resolved")">Resolved</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+{
+    <a asp-action="Index" asp-route-id="@ViewBag.Id" class="btn btn-outline-secondary mb-2">Clear Search</a>
+}
+
+<table class="table table-bordered table-striped">
+    <thead class="table">
         <tr>
+            <th>#</th>
             <th>Title</th>
             <th>Description</th>
             <th>Category</th>
             <th>Type</th>
             <th>Priority</th>
             <th>Status</th>
-            <th>Project ID</th>
+            <th>Created At</th>
             <th>Attachment</th>
+            <th>New Comments</th>
+            <th>Comments</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
+        @{
+            var counter = 1;
+        }
         @foreach (var issue in Model)
         {
             <tr>
+                <td>@counter</td>
                 <td>@issue.Title</td>
                 <td>@issue.Description</td>
                 <td>@issue.Category</td>
                 <td>@issue.Type</td>
                 <td>@issue.Priority</td>
-                <td>@issue.Status</td>
-                <td>@issue.ProjectId</td>
+                <td>
+                    <span class="badge bg-secondary">@issue.Status</span>
+                </td>
+                <td>@issue.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                 <td>
                     @if (issue.DocumentId.HasValue)
                     {
-                        <a asp-controller="ProjectDocument" asp-action="Download" asp-route-versionId="@issue.DocumentId" asp-route-projectId="@issue.ProjectId">Download</a>
+                        <div class="btn-group">
+                            <a asp-controller="ProjectDocument"
+                               asp-action="Download"
+                               asp-route-versionId="@issue.DocumentId"
+                               asp-route-projectId="@issue.ProjectId"
+                               class="btn btn-sm btn-outline-primary">
+                                Download
+                            </a>
+                            <a href="@Url.Action("OpenFromIssue", "ProjectDocument", new { versionId = issue.DocumentId, projectId = issue.ProjectId })"
+                               class="btn btn-sm btn-primary">
+                                Open
+                            </a>
+                        </div>
                     }
                     else
                     {
-                        <span>No Attachment</span>
+                        <span class="text-muted">No Attachment</span>
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@issue.Id" class="btn btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@issue.Id" class="btn btn-danger">Delete</a>
+                    @if (ViewBag.UnreadCommentsCount != null && ViewBag.UnreadCommentsCount.ContainsKey(issue.Id))
+                    {
+                        var count = (int)ViewBag.UnreadCommentsCount[issue.Id];
+                        if (count > 0)
+                        {
+                            <span class="badge bg-danger">@count new comment(s)</span>
+                        }
+                        else
+                        {
+                            <span>No comment</span>
+                        }
+                    }
+                    else
+                    {
+                        <span>No comment</span>
+                    }
+                </td>
+
+
+                <td>
+                    <a asp-controller="IssueComment" asp-action="Index" asp-route-issueId="@issue.Id" class="btn btn-sm btn-info">Comments</a>
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@issue.Id" class="btn btn-sm btn-warning">Edit</a>
+                    @* <a asp-action="Delete" asp-route-id="@issue.Id" class="btn btn-sm btn-danger">Delete</a> *@
                 </td>
             </tr>
+            counter++;
         }
     </tbody>
 </table>

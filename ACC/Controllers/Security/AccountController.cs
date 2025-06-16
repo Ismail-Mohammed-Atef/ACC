@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
+using ACC.Services;
 using ACC.ViewModels.Security;
 using DataLayer.Models;
+using DataLayer.Models.ClassHelper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +12,13 @@ namespace ACC.Controllers.Security
     {
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly SignInManager<ApplicationUser> SignInManager;
+        private readonly UserRoleService _userRoleService;
 
-        public AccountController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager , UserRoleService userRoleService)
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            _userRoleService = userRoleService;
         }
         [HttpGet]
         public IActionResult Register()
@@ -73,7 +77,9 @@ namespace ACC.Controllers.Security
                     if (IsFound)
                     {
                         await SignInManager.SignInAsync(UserFromDatabase, logInUserVM.RememberMe);
-                        return RedirectToAction("Index", "Home");
+                        bool IsAdmin = _userRoleService.GetAll().Any(i => i.UserId == UserFromDatabase.Id && i.Role.Name == GlobalAccessLevels.AccountAdmin);
+                        if(IsAdmin)  return RedirectToAction("Index", "Home");
+                        else return RedirectToAction("Index", "Project");
                     }
                 }
                 ModelState.AddModelError("", "Invalid username and password.");

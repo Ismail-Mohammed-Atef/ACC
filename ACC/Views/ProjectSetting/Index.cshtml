@@ -1,4 +1,3 @@
-
 ﻿@using ACC.ViewModels.ProjectVMs
 @using Helpers;
 
@@ -25,8 +24,12 @@
 		  crossorigin="anonymous">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqbWUXIAolPajv3pLIleGfeg1RE0i6FjA"></script>
 
-	
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
 
 	<style>
 
@@ -51,22 +54,28 @@
 		}
 
 		.nav-links {
+			display: flex;
 			border-bottom: 1px solid rgb(220, 220, 220);
 			margin-bottom: 20px;
-			padding-bottom:5px;
+			position: relative;
 		}
 
 			.nav-links a {
-				margin-right: 20px;
+				flex: 0 0 80px;
 				color: #666;
 				text-decoration: none;
+				padding-bottom: 5px;
+				border-bottom: 2px solid transparent;
+				transition: border-color 0.3s ease, color 0.3s ease;
+				position: relative;
 			}
 
 				.nav-links a.active {
 					color: #007bff;
 					border-bottom: 2px solid #007bff;
-					padding-bottom:5px;
+					margin-bottom: -1px;
 				}
+
 
 		.button-group {
 			display: flex;
@@ -74,7 +83,7 @@
 			align-items: center;
 			border-bottom: 1px solid #ccc;
 			padding-bottom: 15px;
-			margin-bottom: 20px;	
+			margin-bottom: 20px;
 		}
 
 		.btn-primary {
@@ -197,10 +206,9 @@
 	</style>
 </head>
 <body>
+
 	<div class="d-flex">
 		<div class="container-fluid p-4">
-
-			@* Update notificatio message *@
 
 			<div id="custom-notification" class="custom-notification">
 				<span id="notification-message"></span>
@@ -211,80 +219,129 @@
 			</div>
 
 			<div class="nav-links mb-3">
-				<a href="@Url.Action("Index", new {Id = Model.id})" class="active">Project</a>
-				<a href="@Url.Action("Index", new {Id = Model.id})">Locations</a>
+				<a href="#" class="nav-link active" data-target="project-data">Project</a>
+				<a href="#" class="nav-link" data-target="locations-data">Locations</a>
 			</div>
 
-			<div class="button-group mb-3">
-				<div>
-					<button class="btn btn-primary me-2" id="editDataModel" style="display:block;">Edit</button>
-					<button type="button" class="btn btn-primary me-2" id="cancelDataModel">Cancel</button>
-					<button type="submit" form="editProjectForm" class="btn btn-primary me-2" id="saveDataModel" style="display:none;">Save</button>
+			<div id="project-data">
+
+				<div class="button-group mb-3">
+					<div>
+						<button class="btn btn-primary me-2" id="editDataModel" style="display:block;">Edit</button>
+						<button type="button" class="btn btn-primary me-2" id="cancelDataModel">Cancel</button>
+						<button type="submit" form="editProjectForm" class="btn btn-primary me-2" id="saveDataModel" style="display:none;">Save</button>
+					</div>
+					<div>
+						<a href="#" class="btn-link"><i class="bi bi-link-45deg me-1"></i>Save as template</a>
+					</div>
 				</div>
-				<div>
-					<a href="#" class="btn-link"><i class="bi bi-link-45deg me-1"></i>Save as template</a>
+
+				<div id="display-data-class">
+
+					<div class="general-data">
+						<!-- Left Side: Header -->
+						<div class="header">
+							<h3>General</h3>
+							<p class="subtitle">Visible to all project members</p>
+						</div>
+
+						<!-- Right Side: Details -->
+						<div class="details">
+							<div class="name-data">
+								<h4>Name</h4>
+								<p>@Model.Name</p>
+							</div>
+
+							<div class="address-data">
+								<h4>Address</h4>
+								<p>@Model.Address</p>
+							</div>
+
+							<div class="startdate-data">
+								<h4>Start date <i class="bi bi-info-circle info-icon"></i></h4>
+								<p>@(Model.StartDate != null ? Model.StartDate.Value.ToString("MMMM d, yyyy") : "N/A")</p>
+							</div>
+
+							<div class="enddate-data">
+								<h4>End date <i class="bi bi-info-circle info-icon"></i></h4>
+								<p>@(Model.EndDate != null ? Model.EndDate.Value.ToString("MMMM d, yyyy") : "N/A")</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="advanced-data">
+						<!-- Left Side: Header -->
+						<div class="header">
+							<h3>Advanced</h3>
+							<p class="subtitle">Only visible to project and account admins</p>
+						</div>
+
+						<!-- Right Side: Details -->
+						<div class="details">
+							<div class="number-data">
+								<h4>Project number</h4>
+								<p>@Model.ProjectNumber</p>
+							</div>
+
+							<div class="type-data">
+								<h4>Type</h4>
+								<p>@Model.ProjectType</p>
+							</div>
+
+							<div class="value-data">
+								<h4>Project value</h4>
+								<p>@Model.ProjectValue</p>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 
-			<div id="display-data-class">
 
-				<div class="general-data">
-					<!-- Left Side: Header -->
-					<div class="header">
-						<h3>General</h3>
-						<p class="subtitle">Visible to all project members</p>
-					</div>
+			<div id="locations-data">
+				<div class="card mb-3">
+					<div class="card-body" style="padding: 16px;">
 
-					<!-- Right Side: Details -->
-					<div class="details">
-						<div class="name-data">
-							<h4>Name</h4>
-							<p>@Model.Name</p>
+						<!-- Header: Title and Edit Button -->
+						<div id="header-data" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+							<h4 class="card-title" style="margin: 0;">Project Location</h4>
+							<div id="edit-button" style="margin-top: 10px;">
+								<button class="btn btn-primary" id="editLocationBtn" style="min-width: 80px;">Edit</button>
+							</div>
+						</div>
+						<!-- Display Mode -->
+						<div id="input-data" style="margin-bottom: 20px;">
+							<p class="card-text" style="margin: 0;"><strong>Address:</strong> @Model.Address</p>
 						</div>
 
-						<div class="address-data">
-							<h4>Address</h4>
-							<p>@Model.Address</p>
-						</div>
 
-						<div class="startdate-data">
-							<h4>Start date <i class="bi bi-info-circle info-icon"></i></h4>
-							<p>@(Model.StartDate != null ? Model.StartDate.Value.ToString("MMMM d, yyyy") : "N/A")</p>
-						</div>
+						<!-- Edit Mode Form -->
+						<form id="locationForm" method="post" asp-action="UpdateProjectLocation">
+							<div id="update-location-data" style="display: none; margin-bottom: 20px;">
+								<input type="hidden" asp-for="id" />
+								<input type="hidden" asp-for="Latitude" id="Latitude" />
+								<input type="hidden" asp-for="Longitude" id="Longitude" />
 
-						<div class="enddate-data">
-							<h4>End date <i class="bi bi-info-circle info-icon"></i></h4>
-							<p>@(Model.EndDate != null ? Model.EndDate.Value.ToString("MMMM d, yyyy") : "N/A")</p>
-						</div>
-					</div>
-				</div>
+								<label asp-for="Address" class="form-label">Address</label>
+								<input type="text" class="form-control mb-2" asp-for="Address" id="Address" />
 
-				<div class="advanced-data">
-					<!-- Left Side: Header -->
-					<div class="header">
-						<h3>Advanced</h3>
-						<p class="subtitle">Only visible to project and account admins</p>
-					</div>
+								<div class="d-flex justify-content-end mt-2">
+									<button type="submit" class="btn btn-success me-2" id="saveLocationBtn">Save</button>
+									<button type="button" class="btn btn-secondary" id="cancelLocationBtn">Cancel</button>
+								</div>
+							</div>
+						</form>
 
-					<!-- Right Side: Details -->
-					<div class="details">
-						<div class="number-data">
-							<h4>Project number</h4>
-							<p>@Model.ProjectNumber</p>
-						</div>
+						<!-- Google Map -->
+						<div id="map" style="height: 400px; width: 100%; border: 1px solid #ccc;"></div>
+						<div id="latlng-display" class="mt-2 text-muted" style="font-size: 14px;"></div>
 
-						<div class="type-data">
-							<h4>Type</h4>
-							<p>@Model.ProjectType</p>
-						</div>
-
-						<div class="value-data">
-							<h4>Project value</h4>
-							<p>@Model.ProjectValue</p>
-						</div>
 					</div>
 				</div>
 			</div>
+
+
+
 
 			<div id="Edit-data-class">
 
@@ -379,14 +436,29 @@
 
 
 
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
-
 
 	<script>
 		$(document).ready(function () {
+
+			
+
+				// Remove 'active' from all nav links, then add it to the clicked one
+				$(".nav-link").removeClass("active");
+				$(this).addClass("active");
+
+				// Hide all data sections
+				$("#project-data, #locations-data").hide();
+
+				// Show the corresponding section based on data-target
+				var targetId = $(this).data("target");
+				$("#" + targetId).show();
+			});
+
+			// (Optional) Show the project section by default
+			$("#project-data").show();
+			$("#locations-data").hide();
+
+			// Existing edit/cancel/save logic ...
 			$("#editDataModel").click(function () {
 				$("#display-data-class").hide();
 				$("#Edit-data-class").show();
@@ -395,7 +467,7 @@
 				$("#saveDataModel").show();
 			});
 
-			$("#cancelDataModel").click(function(){
+			$("#cancelDataModel").click(function () {
 				$("#editDataModel").show();
 				$("#display-data-class").show();
 				$("#Edit-data-class").hide();
@@ -410,12 +482,13 @@
 					.addClass(isError ? "bg-danger" : "bg-success")
 					.fadeIn(400)
 					.delay(5000)
-					.fadeOut(2000);
+					.fadeOut(2000, function() {
+			$(this).css("display", "none"); // Ensure it's hidden
+		});
 			}
-
+		
 			$("#editProjectForm").submit(function (event) {
 				event.preventDefault();
-
 				$.ajax({
 					url: '@Url.Action("EditProject", "ProjectSetting")',
 					type: "POST",
@@ -446,7 +519,140 @@
 				});
 			});
 		});
+
+		function reverseGeocode(lat, lng) {
+			fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+				.then(res => res.json())
+				.then(data => {
+					document.getElementById("Address").value = data.display_name;
+				})
+				.catch(() => {
+					document.getElementById("Address").value = "Unknown address";
+				});
+		}
+
+		let marker; // make marker accessible globally
+
+		function initMap() {
+			const lat = parseFloat('@(Model.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0")');
+			const lng = parseFloat('@(Model.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0")');
+
+			console.log("📍 Latitude:", lat, "Longitude:", lng);
+
+			if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+				document.getElementById("map").innerHTML = "<p class='text-danger'>Location unavailable.</p>";
+				return;
+			}
+
+			const projectLatLng = { lat: lat, lng: lng };
+
+			const map = new google.maps.Map(document.getElementById("map"), {
+				center: projectLatLng,
+				zoom: 15,
+			});
+
+			marker = new google.maps.Marker({
+				position: projectLatLng,
+				map: map,
+				draggable: true,
+				title: "Project Location"
+			});
+
+			const infoWindow = new google.maps.InfoWindow({
+				content: `<strong>@Model.Name</strong><br>@Model.Address<br><small>Lat: ${lat}, Lng: ${lng}</small>`
+			});
+
+			infoWindow.open(map, marker);
+
+			// Update location when dragging marker
+			marker.addListener('dragend', function (e) {
+				const newLat = e.latLng.lat();
+				const newLng = e.latLng.lng();
+				updateLocation(newLat, newLng);
+			});
+
+			// Update location when clicking on the map
+			map.addListener('click', function (e) {
+				const clickedLat = e.latLng.lat();
+				const clickedLng = e.latLng.lng();
+
+				// Move the marker to clicked location
+				marker.setPosition(e.latLng);
+
+				// Update fields
+				updateLocation(clickedLat, clickedLng);
+			});
+
+			// Initial lat/lng display
+			updateLatLngDisplay(lat, lng);
+		}
+
+		// Update hidden fields + reverse geocode + UI text
+		function updateLocation(lat, lng) {
+			document.getElementById("Latitude").value = lat;
+			document.getElementById("Longitude").value = lng;
+			reverseGeocode(lat, lng);
+			updateLatLngDisplay(lat, lng);
+		}
+
+		function updateLatLngDisplay(lat, lng) {
+			let display = document.getElementById("latlng-display");
+			if (display) {
+				display.innerHTML = `📌 <strong>Lat:</strong> ${lat.toFixed(6)} &nbsp;&nbsp; <strong>Lng:</strong> ${lng.toFixed(6)}`;
+			}
+		}
+
+		$(document).ready(function () {
+			// Show map on tab change
+			$(".nav-link").click(function () {
+				const target = $(this).data("target");
+				if (target === "locations-data") {
+					setTimeout(initMap, 200);
+				}
+			});
+
+			// Enable edit mode
+			$("#editLocationBtn").click(function () {
+				$("#input-data").hide();
+				$("#update-location-data").show();
+				$(this).hide();
+			});
+
+			// Cancel edit
+			$("#cancelLocationBtn").click(function () {
+				$("#update-location-data").hide();
+				$("#input-data").show();
+				$("#editLocationBtn").show();
+			});
+
+			// Submit form
+			$("#locationForm").submit(function (e) {
+				e.preventDefault();
+
+				$.ajax({
+					url: '@Url.Action("UpdateProjectLocation", "ProjectSetting")',
+					type: "POST",
+					data: $(this).serialize(),
+					success: function (res) {
+						if (res.success) {
+							$("#input-data").html(`<p class="card-text"><strong>Address:</strong> ${res.newAddress}</p>`);
+							$("#update-location-data").hide();
+							$("#input-data").show();
+							$("#editLocationBtn").show();
+						} else {
+							alert("❌ " + (res.error || "Failed to update."));
+						}
+					},
+					error: function () {
+						alert("❌ Server error occurred.");
+					}
+				});
+			});
+		});
 	</script>
+
+
+
 </body>
 
 

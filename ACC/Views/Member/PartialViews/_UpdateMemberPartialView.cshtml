@@ -1,6 +1,12 @@
 ﻿@using ACC.ViewModels.MemberVM.MemberVM
 @model InsertMemberVM
 
+@{
+    var companies = ViewBag.Companies as SelectList;
+    var accessLevels = ViewBag.GlobalAccessLevelsList as SelectList;
+}
+
+
 <div id="memberDetailsPanel" class="details-panel">
     <div class="panel-header">
         <div class="avatar">
@@ -20,45 +26,32 @@
     <div class="panel-body">
         <div id="validationErrors" class="text-danger" style="display: none;"></div>
 
-        <label>Company</label>
-        <select placeholder="Please Select Company" id="memberCompany" class="form-select">
-            <option value="" disabled selected>Please Select Company</option>
+        <label for="memberCompany">Company</label>
+        <select id="memberCompany" class="form-select">
+            <option value="" disabled selected>Select Company</option>
             <option value="">No Company</option>
-            @if (ViewBag.Companies != null)
+            @if (companies != null)
             {
-                foreach (var company in ViewBag.Companies as SelectList)
+                foreach (var company in companies)
                 {
-                    if (Model.currentCompany == company.Text)
-                    {
-                        <option value="@company.Value" selected>@company.Text</option>
-
-                    }
-                    else
-                    {
-                        <option value="@company.Value">@company.Text</option>
-                    }
+                    <option value="@company.Value" selected="@(Model.currentCompany == company.Text ? "selected" : null)">
+                        @company.Text
+                    </option>
                 }
             }
         </select>
 
-        <label>Role</label>
-        <select placeholder="Please Select Company" id="memberRole" class="form-select">
-            <option value="" disabled selected>Please Select Role</option>
-            <option value="">No Role</option>
-            @if (ViewBag.Roles != null)
+        <label for="memberRole">Access Level</label>
+        <select id="memberRole" class="form-select">
+            <option value="" disabled selected>Select Access Level</option>
+            <option value="">No Access</option>
+            @if (accessLevels != null)
             {
-                foreach (var role in ViewBag.Roles as SelectList)
+                foreach (var role in accessLevels)
                 {
-
-                    if (Model.currentRole == role.Text)
-                    {
-                        <option value="@role.Value" selected>@role.Text</option>
-
-                    }
-                    else
-                    {
-                        <option value="@role.Value">@role.Text</option>
-                    }
+                    <option value="@role.Value" selected="@(Model.GlobalAccessLevelId == role.Text ? "selected" : null)">
+                        @role.Text
+                    </option>
                 }
             }
         </select>
@@ -66,19 +59,7 @@
         <label>Status</label>
         <p id="memberStatus" class="form-control">@Model?.Status</p>
 
-        <label>Access Levels</label>
-        <div class="form-check">
-            <input type="checkbox" id="adminAccess" class="form-check-input" @(Model?.adminAccess == true ? "checked" : "") />
-            <label class="form-check-label" for="adminAccess">Account Admin</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" id="excutive" class="form-check-input" @(Model?.excutive == true ? "checked" : "") />
-            <label class="form-check-label" for="excutive">Executive</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" id="standardAccess" class="form-check-input" @(Model?.standardAccess == true ? "checked" : "") />
-            <label class="form-check-label" for="standardAccess">Standard Access</label>
-        </div>
+        
 
         <hr>
 

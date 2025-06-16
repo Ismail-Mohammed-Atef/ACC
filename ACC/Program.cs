@@ -6,6 +6,7 @@ using DataLayer;
 using DataLayer.Models;
 using Helpers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,15 +25,33 @@ namespace ACC
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
             builder.Services
-                .AddIdentity<ApplicationUser, IdentityRole>(options =>
-                {
-                    options.Password.RequiredLength = 3;
-                    options.Password.RequireDigit = false;
-                    options.Password.RequireNonAlphanumeric = false;
-                    options.Password.RequireUppercase = false;
-                    options.Password.RequireLowercase = false;
-                })
-                .AddEntityFrameworkStores<AppDbContext>();
+                   .AddIdentity<ApplicationUser, ApplicationRole>(options =>
+                   {
+                       options.Password.RequiredLength = 3;
+                       options.Password.RequireDigit = false;
+                       options.Password.RequireNonAlphanumeric = false;
+                       options.Password.RequireUppercase = false;
+                       options.Password.RequireLowercase = false;
+                   })
+                   .AddUserStore<UserStore<
+                       ApplicationUser,
+                       ApplicationRole,
+                       AppDbContext,
+                       string,
+                       IdentityUserClaim<string>,
+                       ApplicationUserRole,
+                       IdentityUserLogin<string>,
+                       IdentityUserToken<string>,
+                       IdentityRoleClaim<string>>>()
+                   .AddRoleStore<RoleStore<
+                       ApplicationRole,
+                       AppDbContext,
+                       string,
+                       ApplicationUserRole,
+                       IdentityRoleClaim<string>>>()
+                   .AddEntityFrameworkStores<AppDbContext>()
+                   .AddDefaultTokenProviders();
+
 
            
 
@@ -46,7 +65,7 @@ namespace ACC
           
             builder.Services.AddControllersWithViews();
 
-
+            
             builder.Services.AddScoped<IProjetcRepository, ProjectRepository>();
             builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
             builder.Services.AddScoped<IRoleRepository, RoleRepository>();
@@ -76,6 +95,7 @@ namespace ACC
             builder.Services.AddScoped<WorkflowStepsUsersService>();
             builder.Services.AddScoped<ReviewStepUsersService>();
             builder.Services.AddScoped<IssueReviewersService>();
+            builder.Services.AddScoped<UserRoleService>();
             builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
 
@@ -89,12 +109,16 @@ namespace ACC
             async Task SeedDataAsync()
             {
                 using var scope = app.Services.CreateScope();
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                await DBInitializer.SeedRolesAsync(roleManager);
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                await DBInitializer.SeedAsync(roleManager, context, userManager);
             }
 
             // ❗ Await it before running the app
-            SeedDataAsync();
+            SeedDataAsync().GetAwaiter().GetResult();
+
 
 
             if (!app.Environment.IsDevelopment())
@@ -113,11 +137,11 @@ namespace ACC
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthorization(); 
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Account}/{action=LogIn}/{id?}");
 
             app.Run();
         }

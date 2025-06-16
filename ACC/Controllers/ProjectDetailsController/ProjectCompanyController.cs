@@ -1,6 +1,7 @@
 ﻿using ACC.ViewModels.ProjectCompanyVM;
 using BusinessLogic.Repository.RepositoryInterfaces;
 using DataLayer.Models;
+using DataLayer.Models.ClassHelper;
 using DataLayer.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -24,6 +25,7 @@ namespace ACC.Controllers.ProjectDetailsController
         // GET: /ProjectCompany/Index/{id}
         public IActionResult Index(int id, int page = 1, int pageSize = 4, string searchTerm = null)
         {
+
             var companies = _companyRepository.GetCompaniesInEacProjectWithPrpjectId(id);
 
             // Apply search filter if searchTerm is provided
@@ -65,6 +67,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
         // GET: /ProjectCompany/GetCompaniesForProject/{id}
         [HttpGet]
+
         public IActionResult GetCompaniesForProject(int id)
         {
             var allCompanies = _companyRepository.GetAll();
@@ -83,6 +86,8 @@ namespace ACC.Controllers.ProjectDetailsController
         // POST: /ProjectCompany/SaveNew
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasRoles(GlobalAccessLevels.AccountAdmin , projectIdRouteKey:"id", ProjectAccessLevels.ProjectAdmin)]
+
         public async Task<IActionResult> SaveNew(int id, [Bind("Name,Address,Description,Website,PhoneNumber,SelectedCountry,SelectedCompanyType")] ProjectCompanyVM model, string selectedCompanyId)
         {
             //Console.WriteLine($"selectedCompanyId: {selectedCompanyId}");
@@ -144,6 +149,9 @@ namespace ACC.Controllers.ProjectDetailsController
         // POST: /ProjectCompany/Delete
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasRoles(GlobalAccessLevels.AccountAdmin, projectIdRouteKey: "projectId", ProjectAccessLevels.ProjectAdmin)]
+
+
         public IActionResult Delete(int? id, int projectId)
         {
             if (id == null)
@@ -191,7 +199,9 @@ namespace ACC.Controllers.ProjectDetailsController
         // POST: /ProjectCompany/UpdateCompany
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateCompany(int id, [FromBody] UpdatedProjectCompanyVM model)
+
+
+        public IActionResult UpdateCompany(int id,  [FromBody] UpdatedProjectCompanyVM model)
         {
             if (!ModelState.IsValid)
             {
