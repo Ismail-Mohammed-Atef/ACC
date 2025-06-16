@@ -3,7 +3,8 @@
 
 @model List<DisplayProjectsVM>
 @{
-    Layout = "_Layout";
+	Layout = "_Layout";
+	var CurrentUserId = UserManager.GetUserId(User);
 }
 
 <!DOCTYPE html>
@@ -176,19 +177,22 @@
 				<a href="@Url.Action("Index", new { showArchived = true })" class="@(ViewBag.ShowArchived == true ? "active" : "")">Archived</a>
 			</div>
 
+		    @if (UserRoleService.HasGlobalAccess(CurrentUserId, GlobalAccessLevels.AccountAdmin))
+		    {
 			<div class="d-flex justify-content-between button-group mb-3">
 				<div>
 					<button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addProjectModal">+ Create Project</button>
 					<i class="fas fa-info-circle" style="color: #666;"></i>
 				</div>
 
-				<form action="/Project/Index" method="get" class="d-flex">
-					<div class="search-container">
-						<input type="text" class="form-control" name="srchText" placeholder="Search" value="@Context.Request.Query["srchText"]" />
-					</div>
-					<button type="submit" class="btn btn-primary ms-2" style="height:40px;">Search</button>
-				</form>
+					<form action="/Project/Index" method="get" class="d-flex">
+						<div class="search-container">
+							<input type="text" class="form-control" name="srchText" placeholder="Search" value="@Context.Request.Query["srchText"]" />
+						</div>
+						<button type="submit" class="btn btn-primary ms-2" style="height:40px;">Search</button>
+					</form>
 			</div>
+		    }
 
 			<div class="table-container">
 				<table class="table table-hover">
@@ -201,7 +205,12 @@
 							<th>Start Date</th>
 							<th>End Date</th>
 							<th>Creation Date</th>
+							@if (UserRoleService.HasGlobalAccess(CurrentUserId, GlobalAccessLevels.AccountAdmin))
+							{
+								
 							<th class="action-column">Actions</th>
+							}
+
 						</tr>
 					</thead>
 					<tbody>
@@ -223,6 +232,9 @@
 									<td>@item.StartDate?.ToString("MM/dd/yyyy")</td>
 									<td>@item.EndDate?.ToString("MM/dd/yyyy")</td>
 									<td>@item.CreationDate?.ToString("MM/dd/yyyy")</td>
+									@if (UserRoleService.HasGlobalAccess(CurrentUserId, GlobalAccessLevels.AccountAdmin))
+									{
+										
 									<td>
 										<div class="dropdown">
 											<button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton_@item.id" data-bs-toggle="dropdown" aria-expanded="false">
@@ -241,6 +253,8 @@
 											</ul>
 										</div>
 									</td>
+									}
+
 								</tr>
 							}
 						}

@@ -12,6 +12,8 @@ namespace ACC.ViewModels.WorkflowVM
         public List<string> AssignedUsersIds { get; set; } = new List<string>();
 
         public ReviewersType? SelectedReviewersType { get; set; }
+
+        public int selectedPositionId { get; set; }
         public string? SelectedOption { get; set; }
 
         public int? MinReviewers { get; set; }

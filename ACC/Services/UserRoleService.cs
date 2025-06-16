@@ -1,5 +1,6 @@
 ﻿using DataLayer;
 using DataLayer.Models;
+using DataLayer.Models.ClassHelper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace ACC.Services
 
         public IList<ApplicationUserRole> GetAll()
         {
-            return _context.Set<ApplicationUserRole>().Include(i=>i.Role).ToList();
+            return _context.Set<ApplicationUserRole>().Include(i=>i.Role).Include(i=>i.User).ToList();
         }
 
         public ApplicationUserRole GetByUserId(string UserId , int? projId = null)
@@ -107,6 +108,17 @@ namespace ACC.Services
         {
             string userId = _context.Set<ApplicationUserRole>().Include(u => u.User).Include(u => u.Role).FirstOrDefault(i => i.User.UserName == Name && i.ProjectId==ProjId && i.Role.ProjectPosition == true).UserId;
             return await _userManager.FindByIdAsync(userId);
+        }
+
+        public bool HasGlobalAccess(string UserId, string GlobalAccessLevel)
+        {
+          return _context.Set<ApplicationUserRole>().Any(i => i.UserId == UserId && i.Role.Name == GlobalAccessLevel);
+
+        }
+        public bool HasProjectAccess(string UserId,int projectId, string GlobalAccessLevel)
+        {
+            return _context.Set<ApplicationUserRole>().Any(i => i.UserId == UserId && i.Role.Name == GlobalAccessLevel && i.ProjectId==projectId);
+
         }
 
     }
