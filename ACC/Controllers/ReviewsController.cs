@@ -27,8 +27,10 @@ namespace ACC.Controllers
         private readonly ReviewFolderService ReviewFolderService;
         private readonly WorkflowStepsUsersService WorkflowStepUserService;
         private readonly ReviewStepUsersService ReviewStepUsersService;
+        private readonly INotificationService _notificationService;
 
-        public ReviewsController( IDocumentRepository documentRepository ,IReviewRepository reviewRepo, IWorkflowRepository workflowRepo, IWorkFlowStepRepository workFlowStepRepo, FolderService folderService, ReviewDocumentService reviewDocumentService, ReviewFolderService reviewFolderService ,WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , UserManager<ApplicationUser> userManager)
+
+        public ReviewsController( IDocumentRepository documentRepository ,IReviewRepository reviewRepo, IWorkflowRepository workflowRepo, IWorkFlowStepRepository workFlowStepRepo, FolderService folderService, ReviewDocumentService reviewDocumentService, ReviewFolderService reviewFolderService ,WorkflowStepsUsersService workflowStepsUsersService, ReviewStepUsersService reviewStepUsersService , UserManager<ApplicationUser> userManager, INotificationService notificationService)
         {
             _documentRepository = documentRepository;
             _reviewRepository = reviewRepo;
@@ -40,10 +42,10 @@ namespace ACC.Controllers
             WorkflowStepUserService= workflowStepsUsersService;
             ReviewStepUsersService = reviewStepUsersService;
             UserManager = userManager;
+            _notificationService = notificationService;
         }
         [Authorize]
-        public async Task<IActionResult> Index(int id ,int page = 1, int pageSize = 4)
-            
+        public async Task<IActionResult> Index(int id ,int page = 1, int pageSize = 4)   
         {
             var CurrentUser = await UserManager.GetUserAsync(User);
             var query = _reviewRepository.GetCurrentStepUserReviews(CurrentUser.Id , id);
@@ -97,6 +99,7 @@ namespace ACC.Controllers
             var Templatesteps = _workflowRepository.GetById(model.SelectedWorkflowId).Steps;
             var CurrentUser = await UserManager.GetUserAsync(User);
 
+           
 
             try
             {
@@ -108,7 +111,7 @@ namespace ACC.Controllers
                     FinalReviewStatus = model.SelectedFinalReviewStatus,
                     WorkflowTemplate = _workflowRepository.GetById(model.SelectedWorkflowId),
                     WorkflowTemplateId = model.SelectedWorkflowId,
-                    CurrentStepId = null,
+                    CurrentStepId = GetFirstStepId(model.SelectedWorkflowId),
                     CreatedAt = DateTime.Now,
                     InitiatorUserId = CurrentUser.Id,
 
@@ -116,8 +119,10 @@ namespace ACC.Controllers
                 _reviewRepository.Insert(Review);
                 _reviewRepository.Save();
 
+                // Send notifications to assigned reviewers
+                await _notificationService.NotifyReviewCreatedAsync(Review);
 
-                if(model.SelectedDocumentIds != null)
+                if (model.SelectedDocumentIds != null)
                 {
                     foreach (var id in model.SelectedDocumentIds)
                     {
@@ -413,6 +418,8 @@ namespace ACC.Controllers
             ViewBag.ReviewId = review.Id;
             ViewBag.CurrentUserId = CurrentUser.Id;
             ViewBag.Initiator = review.InitiatorUser.Id;
+            ViewBag.InitiatorName = review.InitiatorUser.UserName;
+
             return View("Details" , DocumentsListVM);
         }
 
@@ -435,7 +442,14 @@ namespace ACC.Controllers
 
         }
 
-
+        // Helper method to get the first step ID For Notifications
+        private int? GetFirstStepId(int workflowTemplateId)
+        {
+            // Implement this based on your workflow structure
+            // This should return the ID of the first step in the workflow
+            var firstStep = _workflowRepository.GetFirstStepByTemplateId(workflowTemplateId);
+            return firstStep?.Id;
+        }
 
 
     }

@@ -34,6 +34,7 @@ namespace ACC
                 })
                 .AddEntityFrameworkStores<AppDbContext>();
 
+           
 
 
             #region Dependency injection
@@ -75,6 +76,8 @@ namespace ACC
             builder.Services.AddScoped<WorkflowStepsUsersService>();
             builder.Services.AddScoped<ReviewStepUsersService>();
             builder.Services.AddScoped<IssueReviewersService>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
             #endregion

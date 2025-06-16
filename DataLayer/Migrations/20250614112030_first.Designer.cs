@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250603053500_new")]
-    partial class @new
+    [Migration("20250614112030_first")]
+    partial class first
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -350,6 +350,58 @@ namespace DataLayer.Migrations
                     b.HasIndex("IssueId");
 
                     b.ToTable("IssueReviwers");
+                });
+
+            modelBuilder.Entity("DataLayer.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RecipientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipientId");
+
+                    b.HasIndex("ReviewId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("DataLayer.Models.Project", b =>
@@ -893,7 +945,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Folder", "Folder")
                         .WithMany("Documents")
                         .HasForeignKey("FolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Folder");
@@ -904,7 +956,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Document", "Document")
                         .WithMany("Versions")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Document");
@@ -931,7 +983,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Project", "Project")
                         .WithMany("Issues")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Document");
@@ -960,6 +1012,31 @@ namespace DataLayer.Migrations
                     b.Navigation("Reviewer");
                 });
 
+            modelBuilder.Entity("DataLayer.Models.Notification", b =>
+                {
+                    b.HasOne("DataLayer.Models.ApplicationUser", "Recipient")
+                        .WithMany("ReceivedNotifications")
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.Models.Review", "Review")
+                        .WithMany()
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataLayer.Models.ApplicationUser", "Sender")
+                        .WithMany("SentNotifications")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Recipient");
+
+                    b.Navigation("Review");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("DataLayer.Models.ProjectActivities", b =>
                 {
                     b.HasOne("DataLayer.Models.Project", "project")
@@ -974,13 +1051,13 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Company", "Company")
                         .WithMany("ProjectCompany")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Project", "Project")
                         .WithMany("ProjectCompany")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -993,13 +1070,13 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.ApplicationUser", "Member")
                         .WithMany("Projects")
                         .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Project", "Project")
                         .WithMany("Members")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Member");
@@ -1016,7 +1093,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.ApplicationUser", "InitiatorUser")
                         .WithMany()
                         .HasForeignKey("InitiatorUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Project", "Project")
@@ -1026,7 +1103,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.WorkflowTemplate", "WorkflowTemplate")
                         .WithMany("Reviews")
                         .HasForeignKey("WorkflowTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("CurrentStep");
@@ -1043,13 +1120,13 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Document", "Document")
                         .WithMany("ReviewDocuments")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Review", "Review")
                         .WithMany("ReviewDocuments")
                         .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Document");
@@ -1062,13 +1139,13 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Folder", "Folder")
                         .WithMany("ReviewFolders")
                         .HasForeignKey("FolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Review", "Review")
                         .WithMany("ReviewFolders")
                         .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Folder");
@@ -1108,13 +1185,13 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.DocumentVersion", "DocumentVersion")
                         .WithMany()
                         .HasForeignKey("DocumentVersionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.Transmittal", "Transmittal")
                         .WithMany("TransmittalDocuments")
                         .HasForeignKey("TransmittalId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("DocumentVersion");
@@ -1131,7 +1208,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.WorkflowTemplate", "WorkflowTemplate")
                         .WithMany("Steps")
                         .HasForeignKey("WorkflowTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("WorkflowTemplate");
@@ -1161,7 +1238,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Project");
@@ -1172,7 +1249,7 @@ namespace DataLayer.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -1181,7 +1258,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -1190,7 +1267,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -1199,13 +1276,13 @@ namespace DataLayer.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("DataLayer.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -1214,7 +1291,7 @@ namespace DataLayer.Migrations
                     b.HasOne("DataLayer.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -1224,7 +1301,11 @@ namespace DataLayer.Migrations
 
                     b.Navigation("Projects");
 
+                    b.Navigation("ReceivedNotifications");
+
                     b.Navigation("ReviewStepUsers");
+
+                    b.Navigation("SentNotifications");
 
                     b.Navigation("WorkflowSteps");
 
