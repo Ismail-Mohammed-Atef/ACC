@@ -391,16 +391,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
                 // ISO 19650 file name pattern
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
-                var iso19650Pattern = @"^[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z]{2}-[A-Z0-9]{4,}-[A-Z0-9]{4,}$";
-
-                //if (!Regex.IsMatch(fileNameWithoutExtension, iso19650Pattern, RegexOptions.IgnoreCase))
-                //{
-                //    TempData["Error"] = "Invalid file name. Please follow ISO 19650 naming conventions. Example: P01-ABC-ZZ-00-DR-A-1234-0001.pdf";
-
-                //    ViewBag.FolderId = folderId;
-                //    ViewBag.ProjectId = projectId;
-                //    return View();
-                //}
+                
 
 
                 var filePath = Path.Combine(uploadFolder, file.FileName);
