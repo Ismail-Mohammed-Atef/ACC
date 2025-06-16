@@ -411,7 +411,7 @@
                     fileViewer.innerHTML = `<img src="${data.fileUrl}" style="max-width: 100%; height: auto;" />`;
                     fileModal.show();
                 }else if (data.fileType === ".ifc"){
-                      const viewerUrl = `/IfcViewer?filePath=${encodeURIComponent(data.fileUrl)}`;
+                      const viewerUrl = `/IfcViewer/Index?filePath=${encodeURIComponent(data.fileUrl)}&projectId=${(data.projectId)}`;
                       window.location.href = viewerUrl;
                 }
                 else {

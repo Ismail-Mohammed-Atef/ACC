@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.Xml;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static NuGet.Packaging.PackagingConstants;
 
@@ -388,6 +389,20 @@ namespace ACC.Controllers.ProjectDetailsController
                 var uploadFolder = Path.Combine(_env.WebRootPath, "uploads", projectId.ToString(), folderId.ToString());
                 Directory.CreateDirectory(uploadFolder);
 
+                // ISO 19650 file name pattern
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                var iso19650Pattern = @"^[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z]{2}-[A-Z0-9]{4,}-[A-Z0-9]{4,}$";
+
+                //if (!Regex.IsMatch(fileNameWithoutExtension, iso19650Pattern, RegexOptions.IgnoreCase))
+                //{
+                //    TempData["Error"] = "Invalid file name. Please follow ISO 19650 naming conventions. Example: P01-ABC-ZZ-00-DR-A-1234-0001.pdf";
+
+                //    ViewBag.FolderId = folderId;
+                //    ViewBag.ProjectId = projectId;
+                //    return View();
+                //}
+
+
                 var filePath = Path.Combine(uploadFolder, file.FileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -589,6 +604,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
                 return Ok(new
                 {
+                    projectId = document.ProjectId,
                     fileUrl = $"/{relaPath}", // e.g., /copied-ifc-files/filename.ifc
                     fileType = document.FileType.ToLower()
                 });
