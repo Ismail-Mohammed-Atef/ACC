@@ -17,14 +17,16 @@ namespace ACC.Controllers
 {
     public class ProjectIssueController : Controller
     {
+        private readonly IDocumentRepository _documentRepository;
         private readonly IIssueRepository issueRepository;
         private readonly IssueReviewersService issueReviewersService;
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public ProjectIssueController(IIssueRepository issueRepository, IssueReviewersService issueReviewersService, AppDbContext context, IWebHostEnvironment env, UserManager<ApplicationUser> userManager)
+        public ProjectIssueController(IDocumentRepository documentRepository,IIssueRepository issueRepository, IssueReviewersService issueReviewersService, AppDbContext context, IWebHostEnvironment env, UserManager<ApplicationUser> userManager)
         {
+            _documentRepository = documentRepository;
             this.issueRepository = issueRepository;
             this.issueReviewersService = issueReviewersService;
             _context = context;
@@ -196,38 +198,55 @@ namespace ACC.Controllers
                 var issueFolderPath = Path.Combine(_env.WebRootPath, "uploads", projectId.ToString(), wipFolder.Id.ToString(), issuesFolder.Id.ToString(), folderName);
                 Directory.CreateDirectory(issueFolderPath);
 
-                // Upload file
-                var fileName = $"{Guid.NewGuid()}_{model.Attachment.FileName}";
-                var filePath = Path.Combine(issueFolderPath, fileName);
+                if (issuesFolder == null)
+                {
+                    return NotFound("Folder not found.");
+                }
+
+                
+
+                // ISO 19650 file name pattern
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(model.Attachment.FileName);
+
+
+
+                var filePath = Path.Combine(issueFolderPath, model.Attachment.FileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await model.Attachment.CopyToAsync(stream);
                 }
 
-                // Create document + version
-                var document = new Document
+                var document = await _documentRepository.GetAllQueryable()
+                    .Include(d => d.Versions)
+                    .FirstOrDefaultAsync(d => d.FolderId == issuesFolder.Id && d.Name == Path.GetFileNameWithoutExtension(model.Attachment.FileName));
+
+                if (document == null)
                 {
-                    Name = Path.GetFileNameWithoutExtension(model.Attachment.FileName),
-                    FileType = extension,
-                    FolderId = issuesFolder.Id,
-                    ProjectId = projectId,
-                    CreatedAt = DateTime.UtcNow,
-                    CreatedBy = User.Identity.Name ?? "System",
-                    Versions = new List<DocumentVersion>()
-                };
+                    document = new Document
+                    {
+                        Name = Path.GetFileNameWithoutExtension(model.Attachment.FileName),
+                        FileType = extension,
+                        FolderId = issuesFolder.Id,
+                        ProjectId = projectId,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = User.Identity.Name ?? "System",
+                        Versions = new List<DocumentVersion>()
+                    };
+                    _documentRepository.Insert(document);
+                }
 
                 var version = new DocumentVersion
                 {
                     FilePath = filePath,
                     UploadedAt = DateTime.UtcNow,
                     UploadedBy = User.Identity.Name ?? "System",
-                    VersionNumber = 1
+                    VersionNumber = document.Versions.Count + 1
                 };
 
                 document.Versions.Add(version);
-                _context.Documents.Add(document);
-                await _context.SaveChangesAsync();
+                _documentRepository.Save();
+
 
                 issue.DocumentId = document.Id;
 
