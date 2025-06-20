@@ -63,8 +63,8 @@ namespace ACC.Controllers
                 Status = i.Status,
                 ProjectId = i.ProjectId,
                 CreatedAt = i.CreatedAt,
-                DocumentId = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.Id, // ✅ الآمن
-                InitiatorId = i.InitiatorID // ✅ لو محتاج في الواجهة
+                DocumentId = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.Id, 
+                InitiatorId = i.InitiatorID 
             }).ToList();
 
             ViewBag.Id = id;
@@ -86,13 +86,13 @@ namespace ACC.Controllers
 
 
 
-        public async Task<IActionResult> Create(int id) 
+        public async Task<IActionResult> Create(int? id =1) 
         {
             var currentUser = await userManager.GetUserAsync(User);
 
             var vm = new ProjectIssueVM
             {
-                ProjectId = id, 
+                ProjectId = id ?? 1, 
                 applicationUsers = userManager.Users
                     .Where(u => u.Id != currentUser.Id)
                     .ToList()
@@ -227,6 +227,80 @@ namespace ACC.Controllers
                 issueRepository.Save();
 
             }
+
+            //snapshot 
+            if (!string.IsNullOrWhiteSpace(model.ScreenshotPath))
+            {
+               
+                var fullFilePath = Path.Combine(_env.WebRootPath, model.ScreenshotPath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                if (System.IO.File.Exists(fullFilePath))
+                {
+                    var projectId = model.ProjectId;
+
+                  
+                    var wipFolder = await _context.Folders
+                        .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.Name == "Work In Progress" && f.ParentFolderId == null);
+                    if (wipFolder == null)
+                    {
+                        wipFolder = new Folder
+                        {
+                            Name = "Work In Progress",
+                            ProjectId = projectId,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = User.Identity?.Name ?? "System"
+                        };
+                        _context.Folders.Add(wipFolder);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var snapshotsFolder = await _context.Folders
+                        .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.Name == "Snapshots" && f.ParentFolderId == wipFolder.Id);
+                    if (snapshotsFolder == null)
+                    {
+                        snapshotsFolder = new Folder
+                        {
+                            Name = "Snapshots",
+                            ParentFolderId = wipFolder.Id,
+                            ProjectId = projectId,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = User.Identity?.Name ?? "System"
+                        };
+                        _context.Folders.Add(snapshotsFolder);
+                        await _context.SaveChangesAsync();
+                    }
+
+                 
+                    var document = new Document
+                    {
+                        Name = "Snapshot_" + DateTime.Now.Ticks,
+                        FileType = Path.GetExtension(fullFilePath),
+                        FolderId = snapshotsFolder.Id,
+                        ProjectId = projectId,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = User.Identity?.Name ?? "System",
+                        Versions = new List<DocumentVersion>()
+                    };
+
+                    var version = new DocumentVersion
+                    {
+                        FilePath = fullFilePath,
+                        UploadedAt = DateTime.UtcNow,
+                        UploadedBy = User.Identity?.Name ?? "System",
+                        VersionNumber = 1
+                    };
+
+                    document.Versions.Add(version);
+                    _context.Documents.Add(document);
+                    await _context.SaveChangesAsync();
+
+                   
+                    issue.DocumentId = document.Id;
+                    issueRepository.Update(issue);
+                    issueRepository.Save();
+                }
+            }
+
 
             return RedirectToAction("Index", new { id = model.ProjectId });
         }
@@ -383,19 +457,18 @@ namespace ACC.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    // إنشاء فولدر جديد باسم {IssueId}_{Title}
+                
                     var archiveIssueFolder = Path.Combine(_env.WebRootPath, "uploads", issue.ProjectId.ToString(), archiveFolder.Id.ToString(), archiveIssuesFolder.Id.ToString(), $"{issue.Id}_{CleanFileName(issue.Title)}");
                     Directory.CreateDirectory(archiveIssueFolder);
 
-                    // نقل الملف فعليًا
                     var oldPath = oldVersion.FilePath;
                     var newFilePath = Path.Combine(archiveIssueFolder, Path.GetFileName(oldPath));
                     System.IO.File.Copy(oldPath, newFilePath, true);
 
-                    // تحديث المسار
+                    
                     oldVersion.FilePath = newFilePath;
 
-                    // حذف الفولدر الخاص بالـ Issue فقط لو فاضي (مش WIP أو Issues)
+                  
                     var oldIssueFolder = Path.GetDirectoryName(oldPath);
                     if (Directory.Exists(oldIssueFolder) && !Directory.EnumerateFileSystemEntries(oldIssueFolder).Any())
                     {
@@ -422,7 +495,31 @@ namespace ACC.Controllers
             return RedirectToAction("Index", new { id = issue.ProjectId });
         }
 
-        //viewers
+        //viewers snapshot
+        [HttpGet]
+        public async Task<IActionResult> CreateFromSnapshot(int projectId, string imagePath)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+
+           
+            var ifcFile = await _context.IfcFiles.FirstOrDefaultAsync(f => f.ProjectId == projectId);
+
+            var vm = new ProjectIssueVM
+            {
+                ProjectId = projectId,
+                ScreenshotPath = imagePath,
+                FileId = ifcFile?.Id ?? 0, 
+                applicationUsers = userManager.Users
+                    .Where(u => u.Id != currentUser.Id)
+                    .ToList()
+            };
+
+            return View("Create", vm);
+        }
+
+
+
+
 
     }
 }

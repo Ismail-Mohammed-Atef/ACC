@@ -16,14 +16,14 @@ namespace ACC.Controllers.Viewer
             _ifcFileService = ifcFileService;
         }
 
-        public async Task<IActionResult> Index(int? fileId, int? projectId , string? filePath)
+        public async Task<IActionResult> Index(int? fileId, int? projectId  , string? filePath)
         {
             var model = new IfcViewerModel
             {
                 FileId = fileId ?? 0,
-                ProjectId = projectId ?? 0,
+                ProjectId = projectId ?? 1,
                 FilePath = filePath,
-                AvailableFiles = await _ifcFileService.GetIfcFilesByProjectIdAsync(projectId?? 0),
+                AvailableFiles = await _ifcFileService.GetIfcFilesByProjectIdAsync(projectId?? 1),
                 ViewerJsFile = GetBuiltViewerJsFileName()
             };
             return View(model);
@@ -35,7 +35,6 @@ namespace ACC.Controllers.Viewer
 
             var files = Directory.GetFiles(distFolder, "index-*.js");
 
-            // رجع أكبر فايل في الحجم (لأنه الغالب entry)
             var biggestFile = files.OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
 
             return biggestFile is not null ? "/dist/assets/" + Path.GetFileName(biggestFile) : "";

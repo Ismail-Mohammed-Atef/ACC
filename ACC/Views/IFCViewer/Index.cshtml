@@ -89,8 +89,37 @@
             visibility: visible;
             opacity: 1;
         }
-</style>
 
+        /* snapshot */
+    .snapshot-button {
+        background: linear-gradient(to right, #0d6efd, #6610f2);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        font-weight: bold;
+        border-radius: 12px;
+        font-size: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        margin-left: 1rem;
+    }
+
+        .snapshot-button:hover {
+            transform: scale(1.05);
+            background: linear-gradient(to right, #6610f2, #0d6efd);
+        }
+
+    #selectionBox {
+        position: absolute;
+        border: 2px dashed #00ffff;
+        pointer-events: none;
+        display: none;
+        z-index: 999;
+    }
+
+</style>
+<div id="selectionBox"></div>
 <div id="container">
     <div id="toolsBar" class="toolsBar">
         <div class="tooltip">
@@ -142,6 +171,11 @@
             </button>
             <span class="tooltiptext">Volume Measurement (Select Columns)</span>
         </div>
+
+        <button id="captureBtn" class="snapshot-button">
+            📸 Take Snapshot & Report Issue
+        </button> 
+
     </div>
 </div>
 
@@ -157,4 +191,45 @@
         window.loadIfcFile?.(url);
     }
 </script>
+
+<!-- to create snapshot -->
+
+<script>
+      document.getElementById("captureBtn").addEventListener("click", async () => {
+        const canvas = document.querySelector("canvas");
+        if (!canvas) {
+            alert("Viewer not ready!");
+            return;
+        }
+
+   
+        requestAnimationFrame(() => {
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append("snapshot", blob, "snapshot.jpg");
+                    const projectId = "@(string.IsNullOrEmpty(ViewBag.ProjectId as string) ? "1" : ViewBag.ProjectId)";
+                     formData.append("projectId", projectId);
+
+
+                const response = await fetch("/IssueHelper/UploadSnapshot", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = `/ProjectIssue/CreateFromSnapshot?projectId=${result.projectId}&imagePath=${encodeURIComponent(result.imagePath)}`;
+                } else {
+                    alert("Snapshot upload failed.");
+                }
+            }, "image/jpeg", 0.95);
+        });
+    });
+
+
+
+</script>
+
+
+
 

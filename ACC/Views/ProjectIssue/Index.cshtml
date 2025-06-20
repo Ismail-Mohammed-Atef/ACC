@@ -48,6 +48,9 @@
             <th>Status</th>
             <th>Created At</th>
             <th>Attachment</th>
+            <th>snapshot</th>
+          
+
             <th>New Comments</th>
             <th>Comments</th>
             <th>Actions</th>
@@ -92,6 +95,20 @@
                         <span class="text-muted">No Attachment</span>
                     }
                 </td>
+                
+                <td>
+                    @if (!string.IsNullOrEmpty(issue.FilePath) && (
+                   issue.FilePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                   issue.FilePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                   issue.FilePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        <a href="@Url.Content(issue.FilePath.Replace("\\", "/"))" target="_blank" class="btn btn-sm btn-secondary">
+                            📷 Open Snapshot
+                        </a>
+                    }
+
+                </td>
+
                 <td>
                     @if (ViewBag.UnreadCommentsCount != null && ViewBag.UnreadCommentsCount.ContainsKey(issue.Id))
                     {
