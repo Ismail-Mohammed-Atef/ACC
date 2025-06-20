@@ -32,10 +32,11 @@ namespace ACC.Controllers
             this.userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int id, string searchTerm, string status)
+        public async Task<IActionResult> Index(int id, string searchTerm, string status, int page = 1)
         {
-            var CurrentUser = await userManager.GetUserAsync(User);
-            List<Issue> issues = issueRepository.GetIssuesByUserId(CurrentUser.Id, id);
+            int pageSize = 6;
+            var currentUser = await userManager.GetUserAsync(User);
+            List<Issue> issues = issueRepository.GetIssuesByUserId(currentUser.Id, id);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -52,7 +53,16 @@ namespace ACC.Controllers
                     .ToList();
             }
 
-            var issueViewModels = issues.Select(i => new ProjectIssueVM
+            var totalIssues = issues.Count();
+
+            // ✅ حدد الصفحة الحالية فقط
+            var pagedIssues = issues
+                .OrderByDescending(i => i.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var issueViewModels = pagedIssues.Select(i => new ProjectIssueVM
             {
                 Id = i.Id,
                 Title = i.Title,
@@ -63,13 +73,17 @@ namespace ACC.Controllers
                 Status = i.Status,
                 ProjectId = i.ProjectId,
                 CreatedAt = i.CreatedAt,
-                DocumentId = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.Id, 
-                InitiatorId = i.InitiatorID 
+                DocumentId = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.Id,
+                FilePath = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.FilePath,
+                InitiatorId = i.InitiatorID
             }).ToList();
 
             ViewBag.Id = id;
             ViewBag.SearchTerm = searchTerm;
             ViewBag.SelectedStatus = status;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalIssues / pageSize);
+            ViewBag.CurrentPage = page;
 
             var currentUserId = userManager.GetUserId(User);
 
@@ -82,7 +96,6 @@ namespace ACC.Controllers
 
             return View(issueViewModels);
         }
-
 
 
 
