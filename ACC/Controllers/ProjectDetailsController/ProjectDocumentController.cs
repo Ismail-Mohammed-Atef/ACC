@@ -73,7 +73,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     await LoadSubFoldersAsync(folder, _folderRepository);
                 }
 
-                ViewBag.ProjectId = Id;
+                ViewBag.Id = Id;
                 id = Id; // Ensure 'id' is defined; consider clarifying its purpose
                 ViewBag.AllFolders = _folderRepository.GetAll();
 
@@ -170,7 +170,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return NotFound("Folder not found or you don't have access.");
                 }
 
-                ViewBag.ProjectId = projectId;
+                ViewBag.Id = projectId;
                 return View(folder);
             }
             catch (Exception ex)
@@ -193,7 +193,7 @@ namespace ACC.Controllers.ProjectDetailsController
             if (folder == null)
                 return NotFound();
 
-            ViewBag.ProjectId = id;
+            ViewBag.Id = id;
 
             return View(folder);
         }
@@ -235,7 +235,7 @@ namespace ACC.Controllers.ProjectDetailsController
         [HttpGet]
         public IActionResult CreateRoot(int projectId)
         {
-            ViewBag.ProjectId = projectId;
+            ViewBag.Id = projectId;
             return View();
         }
 
@@ -248,7 +248,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 if (string.IsNullOrWhiteSpace(folderName))
                 {
                     ModelState.AddModelError("FolderName", "Folder name is required.");
-                    ViewBag.ProjectId = projectId;
+                    ViewBag.Id = projectId;
                     return View();
                 }
 
@@ -278,7 +278,7 @@ namespace ACC.Controllers.ProjectDetailsController
             {
                 // Log the exception
                 TempData["Error"] = "An error occurred while creating the root folder.";
-                ViewBag.ProjectId = projectId;
+                ViewBag.Id = projectId;
                 return View();
             }
         }
@@ -342,7 +342,7 @@ namespace ACC.Controllers.ProjectDetailsController
         public IActionResult Upload(int folderId, int projectId)
         {
             ViewBag.FolderId = folderId;
-            ViewBag.ProjectId = projectId;
+            ViewBag.Id = projectId;
             return View();
         }
 
@@ -391,16 +391,7 @@ namespace ACC.Controllers.ProjectDetailsController
 
                 // ISO 19650 file name pattern
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
-                var iso19650Pattern = @"^[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z0-9]{2,}-[A-Z]{2}-[A-Z0-9]{4,}-[A-Z0-9]{4,}$";
-
-                //if (!Regex.IsMatch(fileNameWithoutExtension, iso19650Pattern, RegexOptions.IgnoreCase))
-                //{
-                //    TempData["Error"] = "Invalid file name. Please follow ISO 19650 naming conventions. Example: P01-ABC-ZZ-00-DR-A-1234-0001.pdf";
-
-                //    ViewBag.FolderId = folderId;
-                //    ViewBag.ProjectId = projectId;
-                //    return View();
-                //}
+                
 
 
                 var filePath = Path.Combine(uploadFolder, file.FileName);
@@ -448,7 +439,7 @@ namespace ACC.Controllers.ProjectDetailsController
                 // Log the exception
                 TempData["Error"] = "An error occurred while uploading the file.";
                 ViewBag.FolderId = folderId;
-                ViewBag.ProjectId = projectId;
+                ViewBag.Id = projectId;
                 return View();
             }
         }
@@ -504,7 +495,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return NotFound("Document not found.");
                 }
 
-                ViewBag.ProjectId = projectId;
+                ViewBag.Id = projectId;
                 return View(document);
             }
             catch (Exception ex)
@@ -772,9 +763,6 @@ namespace ACC.Controllers.ProjectDetailsController
 
             return BadRequest("Unsupported file type.");
         }
-
-
-
 
     }
 

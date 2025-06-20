@@ -13,6 +13,7 @@ namespace ACC.Controllers
     {
         private readonly INotificationService _notificationService;
         private readonly UserManager<ApplicationUser> _userManager;
+        public static int Id;
 
         public NotificationController(
             INotificationService notificationService,
@@ -22,8 +23,9 @@ namespace ACC.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id)
         {
+            Id = id ?? 0; // Set the static Id variable to the provided id or 0 if null
             var userId = _userManager.GetUserId(User);
             var notifications = await _notificationService.GetUserNotificationsAsync(userId);
             var unreadCount = await _notificationService.GetUnreadCountAsync(userId);
@@ -48,7 +50,7 @@ namespace ACC.Controllers
                 UnreadCount = unreadCount,
                 TotalCount = notifications.Count
             };
-
+            ViewBag.Id = id;
             return View(viewModel);
         }
 
@@ -71,6 +73,7 @@ namespace ACC.Controllers
                 FormattedDate = FormatNotificationDate(n.CreatedAt),
                 TypeDisplayName = GetTypeDisplayName(n.Type)
             }).ToList();
+            ViewBag.Id = Id;
 
             return Json(new
             {
@@ -84,6 +87,7 @@ namespace ACC.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var unreadCount = await _notificationService.GetUnreadCountAsync(userId);
+            ViewBag.Id = Id;
 
             return Json(new { unreadCount });
         }
