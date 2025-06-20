@@ -1,0 +1,3 @@
+[6/17/2025 10:51:46 AM] Error: System.IO.IOException: The process cannot access the file 'C:\Users\ibrih\Source\Repos\ACC\ACC\wwwroot\converted\Arkan_Office_58e7a59affb049b4849967585b15ec3d.dxf' because it is being used by another process.
+   at System.IO.FileSystem.DeleteFile(String fullPath)
+   at ACC.Controllers.ProjectDetailsController.ProjectDocumentController.OpenFile(Int32 documentId) in C:\Users\ibrih\Source\Repos\ACC\ACC\Controllers\ProjectDetailsController\ProjectDocumentController.cs:line 628
