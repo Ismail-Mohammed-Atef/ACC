@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -23,7 +24,8 @@ namespace ACC.Controllers
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly UserManager<ApplicationUser> userManager;
-
+        private readonly string _uploadsPath = Path.Combine("wwwroot", "Uploads");
+        private readonly string _convertedPath;
         public ProjectIssueController(IDocumentRepository documentRepository,IIssueRepository issueRepository, IssueReviewersService issueReviewersService, AppDbContext context, IWebHostEnvironment env, UserManager<ApplicationUser> userManager)
         {
             _documentRepository = documentRepository;
@@ -336,7 +338,142 @@ namespace ACC.Controllers
 
             return RedirectToAction("Index", new { id = model.ProjectId });
         }
+        [HttpGet]
+        public async Task<IActionResult> OpenFile(int documentId)
+        {
+            var document = await _documentRepository.GetAllQueryable()
+                .Include(d => d.Versions.OrderByDescending(v => v.VersionNumber))
+                .FirstOrDefaultAsync(d => d.Id == documentId);
 
+            if (document == null || document.Versions == null || !document.Versions.Any())
+            {
+                return NotFound(new { message = "Document or version not found." });
+            }
+
+            var latestVersion = document.Versions.First();
+            var filePath = latestVersion.FilePath;
+
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound(new { message = "File not found on server." });
+            }
+            if (document.FileType.ToLower() == ".ifc")
+            {
+                var relaPath = filePath.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+
+
+                return Ok(new
+                {
+                    projectId = document.ProjectId,
+                    fileUrl = $"/{relaPath}", // e.g., /copied-ifc-files/filename.ifc
+                    fileType = document.FileType.ToLower()
+                });
+            }
+
+            if (document.FileType.ToLower() == ".dwg")
+            {
+                try
+                {
+                    // Ensure directories exist
+                    Directory.CreateDirectory(_uploadsPath);
+                    Directory.CreateDirectory(_convertedPath);
+
+                    // Clear old files to avoid conflicts (optional, consider optimizing)
+                    foreach (var oldFile in Directory.GetFiles(_uploadsPath))
+                    {
+                        System.IO.File.Delete(oldFile);
+                    }
+                    foreach (var oldFile in Directory.GetFiles(_convertedPath))
+                    {
+                        System.IO.File.Delete(oldFile);
+                    }
+
+                    // Generate unique filenames
+                    var baseName = Path.GetFileNameWithoutExtension(filePath);
+                    var uniqueName = $"{baseName}_{Guid.NewGuid():N}";
+                    var dwgFile = Path.Combine(_uploadsPath, uniqueName + ".dwg");
+
+                    // Copy DWG to uploads folder
+                    using (var sourceStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    using (var destStream = new FileStream(dwgFile, FileMode.Create, FileAccess.Write))
+                    {
+                        await sourceStream.CopyToAsync(destStream);
+                    }
+
+                    // External tools paths
+                    var odaPath = @"C:\Tools\ODAFileConverter\ODAFileConverter.exe";
+                    var inkscapePath = @"C:\Program Files\Inkscape\bin\inkscape.exe";
+
+                    if (!System.IO.File.Exists(odaPath))
+                    {
+                        return StatusCode(500, new { message = $"ODA converter not found at: {odaPath}" });
+                    }
+                    if (!System.IO.File.Exists(inkscapePath))
+                    {
+                        return StatusCode(500, new { message = $"Inkscape not found at: {inkscapePath}" });
+                    }
+
+                    // Step 1: Convert DWG to DXF
+                    var dxfFile = Path.Combine(_convertedPath, uniqueName + ".dxf");
+                    var odaArgs = $"\"{Path.GetFullPath(_uploadsPath)}\" \"{Path.GetFullPath(_convertedPath)}\" ACAD2018 DXF 0 1";
+
+                    var odaProcess = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = odaPath,
+                        Arguments = odaArgs,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    });
+                    odaProcess?.WaitForExit();
+
+                    if (!System.IO.File.Exists(dxfFile))
+                    {
+                        return StatusCode(500, new { message = "DXF file not generated. ODA conversion failed." });
+                    }
+
+                    // Step 2: Convert DXF to PDF
+                    var pdfFile = Path.Combine(_convertedPath, uniqueName + ".pdf");
+                    var inkscapeArgs = $"\"{dxfFile}\" --export-filename=\"{pdfFile}\" --export-area-drawing --export-type=pdf";
+
+                    var inkProcess = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = inkscapePath,
+                        Arguments = inkscapeArgs,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
+                    inkProcess?.WaitForExit();
+
+                    if (!System.IO.File.Exists(pdfFile))
+                    {
+                        return StatusCode(500, new { message = "PDF file not created. Inkscape conversion failed." });
+                    }
+
+                    // Construct relative URL for the PDF
+                    var relativePath = pdfFile.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+                    return Ok(new
+                    {
+                        fileUrl = $"/{relativePath}", // e.g., /converted/uniqueName.pdf
+                        fileType = ".pdf" // Return as PDF since DWG is converted
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.IO.File.AppendAllText("log.txt", $"[{DateTime.Now}] Error: {ex}\n");
+                    return StatusCode(500, new { message = $"Unexpected error: {ex.Message}" });
+                }
+            }
+
+            // Handle PDFs and images
+            var relPath = filePath.Replace(_env.WebRootPath, "").Replace("\\", "/").TrimStart('/');
+            return Ok(new
+            {
+                fileUrl = $"/{relPath}", // e.g., /uploads/1/2/document.pdf
+                fileType = document.FileType.ToLower()
+            });
+        }
         // Helper method to sanitize folder names
         private string CleanFileName(string name)
         {
