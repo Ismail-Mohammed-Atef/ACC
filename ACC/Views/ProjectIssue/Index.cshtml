@@ -205,7 +205,7 @@
         loadingSpinner.classList.remove("d-none");
 
         try {
-            const response = await fetch(`/ProjectIssue/OpenFile?documentId=${documentId}`);
+            const response = await fetch(`/ProjectDocument/OpenFile?documentId=${documentId}`);
             if (!response.ok) {
                 throw new Error(`Server error: ${response.statusText}`);
             }

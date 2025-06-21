@@ -350,6 +350,10 @@ namespace ACC.Controllers.ProjectDetailsController
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(int folderId, int projectId, IFormFile file)
         {
+            if (projectId == 0)
+            {
+                projectId = id;
+            }
             try
             {
                 if (file == null || file.Length == 0)
@@ -582,7 +586,7 @@ namespace ACC.Controllers.ProjectDetailsController
             }
 
             var latestVersion = document.Versions.First();
-            var filePath = Path.Combine(_env.WebRootPath, "uploads", document.ProjectId.ToString(), document.FolderId.ToString(), latestVersion.Document.Name + latestVersion.Document.FileType);
+            var filePath = latestVersion.FilePath;
 
             if (!System.IO.File.Exists(filePath))
             {

@@ -34,6 +34,8 @@ namespace ACC.Controllers
             _context = context;
             _env = env;
             this.userManager = userManager;
+            _convertedPath = Path.Combine("wwwroot", "Converted");
+
         }
 
         public async Task<IActionResult> Index(int id, string searchTerm, string status, int page = 1)
@@ -77,7 +79,7 @@ namespace ACC.Controllers
                 Status = i.Status,
                 ProjectId = i.ProjectId,
                 CreatedAt = i.CreatedAt,
-                DocumentId = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.Id,
+                DocumentId = i.Document?.Id,
                 FilePath = i.Document?.Versions?.OrderByDescending(v => v.VersionNumber).FirstOrDefault()?.FilePath,
                 InitiatorId = i.InitiatorID
             }).ToList();
@@ -132,7 +134,7 @@ namespace ACC.Controllers
                 Priority = model.Priority,
                 Status = model.Status,
                 ProjectId = model.ProjectId,
-                InitiatorID = CurrentUser.Id
+                InitiatorID = CurrentUser.Id,
             };
 
             issueRepository.Insert(issue);
@@ -164,19 +166,7 @@ namespace ACC.Controllers
                 // Get or create "Work In Progress" folder
                 var wipFolder = await _context.Folders
                     .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.Name == "Work In Progress" && f.ParentFolderId == null);
-                if (wipFolder == null)
-                {
-                    wipFolder = new Folder
-                    {
-                        Name = "Work In Progress",
-                        ParentFolderId = null,
-                        ProjectId = projectId,
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = User.Identity.Name ?? "System"
-                    };
-                    _context.Folders.Add(wipFolder);
-                    await _context.SaveChangesAsync();
-                }
+                
 
                 // Get or create "Issues" subfolder
                 var issuesFolder = await _context.Folders
@@ -195,9 +185,7 @@ namespace ACC.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Create issue folder named: {IssueId}_{Title}
-                var folderName = $"{issue.Id}_{CleanFileName(issue.Title)}";
-                var issueFolderPath = Path.Combine(_env.WebRootPath, "uploads", projectId.ToString(), wipFolder.Id.ToString(), issuesFolder.Id.ToString(), folderName);
+                var issueFolderPath = Path.Combine(_env.WebRootPath, "uploads", projectId.ToString(), wipFolder.Id.ToString(), issuesFolder.Id.ToString());
                 Directory.CreateDirectory(issueFolderPath);
 
                 if (issuesFolder == null)
@@ -235,7 +223,8 @@ namespace ACC.Controllers
                         CreatedBy = User.Identity.Name ?? "System",
                         Versions = new List<DocumentVersion>()
                     };
-                    _documentRepository.Insert(document);
+
+                    _documentRepository.Insert(document); // This should set document.Id after Save()
                 }
 
                 var version = new DocumentVersion
@@ -247,11 +236,10 @@ namespace ACC.Controllers
                 };
 
                 document.Versions.Add(version);
-                _documentRepository.Save();
+                _documentRepository.Save(); // This persists the document and its versions
 
-
-                issue.DocumentId = document.Id;
-
+                
+                // Update the issue with the document ID
                 var existingIssue = issueRepository.GetById(issue.Id);
                 if (existingIssue == null)
                     throw new Exception("Issue not found.");
