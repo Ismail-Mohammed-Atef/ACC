@@ -350,6 +350,10 @@ namespace ACC.Controllers.ProjectDetailsController
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(int folderId, int projectId, IFormFile file)
         {
+            if (projectId == 0)
+            {
+                projectId = id;
+            }
             try
             {
                 if (file == null || file.Length == 0)
@@ -368,7 +372,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return View();
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".jepg", ".png", ".dwg", ".ifc", ".rvt", ".pptx" };
+                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".jpeg", ".png", ".dwg", ".ifc", ".rvt", ".pptx" };
                 var extension = Path.GetExtension(file.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
                 {
@@ -443,6 +447,36 @@ namespace ACC.Controllers.ProjectDetailsController
                 return View();
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFile(int documentId, int projectId)
+        {
+            var document = await _documentRepository.GetAllQueryable()
+                .Include(d => d.Versions)
+                .FirstOrDefaultAsync(d => d.Id == documentId);
+
+            if (document == null)
+            {
+                return NotFound();
+            }
+
+            // Delete all version files from disk
+            foreach (var version in document.Versions)
+            {
+                if (!string.IsNullOrEmpty(version.FilePath) && System.IO.File.Exists(version.FilePath))
+                {
+                    System.IO.File.Delete(version.FilePath);
+                }
+            }
+
+            // Delete the document and all its versions
+            _documentRepository.Delete(document);
+             _documentRepository.Save(); // use async version if available
+
+            TempData["Success"] = "Document and all its versions deleted successfully.";
+            return RedirectToAction("Index", new { projectId });
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> Download(int versionId, int projectId)
@@ -537,16 +571,24 @@ namespace ACC.Controllers.ProjectDetailsController
             return PartialView("_DocumentDetails", folder);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> MoveOrCopyDocument([FromBody] MoveOrCopyVM dto)
         {
-            var document = await _context.Documents.FindAsync(dto.DocumentId);
-            if (document == null) return NotFound();
+            var document = await _context.Documents
+                .Include(d => d.Versions)
+                .FirstOrDefaultAsync(d => d.Id == dto.DocumentId);
+
+            if (document == null)
+                return NotFound();
+
+            var rootPath = Path.Combine(_env.WebRootPath, "uploads");
+            var sourceFolderPath = Path.Combine(rootPath, document.ProjectId.ToString(), document.FolderId.ToString());
+            var targetFolderPath = Path.Combine(rootPath, document.ProjectId.ToString(), dto.TargetFolderId.ToString());
+
+            Directory.CreateDirectory(targetFolderPath);
 
             if (dto.ActionType == "copy")
             {
-
                 var newDoc = new Document
                 {
                     Name = document.Name,
@@ -554,14 +596,43 @@ namespace ACC.Controllers.ProjectDetailsController
                     ProjectId = document.ProjectId,
                     CreatedAt = DateTime.Now,
                     CreatedBy = document.CreatedBy,
-                    Versions = new List<DocumentVersion>(),
-                    FolderId = dto.TargetFolderId
-
+                    FolderId = dto.TargetFolderId,
+                    Versions = new List<DocumentVersion>()
                 };
+
+                foreach (var version in document.Versions)
+                {
+                    var fileName = Path.GetFileName(version.FilePath);
+                    var newFilePath = Path.Combine(targetFolderPath, fileName);
+
+                    if (System.IO.File.Exists(version.FilePath))
+                        System.IO.File.Copy(version.FilePath, newFilePath, overwrite: true);
+
+                    newDoc.Versions.Add(new DocumentVersion
+                    {
+                        FilePath = newFilePath,
+                        UploadedAt = version.UploadedAt,
+                        UploadedBy = version.UploadedBy,
+                        VersionNumber = version.VersionNumber
+                    });
+                }
+
                 _context.Documents.Add(newDoc);
             }
             else if (dto.ActionType == "move")
             {
+                foreach (var version in document.Versions)
+                {
+                    var fileName = Path.GetFileName(version.FilePath);
+                    var newFilePath = Path.Combine(targetFolderPath, fileName);
+
+                    if (System.IO.File.Exists(version.FilePath))
+                    {
+                        System.IO.File.Move(version.FilePath, newFilePath);
+                        version.FilePath = newFilePath;
+                    }
+                }
+
                 document.FolderId = dto.TargetFolderId;
                 _context.Documents.Update(document);
             }
@@ -569,6 +640,7 @@ namespace ACC.Controllers.ProjectDetailsController
             await _context.SaveChangesAsync();
             return Ok(new { success = true });
         }
+
         [HttpGet]
         public async Task<IActionResult> OpenFile(int documentId)
         {
@@ -582,7 +654,7 @@ namespace ACC.Controllers.ProjectDetailsController
             }
 
             var latestVersion = document.Versions.First();
-            var filePath = Path.Combine(_env.WebRootPath, "uploads", document.ProjectId.ToString(), document.FolderId.ToString(), latestVersion.Document.Name + latestVersion.Document.FileType);
+            var filePath = latestVersion.FilePath;
 
             if (!System.IO.File.Exists(filePath))
             {

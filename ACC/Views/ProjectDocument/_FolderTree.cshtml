@@ -81,6 +81,31 @@
         </form>
     </div>
 </div>
+<!-- Delete File Modal -->
+<div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="DeleteFile" asp-controller="ProjectDocument">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFileModalLabel">Delete File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="documentId" id="deleteFileDocumentId" />
+
+                    <input type="hidden" name="projectId" value="@ViewBag.ProjectId" />
+                    <p>Are you sure you want to delete this file?</p>
+                    <p class="text-danger">This action will delete the selected version and its physical file.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <li class="list-group-item d-flex justify-content-between align-items-center folder-item" data-folder-id="@Model.Id">
     <div class="folder-label d-flex align-items-center gap-2">
@@ -150,6 +175,14 @@
                             </li>
                             <li><a class="dropdown-item copy-document" href="#" data-document-id="@doc.Id">Copy To...</a></li>
                             <li><a class="dropdown-item move-document" href="#" data-document-id="@doc.Id">Move To...</a></li>
+                            <li>
+                            <button class="dropdown-item delete-file-btn"
+                                    data-document-id="@doc.Id">
+                                Delete File
+                            </button>
+                            </li>
+
+
                         </ul>
                     </div>
                 </li>
@@ -253,4 +286,16 @@
             });
         });
     });
+
+        document.querySelectorAll('.delete-file-btn').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            const documentId = this.getAttribute('data-document-id');
+            document.getElementById('deleteFileDocumentId').value = documentId;
+            const modal = new bootstrap.Modal(document.getElementById('deleteFileModal'));
+            modal.show();
+        });
+    });
+
+
 </script>
