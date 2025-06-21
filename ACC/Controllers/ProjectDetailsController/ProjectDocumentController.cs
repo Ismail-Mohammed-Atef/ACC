@@ -372,7 +372,7 @@ namespace ACC.Controllers.ProjectDetailsController
                     return View();
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".jepg", ".png", ".dwg", ".ifc", ".rvt", ".pptx" };
+                var allowedExtensions = new[] { ".pdf", ".docx", ".jpg", ".jpeg", ".png", ".dwg", ".ifc", ".rvt", ".pptx" };
                 var extension = Path.GetExtension(file.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
                 {
